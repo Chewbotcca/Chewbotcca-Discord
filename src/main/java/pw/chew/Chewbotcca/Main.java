@@ -13,6 +13,7 @@ import pw.chew.Chewbotcca.commands.about.InviteCommand;
 import pw.chew.Chewbotcca.commands.about.PingCommand;
 import pw.chew.Chewbotcca.commands.about.StatsCommand;
 import pw.chew.Chewbotcca.commands.cat.CatCommand;
+import pw.chew.Chewbotcca.commands.english.DefineCommand;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
@@ -49,7 +50,10 @@ public class Main {
                 new StatsCommand(),
 
                 // Cat Module
-                new CatCommand()
+                new CatCommand(),
+
+                // English Module
+                new DefineCommand()
         );
 
         // Register listeners
@@ -64,5 +68,9 @@ public class Main {
 
     public JDA getJDA() {
         return jda;
+    }
+
+    public static Properties getProp() {
+        return prop;
     }
 }
