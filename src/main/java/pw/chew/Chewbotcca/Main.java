@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pw.chew.Chewbotcca.commands.LastFMCommand;
 import pw.chew.Chewbotcca.commands.MixerCommand;
 import pw.chew.Chewbotcca.commands.about.HelpCommand;
 import pw.chew.Chewbotcca.commands.about.InviteCommand;
@@ -65,6 +66,7 @@ public class Main {
                 new TRBMBCommand(),
 
                 // Everything Else
+                new LastFMCommand(),
                 new MixerCommand()
         );
 
