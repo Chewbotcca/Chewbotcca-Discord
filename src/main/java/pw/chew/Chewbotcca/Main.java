@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pw.chew.Chewbotcca.commands.MixerCommand;
 import pw.chew.Chewbotcca.commands.about.HelpCommand;
 import pw.chew.Chewbotcca.commands.about.InviteCommand;
 import pw.chew.Chewbotcca.commands.about.PingCommand;
@@ -61,7 +62,10 @@ public class Main {
                 new YouTubeCommand(),
 
                 // Quotes Module
-                new TRBMBCommand()
+                new TRBMBCommand(),
+
+                // Everything Else
+                new MixerCommand()
         );
 
         // Register listeners
