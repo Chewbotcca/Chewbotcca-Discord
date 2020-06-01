@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import pw.chew.Chewbotcca.commands.about.HelpCommand;
 import pw.chew.Chewbotcca.commands.about.InviteCommand;
 import pw.chew.Chewbotcca.commands.about.PingCommand;
+import pw.chew.Chewbotcca.commands.about.StatsCommand;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
@@ -41,7 +42,8 @@ public class Main {
                 // About Module
                 new HelpCommand(),
                 new InviteCommand(),
-                new PingCommand()
+                new PingCommand(),
+                new StatsCommand()
         );
 
         // Register listeners
