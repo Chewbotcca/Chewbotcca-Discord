@@ -2,6 +2,7 @@ package pw.chew.Chewbotcca;
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -11,6 +12,7 @@ import pw.chew.Chewbotcca.commands.about.HelpCommand;
 import pw.chew.Chewbotcca.commands.about.InviteCommand;
 import pw.chew.Chewbotcca.commands.about.PingCommand;
 import pw.chew.Chewbotcca.commands.about.StatsCommand;
+import pw.chew.Chewbotcca.commands.cat.CatCommand;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
@@ -20,6 +22,7 @@ import java.util.Properties;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     static Properties prop = new Properties();
+    public static JDA jda;
 
     public static void main(String[] args) throws LoginException, IOException {
         prop.load(new FileInputStream("bot.properties"));
@@ -43,17 +46,23 @@ public class Main {
                 new HelpCommand(),
                 new InviteCommand(),
                 new PingCommand(),
-                new StatsCommand()
+                new StatsCommand(),
+
+                // Cat Module
+                new CatCommand()
         );
 
         // Register listeners
 
         // Register JDA
-        JDABuilder.createDefault(prop.getProperty("token"))
+        jda = JDABuilder.createDefault(prop.getProperty("token"))
                 .setStatus(OnlineStatus.ONLINE)
                 .setActivity(Activity.playing("Booting..."))
                 .addEventListeners(waiter, client.build())
                 .build();
+    }
 
+    public JDA getJDA() {
+        return jda;
     }
 }
