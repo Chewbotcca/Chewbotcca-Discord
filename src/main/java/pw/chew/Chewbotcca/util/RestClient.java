@@ -2,6 +2,7 @@ package pw.chew.Chewbotcca.util;
 
 import okhttp3.Request;
 import okhttp3.Response;
+import org.slf4j.LoggerFactory;
 import pw.chew.Chewbotcca.Main;
 
 import java.io.IOException;
@@ -13,12 +14,15 @@ public class RestClient {
                 .get()
                 .build();
 
+        LoggerFactory.getLogger(RestClient.class).info("Making call to GET " + url);
         return performRequest(request);
     }
 
     public static String performRequest(Request request) {
         try (Response response = Main.jda.getHttpClient().newCall(request).execute()) {
-            return response.body().string();
+            String r = response.body().string();
+            // System.out.println(r);
+            return r;
         } catch (IOException e) {
             e.printStackTrace();
         }
