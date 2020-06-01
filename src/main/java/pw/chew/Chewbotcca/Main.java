@@ -15,6 +15,7 @@ import pw.chew.Chewbotcca.commands.about.StatsCommand;
 import pw.chew.Chewbotcca.commands.cat.CatCommand;
 import pw.chew.Chewbotcca.commands.english.DefineCommand;
 import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
+import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
@@ -57,7 +58,10 @@ public class Main {
                 new DefineCommand(),
 
                 // Google Module
-                new YouTubeCommand()
+                new YouTubeCommand(),
+
+                // Quotes Module
+                new TRBMBCommand()
         );
 
         // Register listeners
