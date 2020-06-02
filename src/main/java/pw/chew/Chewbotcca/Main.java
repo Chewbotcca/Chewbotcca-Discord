@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pw.chew.Chewbotcca.commands.LastFMCommand;
 import pw.chew.Chewbotcca.commands.MixerCommand;
+import pw.chew.Chewbotcca.commands.ServerInfoCommand;
 import pw.chew.Chewbotcca.commands.about.HelpCommand;
 import pw.chew.Chewbotcca.commands.about.InviteCommand;
 import pw.chew.Chewbotcca.commands.about.PingCommand;
@@ -67,7 +68,8 @@ public class Main {
 
                 // Everything Else
                 new LastFMCommand(),
-                new MixerCommand()
+                new MixerCommand(),
+                new ServerInfoCommand()
         );
 
         // Register listeners
