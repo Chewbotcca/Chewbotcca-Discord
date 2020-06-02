@@ -20,6 +20,7 @@ import pw.chew.Chewbotcca.commands.cat.CatFactCommand;
 import pw.chew.Chewbotcca.commands.cat.RubyGemsCommand;
 import pw.chew.Chewbotcca.commands.english.DefineCommand;
 import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
+import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
 import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
 
 import javax.security.auth.login.LoginException;
@@ -65,6 +66,9 @@ public class Main {
 
                 // Google Module
                 new YouTubeCommand(),
+
+                // Minecraft Module
+                new MCServerCommand(),
 
                 // Quotes Module
                 new TRBMBCommand(),
