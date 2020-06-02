@@ -51,7 +51,7 @@ public class ServerInfoCommand extends Command {
 
         e.setThumbnail(server.getIconUrl());
 
-        server.retrieveOwner(true);
+        server.retrieveOwner(true).queue();
         try {
             await().atMost(3, TimeUnit.SECONDS).until(() -> server.getOwner() != null);
             assert server.getOwner() != null;
