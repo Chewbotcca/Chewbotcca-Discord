@@ -16,6 +16,7 @@ import pw.chew.Chewbotcca.commands.about.InviteCommand;
 import pw.chew.Chewbotcca.commands.about.PingCommand;
 import pw.chew.Chewbotcca.commands.about.StatsCommand;
 import pw.chew.Chewbotcca.commands.cat.CatCommand;
+import pw.chew.Chewbotcca.commands.cat.CatFactCommand;
 import pw.chew.Chewbotcca.commands.english.DefineCommand;
 import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
@@ -56,6 +57,7 @@ public class Main {
 
                 // Cat Module
                 new CatCommand(),
+                new CatFactCommand(),
 
                 // English Module
                 new DefineCommand(),
