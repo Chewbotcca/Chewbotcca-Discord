@@ -17,6 +17,7 @@ import pw.chew.Chewbotcca.commands.about.PingCommand;
 import pw.chew.Chewbotcca.commands.about.StatsCommand;
 import pw.chew.Chewbotcca.commands.cat.CatCommand;
 import pw.chew.Chewbotcca.commands.cat.CatFactCommand;
+import pw.chew.Chewbotcca.commands.cat.DogCommand;
 import pw.chew.Chewbotcca.commands.cat.RubyGemsCommand;
 import pw.chew.Chewbotcca.commands.english.DefineCommand;
 import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
@@ -61,6 +62,7 @@ public class Main {
                 // Cat Module
                 new CatCommand(),
                 new CatFactCommand(),
+                new DogCommand(),
 
                 // English Module
                 new DefineCommand(),
