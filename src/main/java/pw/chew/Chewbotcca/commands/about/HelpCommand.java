@@ -19,9 +19,9 @@ public class HelpCommand extends Command {
                 .setTitle("Welcome to the Chewbotcca Discord Bot")
                 .setColor(0xd084)
                 .setDescription("Chewbotcca is a multi-purpose, semi-functional, almost always online, discord bot!")
-                .addField("Commands", "You can find all my commands [here](http://discord.chewbotcca.co/commands)", true)
-                .addField("Invite me!", "You can invite me to your server with [this link](http://bit.ly/Chewbotcca).", true)
-                .addField("Help Server", "Click [me](https://discord.gg/Q8TazNz) to join the help server.", true)
+                .addField("Commands", "You can find all my commands [here](https://chew.pw/chewbotcca/discord/commands)", true)
+                .addField("Invite me!", "You can invite me to your server with [this link](https://discord.com/oauth2/authorize?client_id=604362556668248095&scope=bot&permissions=0).", true)
+                .addField("Help Server", "Click [me](https://discord.gg/hUvyjeQ) to join the help server.", true)
                 .addField("More Bot Stats", "Run `%^stats` to see more stats!", true)
         .build());
     }
