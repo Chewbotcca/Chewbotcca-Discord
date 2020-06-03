@@ -22,9 +22,8 @@ public class MixerCommand extends Command {
     @Override
     protected void execute(CommandEvent event) {
         JSONObject parse;
-        try {
-            parse = new JSONObject(RestClient.get("https://mixer.com/api/v1/channels/" + event.getArgs()));
-        } catch (JSONException e) {
+        parse = new JSONObject(RestClient.get("https://mixer.com/api/v1/channels/" + event.getArgs()));
+        if(parse.has("error")) {
             event.reply("User not found!");
             return;
         }
