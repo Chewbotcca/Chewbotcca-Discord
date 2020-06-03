@@ -23,6 +23,7 @@ import pw.chew.Chewbotcca.commands.english.DefineCommand;
 import pw.chew.Chewbotcca.commands.english.UrbanDictionaryCommand;
 import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
+import pw.chew.Chewbotcca.commands.minecraft.MCStatusCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCUserCommand;
 import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
 
@@ -74,6 +75,7 @@ public class Main {
 
                 // Minecraft Module
                 new MCServerCommand(),
+                new MCStatusCommand(),
                 new MCUserCommand(),
 
                 // Quotes Module
