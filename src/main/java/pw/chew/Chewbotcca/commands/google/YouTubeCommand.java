@@ -11,6 +11,11 @@ import pw.chew.Chewbotcca.util.RestClient;
 import java.awt.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class YouTubeCommand extends Command {
 
@@ -73,30 +78,53 @@ public class YouTubeCommand extends Command {
         JSONObject stats = url.getJSONArray("items").getJSONObject(0).getJSONObject("statistics");
         JSONObject info = url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet");
         String length = url.getJSONArray("items").getJSONObject(0).getJSONObject("contentDetails").getString("duration");
-        String views = stats.getString("viewCount");
-        String likes = stats.getString("likeCount");
-        String dislike = stats.getString("dislikeCount");
+        int views = Integer.parseInt(stats.getString("viewCount"));
+        int likes = Integer.parseInt(stats.getString("likeCount"));
+        int dislike = Integer.parseInt(stats.getString("dislikeCount"));
         String upload = info.getString("publishedAt");
         /*
         upload = info["publishedAt"][0. .9]
         upload = upload.split("-")
         */
-        float totallikes = Integer.parseInt(likes) + Integer.parseInt(dislike);
-        float percent = (Integer.parseInt(likes) / totallikes * 100);
-        float dispercent = (Integer.parseInt(dislike) / totallikes * 100);
+        DecimalFormat df = new DecimalFormat("#.##");
+        float totallikes = likes + dislike;
+        String percent = df.format(likes / totallikes * 100);
+        String dispercent = df.format(dislike / totallikes * 100);
 
         String urlpls = "http://youtu.be/" + id;
 
         return new EmbedBuilder()
-                .setTitle("YouTube Video Search")
-                .addField("Title", info.getString("title"), true)
-                .addField("Uploader", info.getString("channelTitle"), true)
-                .addField("Duration", length, true)
-                .addField("Views", views, true)
-                .addField("Rating", "<:ytup:717600455580188683> **" + likes +  "** *(" + percent + "%)*\n" +
-                        "<:ytdown:717600455353696317> **" + dislike + "** *(" + dispercent + "%)*", true)
-                .addField("Uploaded", upload, true)
-                .addField("Video URL", urlpls, true)
+                .setAuthor("YouTube Video Search")
+                .setTitle(info.getString("title"), urlpls)
+                .addField("Uploader", "[" + info.getString("channelTitle") + "](https://youtube.com/channel/" + info.getString("channelId") + ")", true)
+                .addField("Duration", durationParser(length), true)
+                .addField("Views", NumberFormat.getNumberInstance(Locale.US).format(views), true)
+                .addField("Rating", "<:ytup:717600455580188683> **" + NumberFormat.getNumberInstance(Locale.US).format(likes) +  "** *(" + percent + "%)*\n" +
+                        "<:ytdown:717600455353696317> **" + NumberFormat.getNumberInstance(Locale.US).format(dislike) + "** *(" + dispercent + "%)*", true)
+                .addField("Uploaded", dateParser(upload), true)
                 .setColor(Color.decode("#FF0001"));
+    }
+
+    public String durationParser(String duration) {
+        duration = duration.replace("PT", "");
+        String[] chars = duration.split("");
+        StringBuilder output = new StringBuilder();
+        for(int i = 0; i < duration.length() - 1; i++) {
+            String chari = chars[i];
+            try {
+                Integer.parseInt(chari);
+                output.append(chari);
+            } catch (NumberFormatException e) {
+                output.append(":");
+            }
+        }
+        return output.toString();
+    }
+
+    public String dateParser(String date) {
+        DateTimeFormatter inputFormat = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ssX");
+        OffsetDateTime odtInstanceAtOffset = OffsetDateTime.parse(date, inputFormat);
+        DateTimeFormatter outputFormat = DateTimeFormatter.ofPattern("MM/dd/uuuu'\n'HH:mm' UTC'");
+        return odtInstanceAtOffset.format(outputFormat);
     }
 }
