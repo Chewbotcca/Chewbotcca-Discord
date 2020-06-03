@@ -93,8 +93,8 @@ public class YouTubeCommand extends Command {
                 .addField("Uploader", info.getString("channelTitle"), true)
                 .addField("Duration", length, true)
                 .addField("Views", views, true)
-                .addField("Rating", "<:ytup:469274644982267905> **" + likes +  "** *(" + percent + "%)*\n" +
-                        "<:ytdown:469274880416940042> **" + dislike + "** *(" + dispercent + "%)*", true)
+                .addField("Rating", "<:ytup:717600455580188683> **" + likes +  "** *(" + percent + "%)*\n" +
+                        "<:ytdown:717600455353696317> **" + dislike + "** *(" + dispercent + "%)*", true)
                 .addField("Uploaded", upload, true)
                 .addField("Video URL", urlpls, true)
                 .setColor(Color.decode("#FF0001"));
