@@ -19,7 +19,7 @@ public class StatsCommand extends Command {
                 .setTitle("Chewbotcca - A basic, yet functioning, discord bot")
                 .addField("Author", "<@!476488167042580481>", true)
                 .addField("Code", "[View code on GitHub](http://github.com/Chewbotcca/Discord)", true)
-                .addField("Library", "JDA 4.1.1_154", true)
+                .addField("Library", "JDA 4.1.1_156", true)
                 .addField("Server Count", String.valueOf(commandEvent.getJDA().getGuildCache().size()), true)
                 .setColor(0xd084)
                 .build()
