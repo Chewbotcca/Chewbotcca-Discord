@@ -36,36 +36,7 @@ public class YouTubeCommand extends Command {
             event.reply("No results found.");
             return;
         }
-        JSONObject stats = url.getJSONArray("items").getJSONObject(0).getJSONObject("statistics");
-        JSONObject info = url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet");
-        String length = url.getJSONArray("items").getJSONObject(0).getJSONObject("contentDetails").getString("duration");
-        String views = stats.getString("viewCount");
-        String likes = stats.getString("likeCount");
-        String dislike = stats.getString("dislikeCount");
-        String upload = info.getString("publishedAt");
-        /*
-        upload = info["publishedAt"][0. .9]
-        upload = upload.split("-")
-        */
-        float totallikes = Integer.parseInt(likes) + Integer.parseInt(dislike);
-        float percent = (Integer.parseInt(likes) / totallikes * 100);
-        float dispercent = (Integer.parseInt(dislike) / totallikes * 100);
-
-        String urlpls = "http://youtu.be/" + id;
-
-        event.reply(new EmbedBuilder()
-                .setTitle("YouTube Video Search")
-                .addField("Title", info.getString("title"), true)
-                .addField("Uploader", info.getString("channelTitle"), true)
-                .addField("Duration", length, true)
-                .addField("Views", views, true)
-                .addField("Rating", "<:ytup:469274644982267905> **" + likes +  "** *(" + percent + "%)*\n" +
-                        "<:ytdown:469274880416940042> **" + dislike + "** *(" + dispercent + "%)*", true)
-                .addField("Uploaded", upload, true)
-                .addField("Video URL", urlpls, true)
-                .setColor(Color.decode("#FF0001"))
-                .build()
-        );
+        event.reply(response(url, id).build());
     }
 
     public String monthToString(String input) {
@@ -96,5 +67,36 @@ public class YouTubeCommand extends Command {
                 return "December";
         }
         return "what";
+    }
+
+    public EmbedBuilder response(JSONObject url, String id) {
+        JSONObject stats = url.getJSONArray("items").getJSONObject(0).getJSONObject("statistics");
+        JSONObject info = url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet");
+        String length = url.getJSONArray("items").getJSONObject(0).getJSONObject("contentDetails").getString("duration");
+        String views = stats.getString("viewCount");
+        String likes = stats.getString("likeCount");
+        String dislike = stats.getString("dislikeCount");
+        String upload = info.getString("publishedAt");
+        /*
+        upload = info["publishedAt"][0. .9]
+        upload = upload.split("-")
+        */
+        float totallikes = Integer.parseInt(likes) + Integer.parseInt(dislike);
+        float percent = (Integer.parseInt(likes) / totallikes * 100);
+        float dispercent = (Integer.parseInt(dislike) / totallikes * 100);
+
+        String urlpls = "http://youtu.be/" + id;
+
+        return new EmbedBuilder()
+                .setTitle("YouTube Video Search")
+                .addField("Title", info.getString("title"), true)
+                .addField("Uploader", info.getString("channelTitle"), true)
+                .addField("Duration", length, true)
+                .addField("Views", views, true)
+                .addField("Rating", "<:ytup:469274644982267905> **" + likes +  "** *(" + percent + "%)*\n" +
+                        "<:ytdown:469274880416940042> **" + dislike + "** *(" + dispercent + "%)*", true)
+                .addField("Uploaded", upload, true)
+                .addField("Video URL", urlpls, true)
+                .setColor(Color.decode("#FF0001"));
     }
 }

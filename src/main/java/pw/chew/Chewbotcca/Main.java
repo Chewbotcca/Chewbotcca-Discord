@@ -27,6 +27,7 @@ import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCStatusCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCUserCommand;
 import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
+import pw.chew.Chewbotcca.listeners.YouTubeReactListener;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
@@ -90,7 +91,7 @@ public class Main {
                 new ServerInfoCommand()
         );
 
-        // Register listeners
+
 
         // Register JDA
         jda = JDABuilder.createDefault(prop.getProperty("token"))
@@ -98,6 +99,9 @@ public class Main {
                 .setActivity(Activity.playing("Booting..."))
                 .addEventListeners(waiter, client.build())
                 .build();
+
+        // Register listeners
+        jda.addEventListener(new YouTubeReactListener());
     }
 
     public JDA getJDA() {
