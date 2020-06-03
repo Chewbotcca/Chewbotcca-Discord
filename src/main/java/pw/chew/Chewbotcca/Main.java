@@ -20,6 +20,7 @@ import pw.chew.Chewbotcca.commands.cat.CatFactCommand;
 import pw.chew.Chewbotcca.commands.cat.DogCommand;
 import pw.chew.Chewbotcca.commands.cat.RubyGemsCommand;
 import pw.chew.Chewbotcca.commands.english.DefineCommand;
+import pw.chew.Chewbotcca.commands.english.UrbanDictionaryCommand;
 import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCUserCommand;
@@ -66,6 +67,7 @@ public class Main {
 
                 // English Module
                 new DefineCommand(),
+                new UrbanDictionaryCommand(),
 
                 // Google Module
                 new YouTubeCommand(),
