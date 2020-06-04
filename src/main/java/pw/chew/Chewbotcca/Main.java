@@ -23,6 +23,7 @@ import pw.chew.Chewbotcca.commands.cat.RubyGemsCommand;
 import pw.chew.Chewbotcca.commands.english.DefineCommand;
 import pw.chew.Chewbotcca.commands.english.UrbanDictionaryCommand;
 import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
+import pw.chew.Chewbotcca.commands.minecraft.MCPHNodesCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCStatusCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCUserCommand;
@@ -76,6 +77,7 @@ public class Main {
                 new YouTubeCommand(),
 
                 // Minecraft Module
+                new MCPHNodesCommand(),
                 new MCServerCommand(),
                 new MCStatusCommand(),
                 new MCUserCommand(),
