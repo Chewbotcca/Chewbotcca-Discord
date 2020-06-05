@@ -10,16 +10,25 @@ import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.Chewbotcca.util.RestClient;
 
 import javax.annotation.Nonnull;
+import java.time.OffsetDateTime;
 
 public class YouTubeReactListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
-        LoggerFactory.getLogger(YouTubeReactListener.class).debug("GuildMessageReactAddEvent received: " + event.getReactionEmote().getName());
         if(!event.getReactionEmote().getName().equals("\uD83D\uDD0D")) {
             return;
         }
         String id = event.getMessageId();
         event.getChannel().retrieveMessageById(id).queue((msg) -> {
+            if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
+                LoggerFactory.getLogger(YouTubeReactListener.class).debug("Message older than 15 minutes, not describing!");
+                return;
+            }
+            if(YouTubeCommand.didDescribe(msg.getId())) {
+                LoggerFactory.getLogger(YouTubeReactListener.class).debug("Already described this message!");
+                return;
+            }
+            YouTubeCommand.described(msg.getId());
             String content = msg.getContentRaw();
             String video;
             if(content.contains("youtube.com")) {

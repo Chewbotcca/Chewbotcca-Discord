@@ -15,9 +15,11 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class YouTubeCommand extends Command {
+    static ArrayList<String> describedIds = new ArrayList<>();
 
     public YouTubeCommand() {
         this.name = "youtube";
@@ -44,36 +46,6 @@ public class YouTubeCommand extends Command {
         event.reply(response(url, id).build());
     }
 
-    public String monthToString(String input) {
-        switch (input) {
-            case "01":
-                return "January";
-            case "02":
-                return "February";
-            case "03":
-               return "March";
-            case "04":
-                return "April";
-            case "05":
-                return "May";
-            case "06":
-                return "June";
-            case "07":
-                return "July";
-            case "08":
-                return "August";
-            case "09":
-                return "September";
-            case "10":
-                return "October";
-            case "11":
-                return "November";
-            case "12":
-                return "December";
-        }
-        return "what";
-    }
-
     public EmbedBuilder response(JSONObject url, String id) {
         JSONObject stats = url.getJSONArray("items").getJSONObject(0).getJSONObject("statistics");
         JSONObject info = url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet");
@@ -82,10 +54,6 @@ public class YouTubeCommand extends Command {
         int likes = Integer.parseInt(stats.getString("likeCount"));
         int dislike = Integer.parseInt(stats.getString("dislikeCount"));
         String upload = info.getString("publishedAt");
-        /*
-        upload = info["publishedAt"][0. .9]
-        upload = upload.split("-")
-        */
         DecimalFormat df = new DecimalFormat("#.##");
         float totallikes = likes + dislike;
         String percent = df.format(likes / totallikes * 100);
@@ -126,5 +94,13 @@ public class YouTubeCommand extends Command {
         OffsetDateTime odtInstanceAtOffset = OffsetDateTime.parse(date, inputFormat);
         DateTimeFormatter outputFormat = DateTimeFormatter.ofPattern("MM/dd/uuuu'\n'HH:mm' UTC'");
         return odtInstanceAtOffset.format(outputFormat);
+    }
+
+    public static boolean didDescribe(String id) {
+        return describedIds.contains(id);
+    }
+
+    public static void described(String id) {
+        describedIds.add(id);
     }
 }
