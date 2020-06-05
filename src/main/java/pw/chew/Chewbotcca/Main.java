@@ -8,7 +8,10 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pw.chew.Chewbotcca.commands.*;
+import pw.chew.Chewbotcca.commands.InfoCommand;
+import pw.chew.Chewbotcca.commands.LastFMCommand;
+import pw.chew.Chewbotcca.commands.MixerCommand;
+import pw.chew.Chewbotcca.commands.ServerInfoCommand;
 import pw.chew.Chewbotcca.commands.about.HelpCommand;
 import pw.chew.Chewbotcca.commands.about.InviteCommand;
 import pw.chew.Chewbotcca.commands.about.PingCommand;
@@ -32,12 +35,14 @@ import pw.chew.Chewbotcca.listeners.YouTubeReactListener;
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Properties;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     static Properties prop = new Properties();
     public static JDA jda;
+    public static Instant start;
 
     public static void main(String[] args) throws LoginException, IOException {
         prop.load(new FileInputStream("bot.properties"));
@@ -95,14 +100,14 @@ public class Main {
                 new ServerInfoCommand()
         );
 
-
-
         // Register JDA
         jda = JDABuilder.createDefault(prop.getProperty("token"))
                 .setStatus(OnlineStatus.ONLINE)
                 .setActivity(Activity.playing("Booting..."))
                 .addEventListeners(waiter, client.build())
                 .build();
+
+        start = Instant.now();
 
         // Register listeners
         jda.addEventListener(
