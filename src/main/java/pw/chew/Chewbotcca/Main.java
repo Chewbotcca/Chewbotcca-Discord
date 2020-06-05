@@ -26,6 +26,7 @@ import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCStatusCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCUserCommand;
 import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
+import pw.chew.Chewbotcca.listeners.SendJoinedOrLeftGuildListener;
 import pw.chew.Chewbotcca.listeners.YouTubeReactListener;
 
 import javax.security.auth.login.LoginException;
@@ -104,7 +105,10 @@ public class Main {
                 .build();
 
         // Register listeners
-        jda.addEventListener(new YouTubeReactListener());
+        jda.addEventListener(
+                new YouTubeReactListener(),
+                new SendJoinedOrLeftGuildListener()
+        );
     }
 
     public JDA getJDA() {
