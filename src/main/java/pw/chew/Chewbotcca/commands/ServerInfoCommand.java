@@ -64,49 +64,49 @@ public class ServerInfoCommand extends Command {
 
         switch(server.getRegion()) {
             case VIP_AMSTERDAM:
-                e.addField("Server Region", "<:region_amsterdam:426902668871467008> <:vip_region:426902668909477898> Amsterdam", true);
+                e.addField("Server Region", "<:region_amsterdam:718523705080152136> <:vip_region:718523836823240814> Amsterdam", true);
                 break;
             case BRAZIL:
-                e.addField("Server Region", "<:region_brazil:426902668561219605> Brazil", true);
+                e.addField("Server Region", "<:region_brazil:718523705055248418> Brazil", true);
                 break;
             case EU_CENTRAL:
-                e.addField("Server Region", "<:region_eu:426902669110673408> Central Europe", true);
+                e.addField("Server Region", "<:region_eu:718523704979488820> Central Europe", true);
                 break;
             case HONG_KONG:
-                e.addField("Server Region", "<:region_hongkong:426902668636585985> Hong Kong", true);
+                e.addField("Server Region", "<:region_hongkong:718523705105580103> Hong Kong", true);
                 break;
             case JAPAN:
-                e.addField("Server Region", "<:region_japan:426902668578127884> Japan", true);
+                e.addField("Server Region", "<:region_japan:718523704853790892> Japan", true);
                 break;
             case RUSSIA:
-                e.addField("Server Region", "<:region_russia:426902668859015169> Russia", true);
+                e.addField("Server Region", "<:region_russia:718523705193660486> Russia", true);
                 break;
             case SINGAPORE:
-                e.addField("Server Region", "<:region_singapore:426902668951158784> Singapore", true);
+                e.addField("Server Region", "<:region_singapore:718523705583730768> Singapore", true);
                 break;
             case SYDNEY:
-                e.addField("Server Region", "<:region_sydney:426902668934643722> Sydney", true);
+                e.addField("Server Region", "<:region_sydney:718523704879087709> Sydney", true);
                 break;
             case US_CENTRAL:
-                e.addField("Server Region", "<:region_us:426902668900827146> US Central", true);
+                e.addField("Server Region", "<:region_us:718523704845533227> US Central", true);
                 break;
             case US_EAST:
-                e.addField("Server Region", "<:region_us:426902668900827146> US East", true);
+                e.addField("Server Region", "<:region_us:718523704845533227> US East", true);
                 break;
             case VIP_US_EAST:
-                e.addField("Server Region", "<:region_us:426902668900827146> <:vip_region:426902668909477898> US East", true);
+                e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US East", true);
                 break;
             case US_SOUTH:
-                e.addField("Server Region", "<:region_us:426902668900827146> US South", true);
+                e.addField("Server Region", "<:region_us:718523704845533227> US South", true);
                 break;
             case US_WEST:
-                e.addField("Server Region", "<:region_us:426902668900827146> US West", true);
+                e.addField("Server Region", "<:region_us:718523704845533227> US West", true);
                 break;
             case VIP_US_WEST:
-                e.addField("Server Region", "<:region_us:426902668900827146> <:vip_region:426902668909477898> US West", true);
+                e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US West", true);
                 break;
             case EU_WEST:
-                e.addField("Server Region", "<:region_eu:426902669110673408> Western Europe", true);
+                e.addField("Server Region", "<:region_eu:718523704979488820> Western Europe", true);
                 break;
             case INDIA:
             case EUROPE:
