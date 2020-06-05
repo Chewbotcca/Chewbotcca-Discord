@@ -9,6 +9,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.Chewbotcca.util.RestClient;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 public class RubyGemsCommand extends Command {
 
     public RubyGemsCommand() {
@@ -31,23 +35,23 @@ public class RubyGemsCommand extends Command {
         int rank = new JSONArray(RestClient.get("http://bestgems.org/api/v1/gems/" + event.getArgs() + "/total_ranking.json")).getJSONObject(0).getInt("total_ranking");
 
         EmbedBuilder e = new EmbedBuilder();
-                e.setTitle("RubyGem Information");
-                e.setAuthor(data.getString("name") + " (" + data.getString("version") + ")", null, "https://cdn.discordapp.com/emojis/232899886419410945.png");
+                e.setTitle(data.getString("name") + " (" + data.getString("version") + ")", data.getString("project_uri"));
+                e.setAuthor("RubyGem Information", null, "https://cdn.discordapp.com/emojis/232899886419410945.png");
                 e.setDescription(data.getString("info"));
 
         e.addField("Authors", data.getString("authors"), true);
 
-        e.addField("Downloads", "For Version: " + data.getInt("version_downloads") + "\n" +
-                "Total: " + data.getInt("downloads"), true);
+        e.addField("Downloads", "For Version: " + NumberFormat.getNumberInstance(Locale.US).format(data.getInt("version_downloads")) + "\n" +
+                "Total: " + NumberFormat.getNumberInstance(Locale.US).format(data.getInt("downloads")), true);
 
         e.addField("License", data.getJSONArray("licenses").getString(0), true);
-        e.addField("Rank", "#" + rank, true);
+        e.addField("Rank", "#" + NumberFormat.getNumberInstance(Locale.US).format(rank), true);
 
         StringBuilder links = new StringBuilder();
         links.append("[Project](").append(data.getString("project_uri")).append(")\n");
         links.append("[Gem](").append(data.getString("gem_uri")).append(")\n");
-        links.append("[Documentation](").append(data.getString("documentation_uri")).append(")\n");
-
+        if(!data.isNull("documentation_uri"))
+            links.append("[Documentation](").append(data.getString("documentation_uri")).append(")\n");
         if(!data.isNull("homepage_uri"))
             links.append("[Homepage](").append(data.getString("homepage_uri")).append(")\n");
         if(!data.isNull("wiki_uri"))
