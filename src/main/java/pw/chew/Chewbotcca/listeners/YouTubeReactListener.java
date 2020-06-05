@@ -29,7 +29,7 @@ public class YouTubeReactListener extends ListenerAdapter {
                 return;
             }
             YouTubeCommand.described(msg.getId());
-            String content = msg.getContentRaw();
+            String content = msg.getContentStripped().replace(">", "");
             String video;
             if(content.contains("youtube.com")) {
                 video = content.split("=")[1];
