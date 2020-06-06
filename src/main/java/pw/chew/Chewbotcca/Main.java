@@ -8,10 +8,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pw.chew.Chewbotcca.commands.InfoCommand;
-import pw.chew.Chewbotcca.commands.LastFMCommand;
-import pw.chew.Chewbotcca.commands.MixerCommand;
-import pw.chew.Chewbotcca.commands.ServerInfoCommand;
+import pw.chew.Chewbotcca.commands.*;
 import pw.chew.Chewbotcca.commands.about.HelpCommand;
 import pw.chew.Chewbotcca.commands.about.InviteCommand;
 import pw.chew.Chewbotcca.commands.about.PingCommand;
@@ -19,19 +16,20 @@ import pw.chew.Chewbotcca.commands.about.StatsCommand;
 import pw.chew.Chewbotcca.commands.cat.CatCommand;
 import pw.chew.Chewbotcca.commands.cat.CatFactCommand;
 import pw.chew.Chewbotcca.commands.cat.DogCommand;
-import pw.chew.Chewbotcca.commands.cat.RubyGemsCommand;
 import pw.chew.Chewbotcca.commands.english.DefineCommand;
 import pw.chew.Chewbotcca.commands.english.UrbanDictionaryCommand;
 import pw.chew.Chewbotcca.commands.github.GHIssueCommand;
+import pw.chew.Chewbotcca.commands.github.GHUserCommand;
 import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCPHNodesCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCStatusCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCUserCommand;
+import pw.chew.Chewbotcca.commands.owner.NewIssueCommand;
 import pw.chew.Chewbotcca.commands.quotes.QuoteCommand;
 import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
 import pw.chew.Chewbotcca.listeners.SendJoinedOrLeftGuildListener;
-import pw.chew.Chewbotcca.listeners.YouTubeReactListener;
+import pw.chew.Chewbotcca.listeners.MagReactListener;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
@@ -80,6 +78,7 @@ public class Main {
 
                 // GitHub Module
                 new GHIssueCommand(),
+                new GHUserCommand(),
 
                 // Google Module
                 new YouTubeCommand(),
@@ -89,6 +88,9 @@ public class Main {
                 new MCServerCommand(),
                 new MCStatusCommand(),
                 new MCUserCommand(),
+
+                // Owner Module
+                new NewIssueCommand(),
 
                 // Quotes Module
                 new QuoteCommand(),
@@ -113,7 +115,7 @@ public class Main {
 
         // Register listeners
         jda.addEventListener(
-                new YouTubeReactListener(),
+                new MagReactListener(),
                 new SendJoinedOrLeftGuildListener()
         );
     }

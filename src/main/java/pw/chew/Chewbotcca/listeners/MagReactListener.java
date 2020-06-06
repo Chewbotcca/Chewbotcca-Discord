@@ -1,6 +1,5 @@
 package pw.chew.Chewbotcca.listeners;
 
-import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.json.JSONObject;
@@ -12,7 +11,7 @@ import pw.chew.Chewbotcca.util.RestClient;
 import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 
-public class YouTubeReactListener extends ListenerAdapter {
+public class MagReactListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
         if(!event.getReactionEmote().getName().equals("\uD83D\uDD0D")) {
@@ -21,11 +20,11 @@ public class YouTubeReactListener extends ListenerAdapter {
         String id = event.getMessageId();
         event.getChannel().retrieveMessageById(id).queue((msg) -> {
             if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
-                LoggerFactory.getLogger(YouTubeReactListener.class).debug("Message older than 15 minutes, not describing!");
+                LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
                 return;
             }
             if(YouTubeCommand.didDescribe(msg.getId())) {
-                LoggerFactory.getLogger(YouTubeReactListener.class).debug("Already described this message!");
+                LoggerFactory.getLogger(MagReactListener.class).debug("Already described this message!");
                 return;
             }
             YouTubeCommand.described(msg.getId());
