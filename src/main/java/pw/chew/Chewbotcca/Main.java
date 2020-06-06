@@ -28,6 +28,7 @@ import pw.chew.Chewbotcca.commands.minecraft.MCPHNodesCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCStatusCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCUserCommand;
+import pw.chew.Chewbotcca.commands.quotes.QuoteCommand;
 import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
 import pw.chew.Chewbotcca.listeners.SendJoinedOrLeftGuildListener;
 import pw.chew.Chewbotcca.listeners.YouTubeReactListener;
@@ -90,6 +91,7 @@ public class Main {
                 new MCUserCommand(),
 
                 // Quotes Module
+                new QuoteCommand(),
                 new TRBMBCommand(),
 
                 // Everything Else
