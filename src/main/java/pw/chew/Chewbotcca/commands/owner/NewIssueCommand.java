@@ -2,10 +2,7 @@ package pw.chew.Chewbotcca.commands.owner;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import org.kohsuke.github.GHIssue;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.*;
 import pw.chew.Chewbotcca.Main;
 
 import java.io.IOException;
@@ -32,11 +29,36 @@ public class NewIssueCommand extends Command {
             return;
         }
 
+        String args = commandEvent.getArgs();
+
+        boolean hasDescription = args.contains("--description");
+        boolean hasLabel = args.contains("--label");
+
+        String title;
+        String description = null;
+        String label = null;
+        if(!hasDescription && !hasLabel) {
+            title = args;
+        } else if (hasDescription && !hasLabel) {
+            title = args.split(" --description")[0];
+            description = args.split("--description ")[1];
+        } else {
+            title = args.split(" --description")[0];
+            description = args.split("--description ")[1].split(" --label")[0];
+            label = args.split("--label ")[1];
+        }
+
         try {
-            GHIssue issue = repo.createIssue(commandEvent.getArgs()).assignee(github.getMyself()).create();
-            commandEvent.reply("Issue created @ " + issue.getUrl());
+            GHIssueBuilder issueBuilder = repo.createIssue(title).assignee(github.getMyself());
+            if(hasDescription)
+                issueBuilder.body(description);
+            if(hasLabel)
+                issueBuilder.label(label);
+            GHIssue issue = issueBuilder.create();
+            commandEvent.reply("Issue created @ " + issue.getUrl().toString().replace("api.github.com/repos", "github.com"));
         } catch (IOException e) {
             e.printStackTrace();
+            commandEvent.reply("Error occurred creating Issue, check console for more information.");
         }
     }
 }
