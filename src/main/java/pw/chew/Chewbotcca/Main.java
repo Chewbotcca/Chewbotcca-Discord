@@ -26,6 +26,7 @@ import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCStatusCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCUserCommand;
 import pw.chew.Chewbotcca.commands.owner.NewIssueCommand;
+import pw.chew.Chewbotcca.commands.owner.ShutdownCommand;
 import pw.chew.Chewbotcca.commands.quotes.QuoteCommand;
 import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
 import pw.chew.Chewbotcca.listeners.SendJoinedOrLeftGuildListener;
@@ -91,6 +92,7 @@ public class Main {
 
                 // Owner Module
                 new NewIssueCommand(),
+                new ShutdownCommand(),
 
                 // Quotes Module
                 new QuoteCommand(),
