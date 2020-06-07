@@ -52,10 +52,12 @@ public class GHIssueCommand extends Command {
         }
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle(issue.getTitle());
-        if(issue.getBody().length() > 200) {
-            e.setDescription(issue.getBody().substring(0, 199) + "...");
-        } else {
-            e.setDescription(issue.getBody());
+        if(issue.getBody() != null) {
+            if (issue.getBody().length() > 200) {
+                e.setDescription(issue.getBody().substring(0, 199) + "...");
+            } else {
+                e.setDescription(issue.getBody());
+            }
         }
         boolean open = issue.getState() == GHIssueState.OPEN;
         boolean merged = false;
