@@ -57,17 +57,22 @@ public class QuoteCommand extends Command {
         embed.setDescription(message.get().getContentRaw());
         embed.setTimestamp(message.get().getTimeCreated());
         embed.setAuthor(message.get().getAuthor().getAsTag(), null, message.get().getAuthor().getAvatarUrl());
-        if(args.length > 1) {
-            embed.addField("Channel", ((TextChannel)message.get().getChannel()).getAsMention(), true);
+        boolean thisGuild = event.getGuild() == message.get().getGuild();
+        if(!thisGuild)
+            embed.addField("Server", message.get().getGuild().getName(), true);
+        if(args.length > 1 && !thisGuild) {
+            embed.addField("Channel", message.get().getChannel().getName(), true);
+        } else if (args.length > 1) {
+            embed.addField("Channel", ((TextChannel) message.get().getChannel()).getAsMention(), true);
         }
         embed.addField("Jump", "[Link](" + message.get().getJumpUrl() + ")", true);
         AtomicReference<Member> member = new AtomicReference<>();
         AtomicBoolean bruh = new AtomicBoolean(false);
-        event.getGuild().retrieveMember(message.get().getAuthor()).queue(member::set, (uhoh) -> bruh.set(true));
+        event.getGuild().retrieveMember(message.get().getAuthor()).queue(member::set, (oh) -> bruh.set(true));
         await().atMost(5, TimeUnit.SECONDS).until(() -> member.get() != null || bruh.get());
-        if(!bruh.get()){
+
+        if(!bruh.get())
             embed.setColor(member.get().getColor());
-        }
         event.reply(embed.build());
     }
 }
