@@ -4,16 +4,19 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import org.kohsuke.github.*;
+import org.kohsuke.github.GHOrganization;
+import org.kohsuke.github.GHUser;
+import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
 import pw.chew.Chewbotcca.Main;
 
-import java.awt.*;
 import java.io.IOException;
 
 public class GHUserCommand extends Command {
 
     public GHUserCommand() {
         this.name = "ghuser";
+        this.aliases = new String[]{"ghorg"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
     }
@@ -38,12 +41,19 @@ public class GHUserCommand extends Command {
             return;
         }
         EmbedBuilder e = new EmbedBuilder();
-        e.setTitle("GitHub profile for " + user.getLogin(), "https://github.com/" + user.getLogin());
         try {
             e.setThumbnail(user.getAvatarUrl());
             e.addField("Repositories", String.valueOf(user.getPublicRepoCount()), true);
-            e.addField("Followers", String.valueOf(user.getFollowersCount()), true);
-            e.addField("Following", String.valueOf(user.getFollowingCount()), true);
+            boolean isOrg = user.getType().equals("Organization");
+            if(!isOrg) {
+                e.setTitle("GitHub profile for " + user.getLogin(), "https://github.com/" + user.getLogin());
+                e.addField("Followers", String.valueOf(user.getFollowersCount()), true);
+                e.addField("Following", String.valueOf(user.getFollowingCount()), true);
+            } else {
+                GHOrganization org = github.getOrganization(user.getLogin());
+                e.setTitle("GitHub profile for Organization " + user.getLogin(), "https://github.com/" + user.getLogin());
+                e.addField("Public Members", String.valueOf(org.listMembers().toArray().length), true);
+            }
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
