@@ -222,7 +222,12 @@ public class ServerInfoCommand extends Command {
         for (int i=0; i < roles.size() && i < 50; i++) {
             Role role = roles.get(i);
             List<Member> membersWithRole = server.getMembersWithRoles(role);
-            if(!role.isManaged() && membersWithRole != server.getBoosters())
+            int members = membersWithRole.size();
+            boolean skip = false;
+            if(role.isManaged() && members == 1 && membersWithRole.get(0).getUser().isBot())
+                skip = true;
+
+            if(!skip)
                 roleNames.append(membersWithRole.size()).append(" - ").append(role.getAsMention()).append("\n");
         }
 
