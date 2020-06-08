@@ -190,7 +190,10 @@ public class ServerInfoCommand extends Command {
             roleNames.append(role.getAsMention()).append(" ");
         }
 
-        e.addField("Roles - " + roles.size(), roleNames.toString(), false);
+        String roleName = roleNames.toString();
+        if(roleName.length() > 1024)
+            roleName = roleName.substring(0, 1023);
+        e.addField("Roles - " + roles.size(), roleName, false);
 
         e.setFooter("Server Created on");
         e.setTimestamp(server.getTimeCreated());
