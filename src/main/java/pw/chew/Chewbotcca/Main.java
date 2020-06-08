@@ -2,6 +2,8 @@ package pw.chew.Chewbotcca;
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import io.sentry.Sentry;
+import io.sentry.SentryClient;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -53,6 +55,8 @@ public class Main {
 
     public static void main(String[] args) throws LoginException, IOException {
         prop.load(new FileInputStream("bot.properties"));
+
+        Sentry.init(prop.getProperty("sentry-dsn")).setEnvironment(prop.getProperty("sentry-env"));
 
         waiter = new EventWaiter();
 
