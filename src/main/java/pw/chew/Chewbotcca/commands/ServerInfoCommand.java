@@ -13,6 +13,7 @@ import pw.chew.Chewbotcca.util.DateTime;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +34,9 @@ public class ServerInfoCommand extends Command {
         Guild server = event.getGuild();
 
         if(args.contains("boost")) {
-            event.reply(gatherBoostInfo(event, server).build());
+            event.reply(gatherBoostInfo(server).build());
+        } else if(args.contains("role")) {
+            event.reply(gatherRoles(server).build());
         } else {
             event.reply(gatherMainInfo(event, server).build());
         }
@@ -121,6 +124,8 @@ public class ServerInfoCommand extends Command {
             case VIP_SINGAPORE:
             case VIP_EU_CENTRAL:
             case VIP_US_CENTRAL:
+                e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US Central", true);
+                break;
             case VIP_SOUTH_KOREA:
             case VIP_SOUTH_AFRICA:
                 e.addField("Server Region", server.getRegionRaw(), true);
@@ -143,7 +148,6 @@ public class ServerInfoCommand extends Command {
 
         int membercount = server.getMemberCount();
         int humans = membercount - bots;
-
 
         DecimalFormat df = new DecimalFormat("#.##");
 
@@ -173,28 +177,12 @@ public class ServerInfoCommand extends Command {
 
         e.addField("Server Boosting", "Level: " + server.getBoostTier().getKey() + "\nBoosters: " + server.getBoostCount() + "\nView more: `%^sinfo boost`", true);
 
-        List<CharSequence> perks = new ArrayList<>();
-        if(server.getVanityCode() != null)
-            perks.add("Vanity Code: " + "[" + server.getVanityCode() + "](https://discord.gg/" + server.getVanityCode() + ")");
-        for(int i = 0; i < server.getFeatures().size(); i++) {
-            perks.add((CharSequence) server.getFeatures().toArray()[i]);
-        }
+        String perks = perkParser(server);
 
-        if(perks.size() > 0)
-            e.addField("Perks", String.join("\n", perks), true);
+        if(perks.length() > 0)
+            e.addField("Perks", perks, true);
 
-        StringBuilder roleNames = new StringBuilder();
-
-        List<Role> roles = server.getRoles();
-        for (int i=0; i < roles.size() && i < 50; i++) {
-            Role role = roles.get(i);
-            roleNames.append(role.getAsMention()).append(" ");
-        }
-
-        String roleName = roleNames.toString();
-        if(roleName.length() > 1024)
-            roleName = roleName.substring(0, 1023);
-        e.addField("Roles - " + roles.size(), roleName, false);
+        e.addField("View More Info", "Roles - `%^sinfo roles`\nBoosts - `%^sinfo boosts`", true);
 
         e.setFooter("Server Created on");
         e.setTimestamp(server.getTimeCreated());
@@ -204,7 +192,7 @@ public class ServerInfoCommand extends Command {
         return e;
     }
 
-    public EmbedBuilder gatherBoostInfo(CommandEvent event, Guild server) {
+    public EmbedBuilder gatherBoostInfo(Guild server) {
         List<Member> boosters = server.getBoosters();
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Boosters for " + server.getName());
@@ -218,6 +206,78 @@ public class ServerInfoCommand extends Command {
             embed.setDescription("No one is boosting! Will you be the first?");
         }
         return embed;
+    }
+
+    public EmbedBuilder gatherRoles(Guild server) {
+        EmbedBuilder e = new EmbedBuilder();
+
+        e.setTitle("Role List for " + server.getName());
+
+        StringBuilder roleNames = new StringBuilder();
+
+        roleNames.append("Members - Role Mention").append("\n");
+
+        List<Role> roles = server.getRoles();
+        for (int i=0; i < roles.size() && i < 50; i++) {
+            Role role = roles.get(i);
+            roleNames.append(server.getMembersWithRoles(role).size()).append(" - ").append(role.getAsMention()).append("\n");
+        }
+
+        String roleName = roleNames.toString();
+        e.setDescription(roleName);
+
+        return e;
+    }
+
+    public String perkParser(Guild server) {
+
+        List<CharSequence> perks = new ArrayList<>();
+        String[] features = server.getFeatures().toArray(new String[0]);
+        Arrays.sort(features);
+        for(int i = 0; i < server.getFeatures().size(); i++) {
+            switch(features[i]) {
+                case "ANIMATED_ICON":
+                case "COMMERCE":
+                case "DISCOVERABLE":
+                case "MORE_EMOJI":
+                case "NEWS":
+                case "PARTNERED":
+                case "PUBLIC":
+                case "VERIFIED":
+                case "VIP_REGIONS":
+                default:
+                    perks.add(capitalize(features[i]));
+                    break;
+                case "BANNER":
+                    perks.add("[Banner](" + server.getBannerUrl() + ")");
+                    break;
+                case "INVITE_SPLASH":
+                    perks.add("[Invite Splash](" + server.getSplashUrl() + ")");
+                    break;
+                case "VANITY_URL":
+                    perks.add("Vanity URL: " + "[" + server.getVanityCode() + "](https://discord.gg/" + server.getVanityCode() + ")");
+                    break;
+            }
+        }
+
+        return String.join("\n", perks);
+    }
+
+    /*
+    Source: https://github.com/ChewMC/TransmuteIt/blob/2b86/src/pw/chew/transmuteit/DiscoveriesCommand.java#L174-L186
+     */
+    public String capitalize(String to) {
+        if(to.equals("")) {
+            return "";
+        }
+        String[] words = to.split("_");
+        StringBuilder newword = new StringBuilder();
+        for (String word : words) {
+            String rest = word.substring(1).toLowerCase();
+            String first = word.substring(0, 1).toUpperCase();
+            newword.append(first).append(rest).append(" ");
+        }
+        return newword.toString();
     }
 }
 
