@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.entities.Role;
 import org.awaitility.core.ConditionTimeoutException;
 
 import java.awt.*;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +24,7 @@ public class ServerInfoCommand extends Command {
         this.name = "serverinfo";
         this.aliases = new String[]{"sinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = false;
+        this.guildOnly = true;
     }
 
     @Override
@@ -37,10 +39,6 @@ public class ServerInfoCommand extends Command {
                 return;
             }
         } else {
-            if (event.getChannelType() == ChannelType.PRIVATE) {
-                event.reply("You silly meme, you can't do SERVERinfo in a private message!!! haha, trying to bamboozle, who got bamboozled NOW? But seriously, try running this on a server or supplying an ID. Better yet invite me to one: <http://bit.ly/Chewbotcca>");
-                return;
-            }
             server = event.getGuild();
         }
 
@@ -148,8 +146,11 @@ public class ServerInfoCommand extends Command {
         int membercount = server.getMemberCount();
         int humans = membercount - bots;
 
-        float botpercent = ((float)bots / (float)membercount * 100);
-        float humanpercent = ((float)humans / (float)membercount * 100);
+
+        DecimalFormat df = new DecimalFormat("#.##");
+
+        String botpercent = df.format((float)bots / (float)membercount * 100);
+        String humanpercent = df.format((float)humans / (float)membercount * 100);
 
         e.addField("Member Count", "Total: " + membercount + "\n" +
                 "Bots: " + bots + " - (" + botpercent + "%)\n" +
@@ -161,16 +162,25 @@ public class ServerInfoCommand extends Command {
         int categories = server.getCategories().size();
         int storechans = server.getStoreChannels().size();
 
-        float textpercent = ((float)textchans / (float)totalchans * 100);
-        float voicepercent = ((float)voicechans / (float)totalchans * 100);
-        float catepercent = ((float)categories / (float)totalchans * 100);
-        float storepercent = ((float)storechans / (float)totalchans * 100);
+        String textpercent = df.format((float)textchans / (float)totalchans * 100);
+        String voicepercent = df.format((float)voicechans / (float)totalchans * 100);
+        String catepercent = df.format((float)categories / (float)totalchans * 100);
+        String storepercent = df.format((float)storechans / (float)totalchans * 100);
 
         e.addField("Channel Count", "Total: " + totalchans + "\n" +
                 "Text: " + textchans + " (" + textpercent + "%)\n" +
                 "Voice: " + voicechans + " (" + voicepercent + "%)\n" +
                 "Categories: " + categories + " (" + catepercent + "%)\n" +
                 "Store Pages: " + storechans + " (" + storepercent + "%)", true);
+
+        e.addField("Server Boosting", "Level: " + server.getBoostTier().getKey() + "\nBoosters: " + server.getBoostCount(), true);
+
+        List<CharSequence> perks = new ArrayList<>();
+        if(server.getVanityCode() != null)
+            perks.add("Vanity Code:" + server.getVanityCode());
+
+        if(perks.size() > 0)
+            e.addField("Perks", String.join("\n", perks), true);
 
         StringBuilder roleNames = new StringBuilder();
 
@@ -180,12 +190,12 @@ public class ServerInfoCommand extends Command {
             roleNames.append(role.getAsMention()).append(" ");
         }
 
-        e.addField("Roles - " + roles.size(), roleNames.toString(), true);
+        e.addField("Roles - " + roles.size(), roleNames.toString(), false);
 
         e.setFooter("Server Created on");
         e.setTimestamp(server.getTimeCreated());
 
-        e.setColor(Color.decode("#00FF00"));
+        e.setColor(event.getSelfMember().getColor());
 
         event.reply(e.build());
 
