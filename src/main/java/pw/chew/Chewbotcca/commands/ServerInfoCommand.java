@@ -177,7 +177,10 @@ public class ServerInfoCommand extends Command {
 
         List<CharSequence> perks = new ArrayList<>();
         if(server.getVanityCode() != null)
-            perks.add("Vanity Code:" + server.getVanityCode());
+            perks.add("Vanity Code: " + "[" + server.getVanityCode() + "](https://discord.gg/" + server.getVanityCode() + ")");
+        for(int i = 0; i < server.getFeatures().size(); i++) {
+            perks.add((CharSequence) server.getFeatures().toArray()[i]);
+        }
 
         if(perks.size() > 0)
             e.addField("Perks", String.join("\n", perks), true);
