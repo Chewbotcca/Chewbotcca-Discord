@@ -4,6 +4,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.Chewbotcca.Main;
 import pw.chew.Chewbotcca.util.RestClient;
@@ -25,6 +26,8 @@ public class YouTubeCommand extends Command {
         this.name = "youtube";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.cooldown = 5;
+        this.cooldownScope = CooldownScope.USER;
     }
 
     @Override
@@ -37,7 +40,13 @@ public class YouTubeCommand extends Command {
             e.printStackTrace();
             return;
         }
-        String id = new JSONObject(RestClient.get(findidurl)).getJSONArray("items").getJSONObject(0).getJSONObject("id").getString("videoId");
+        String id;
+        try {
+            id = new JSONObject(RestClient.get(findidurl)).getJSONArray("items").getJSONObject(0).getJSONObject("id").getString("videoId");
+        } catch (JSONException e) {
+            event.reply("No videos found!");
+            return;
+        }
         JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + id + "&key=" + Main.getProp().getProperty("google") + "&part=snippet,contentDetails,statistics"));
         if (url.getJSONObject("pageInfo").getInt("totalResults") == 0) {
             event.reply("No results found.");
