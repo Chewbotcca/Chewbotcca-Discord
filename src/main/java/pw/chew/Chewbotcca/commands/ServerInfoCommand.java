@@ -11,14 +11,13 @@ import net.dv8tion.jda.api.entities.Role;
 import org.awaitility.core.ConditionTimeoutException;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 
 public class ServerInfoCommand extends Command {
-
     public ServerInfoCommand() {
         this.name = "serverinfo";
         this.aliases = new String[]{"sinfo"};
@@ -130,6 +129,13 @@ public class ServerInfoCommand extends Command {
             case VIP_SOUTH_AFRICA:
                 e.addField("Server Region", server.getRegionRaw(), true);
                 break;
+        }
+
+        try {
+            event.getGuild().retrieveMembers().get();
+            await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
+        } catch (InterruptedException | ExecutionException interruptedException) {
+            interruptedException.printStackTrace();
         }
 
         List<Member> members = server.getMembers();

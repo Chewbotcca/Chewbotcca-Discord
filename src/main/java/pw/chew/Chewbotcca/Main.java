@@ -6,6 +6,10 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pw.chew.Chewbotcca.commands.*;
@@ -30,8 +34,8 @@ import pw.chew.Chewbotcca.commands.owner.ShutdownCommand;
 import pw.chew.Chewbotcca.commands.quotes.AcronymCommand;
 import pw.chew.Chewbotcca.commands.quotes.QuoteCommand;
 import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
-import pw.chew.Chewbotcca.listeners.SendJoinedOrLeftGuildListener;
 import pw.chew.Chewbotcca.listeners.MagReactListener;
+import pw.chew.Chewbotcca.listeners.SendJoinedOrLeftGuildListener;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
@@ -44,11 +48,12 @@ public class Main {
     static Properties prop = new Properties();
     public static JDA jda;
     public static Instant start;
+    public static EventWaiter waiter;
 
     public static void main(String[] args) throws LoginException, IOException {
         prop.load(new FileInputStream("bot.properties"));
 
-        EventWaiter waiter = new EventWaiter();
+        waiter = new EventWaiter();
 
         CommandClientBuilder client = new CommandClientBuilder();
 
@@ -104,8 +109,10 @@ public class Main {
                 new InfoCommand(),
                 new LastFMCommand(),
                 new MixerCommand(),
+                new RoleInfoCommand(),
                 new RubyGemsCommand(),
-                new ServerInfoCommand()
+                new ServerInfoCommand(),
+                new UserInfoCommand()
         );
 
         // Register JDA
@@ -129,8 +136,12 @@ public class Main {
         );
     }
 
-    public JDA getJDA() {
+    public static JDA getJDA() {
         return jda;
+    }
+
+    public static EventWaiter getWaiter() {
+        return waiter;
     }
 
     public static Properties getProp() {
