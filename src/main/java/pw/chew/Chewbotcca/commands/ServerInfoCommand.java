@@ -216,11 +216,14 @@ public class ServerInfoCommand extends Command {
         StringBuilder roleNames = new StringBuilder();
 
         roleNames.append("Members - Role Mention").append("\n");
+        roleNames.append("Note: Roles that are integrations are skipped!").append("\n");
 
         List<Role> roles = server.getRoles();
         for (int i=0; i < roles.size() && i < 50; i++) {
             Role role = roles.get(i);
-            roleNames.append(server.getMembersWithRoles(role).size()).append(" - ").append(role.getAsMention()).append("\n");
+            List<Member> membersWithRole = server.getMembersWithRoles(role);
+            if(!role.isManaged() && membersWithRole != server.getBoosters())
+                roleNames.append(membersWithRole.size()).append(" - ").append(role.getAsMention()).append("\n");
         }
 
         String roleName = roleNames.toString();
