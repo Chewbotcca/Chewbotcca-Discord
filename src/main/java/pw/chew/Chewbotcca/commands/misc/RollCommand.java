@@ -22,12 +22,18 @@ public class RollCommand extends Command {
         }
 
         String[] types = args.split("d");
-        int dice = Integer.parseInt(types[0]);
-        int sides = 0;
-        if(types.length < 2) {
-            sides = 6;
-        } else {
-            sides = Integer.parseInt(types[1]);
+        int dice;
+        int sides;
+        try {
+            dice = Integer.parseInt(types[0]);
+            if (types.length < 2) {
+                sides = 6;
+            } else {
+                sides = Integer.parseInt(types[1]);
+            }
+        } catch (NumberFormatException e) {
+            commandEvent.reply("Your input is too big! Try again, but with lower numbers.");
+            return;
         }
         if(dice < 1) {
             commandEvent.reply("You must roll at least 1 die.");
