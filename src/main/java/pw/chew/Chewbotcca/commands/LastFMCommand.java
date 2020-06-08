@@ -34,6 +34,11 @@ public class LastFMCommand extends Command {
 
         JSONObject parse = new JSONObject(RestClient.get("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&limit=1&user=" + args + "&api_key=" + key + "&format=json"));
 
+        if(parse.has("message") && parse.getString("message").equals("User not found")) {
+            event.reply("No user found for the provided input!");
+            return;
+        }
+
         JSONObject base = parse.getJSONObject("recenttracks").getJSONArray("track").getJSONObject(0);
 
         String user = parse.getJSONObject("recenttracks").getJSONObject("@attr").getString("user");
