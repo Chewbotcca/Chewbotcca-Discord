@@ -4,14 +4,14 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import org.awaitility.core.ConditionTimeoutException;
+import pw.chew.Chewbotcca.util.DateTime;
 
-import java.awt.*;
 import java.text.DecimalFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -29,19 +29,17 @@ public class ServerInfoCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
-        String id = event.getArgs();
+        String args = event.getArgs();
+        Guild server = event.getGuild();
 
-        Guild server;
-        if(id.length() > 0) {
-            server = event.getJDA().getGuildById(id);
-            if (server == null) {
-                event.reply("I am not on that server and are therefore unable to view that server's stats. Try getting them to add me by sending them this invite link: <http://bit.ly/Chewbotcca>");
-                return;
-            }
+        if(args.contains("boost")) {
+            event.reply(gatherBoostInfo(event, server).build());
         } else {
-            server = event.getGuild();
+            event.reply(gatherMainInfo(event, server).build());
         }
+    }
 
+    public EmbedBuilder gatherMainInfo(CommandEvent event, Guild server) {
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Server Information");
         e.setAuthor(server.getName(), null,server.getIconUrl());
@@ -173,7 +171,7 @@ public class ServerInfoCommand extends Command {
                 "Categories: " + categories + " (" + catepercent + "%)\n" +
                 "Store Pages: " + storechans + " (" + storepercent + "%)", true);
 
-        e.addField("Server Boosting", "Level: " + server.getBoostTier().getKey() + "\nBoosters: " + server.getBoostCount(), true);
+        e.addField("Server Boosting", "Level: " + server.getBoostTier().getKey() + "\nBoosters: " + server.getBoostCount() + "\nView more: `%^sinfo boost`", true);
 
         List<CharSequence> perks = new ArrayList<>();
         if(server.getVanityCode() != null)
@@ -203,8 +201,23 @@ public class ServerInfoCommand extends Command {
 
         e.setColor(event.getSelfMember().getColor());
 
-        event.reply(e.build());
+        return e;
+    }
 
+    public EmbedBuilder gatherBoostInfo(CommandEvent event, Guild server) {
+        List<Member> boosters = server.getBoosters();
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Boosters for " + server.getName());
+        List<CharSequence> boostString = new ArrayList<>();
+        Instant now = Instant.now();
+        for (Member booster : boosters) {
+            boostString.add(booster.getAsMention() + " for " + DateTime.timeAgo(now.toEpochMilli() - booster.getTimeBoosted().toInstant().toEpochMilli()));
+        }
+        embed.setDescription(String.join("\n", boostString));
+        if(boostString.size() == 0) {
+            embed.setDescription("No one is boosting! Will you be the first?");
+        }
+        return embed;
     }
 }
 
