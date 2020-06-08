@@ -29,13 +29,16 @@ public class DefineCommand extends Command {
             return;
         }
 
-        commandEvent.reply(new EmbedBuilder()
+        EmbedBuilder e = new EmbedBuilder()
                 .setTitle("Definition for " + word)
                 .setColor(0xd084)
                 .setDescription(grabbedword.getJSONObject(0).getString("text"))
-                .setAuthor("Dictionary", null, "https://icons.iconarchive.com/icons/johanchalibert/mac-osx-yosemite/1024/dictionary-icon.png")
-                .addField("Part of Speech", grabbedword.getJSONObject(0).getString("partOfSpeech"), true)
-                .build()
-        );
+                .setAuthor("Dictionary", null, "https://icons.iconarchive.com/icons/johanchalibert/mac-osx-yosemite/1024/dictionary-icon.png");
+
+        if(grabbedword.getJSONObject(0).has("partOfSpeech")) {
+            e.addField("Part of Speech", grabbedword.getJSONObject(0).getString("partOfSpeech"), true);
+        }
+
+        commandEvent.reply(e.build());
     }
 }
