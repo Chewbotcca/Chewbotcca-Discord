@@ -110,6 +110,11 @@ public class Main {
 
         // Register JDA
         jda = JDABuilder.createDefault(prop.getProperty("token"))
+                .setChunkingFilter(ChunkingFilter.ALL)
+                .setMemberCachePolicy(MemberCachePolicy.ALL)
+                .enableIntents(GatewayIntent.GUILD_MEMBERS)
+                .enableIntents(GatewayIntent.GUILD_PRESENCES)
+                .enableCache(CacheFlag.ACTIVITY)
                 .setStatus(OnlineStatus.ONLINE)
                 .setActivity(Activity.playing("Booting..."))
                 .addEventListeners(waiter, client.build())
