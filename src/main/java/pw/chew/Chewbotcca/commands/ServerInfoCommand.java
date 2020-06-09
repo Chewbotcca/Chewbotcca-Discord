@@ -33,10 +33,19 @@ public class ServerInfoCommand extends Command {
         String args = event.getArgs();
         Guild server = event.getGuild();
 
+        try {
+            event.getGuild().retrieveMembers().get();
+            await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
+        } catch (InterruptedException | ExecutionException interruptedException) {
+            interruptedException.printStackTrace();
+        }
+
         if(args.contains("boost")) {
             event.reply(gatherBoostInfo(server).build());
         } else if(args.contains("role")) {
             event.reply(gatherRoles(server).build());
+        } else if(args.contains("bot")) {
+            event.reply(gatherBots(server).build());
         } else {
             event.reply(gatherMainInfo(event, server).build());
         }
@@ -226,6 +235,8 @@ public class ServerInfoCommand extends Command {
             boolean skip = false;
             if(role.isManaged() && members == 1 && membersWithRole.get(0).getUser().isBot())
                 skip = true;
+            if(role.isPublicRole())
+                skip = true;
 
             if(!skip)
                 roleNames.append(membersWithRole.size()).append(" - ").append(role.getAsMention()).append("\n");
@@ -235,6 +246,19 @@ public class ServerInfoCommand extends Command {
         e.setDescription(roleName);
 
         return e;
+    }
+
+    public EmbedBuilder gatherBots(Guild server) {
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Bots on " + server.getName());
+        List<CharSequence> bots = new ArrayList<>();
+        List<Member> members = server.getMembers();
+        for (Member member : members) {
+            if (member.getUser().isBot())
+                bots.add(member.getAsMention() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
+        }
+        embed.setDescription(String.join("\n", bots));
+        return embed;
     }
 
     public String perkParser(Guild server) {

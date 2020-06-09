@@ -4,12 +4,11 @@
 
 package pw.chew.Chewbotcca.util;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class DateTime {
+    static boolean useSeconds = true;
+
     public static String timeAgo(long different) {
 
         long secondsInMilli = 1000;
@@ -41,7 +40,7 @@ public class DateTime {
             output.add(elapsedHours + " hours");
         if(elapsedMinutes > 0)
             output.add(elapsedMinutes + " minutes");
-        if(elapsedSeconds > 0)
+        if(elapsedSeconds > 0 && useSeconds)
             output.add(elapsedSeconds + " seconds");
 
         StringBuilder response = new StringBuilder();
@@ -56,5 +55,12 @@ public class DateTime {
         }
 
         return response.toString();
+    }
+
+    public static String timeAgo(long different, boolean seconds) {
+        useSeconds = seconds;
+        String timeago = timeAgo(different);
+        useSeconds = true;
+        return timeago;
     }
 }
