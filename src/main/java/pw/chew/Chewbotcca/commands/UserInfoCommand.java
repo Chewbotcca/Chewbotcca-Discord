@@ -28,10 +28,35 @@ public class UserInfoCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        Member member = commandEvent.getMember();
+        String args = commandEvent.getArgs();
+        Member member = null;
+        if(args.length() == 0) {
+            member = commandEvent.getMember();
+        } else {
+            try {
+                Long.parseLong(commandEvent.getArgs());
+                member = commandEvent.getGuild().getMemberById(commandEvent.getArgs());
+            } catch (NumberFormatException e) {
+                List<Member> members = commandEvent.getGuild().getMembersByName(commandEvent.getArgs(), true);
+                if(members.size() == 0) {
+                    commandEvent.reply("No members found for the given input");
+                    return;
+                } else {
+                    member = members.get(0);
+                }
+            }
+        }
+        if(member == null) {
+            commandEvent.reply("No members found for the given input");
+            return;
+        }
+        boolean self = member == commandEvent.getMember();
 
         EmbedBuilder e = new EmbedBuilder();
-        e.setTitle("User info for you!");
+        if (self)
+            e.setTitle("User info for you!");
+        else
+            e.setTitle("User info for " + member.getUser().getAsTag());
         e.setThumbnail(member.getUser().getAvatarUrl());
         e.addField("Name#Discrim", member.getUser().getAsTag(), true);
         e.addField("User ID", member.getId(), true);
@@ -51,7 +76,10 @@ public class UserInfoCommand extends Command {
                 e.setColor(Color.decode("#F04747"));
             }
             case OFFLINE -> {
-                status = "Offline";
+                if (self)
+                    status = "Invisible";
+                else
+                    status = "Offline";
                 e.setColor(Color.decode("#747F8D"));
             }
             default -> {
