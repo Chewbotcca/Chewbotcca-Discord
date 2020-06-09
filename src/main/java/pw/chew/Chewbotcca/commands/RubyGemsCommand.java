@@ -9,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.Chewbotcca.util.RestClient;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 

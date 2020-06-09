@@ -9,8 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.Chewbotcca.util.RestClient;
 
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;

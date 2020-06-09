@@ -38,26 +38,26 @@ public class UserInfoCommand extends Command {
 
         String status;
         switch (member.getOnlineStatus()) {
-            case ONLINE:
+            case ONLINE -> {
                 status = "Online";
                 e.setColor(Color.decode("#43B581"));
-                break;
-            case IDLE:
+            }
+            case IDLE -> {
                 status = "Idle";
                 e.setColor(Color.decode("#FAA61A"));
-                break;
-            case DO_NOT_DISTURB:
+            }
+            case DO_NOT_DISTURB -> {
                 status = "Do Not Disturb";
                 e.setColor(Color.decode("#F04747"));
-                break;
-            case OFFLINE:
+            }
+            case OFFLINE -> {
                 status = "Offline";
                 e.setColor(Color.decode("#747F8D"));
-                break;
-            case UNKNOWN:
-            default:
+            }
+            default -> {
                 status = member.getOnlineStatus().getKey();
                 e.setColor(Color.decode("#747F8D"));
+            }
         }
 
         e.addField("Status", status, true);
@@ -83,21 +83,12 @@ public class UserInfoCommand extends Command {
             if(!dbio.isNull("birthday"))
                 e.addField("Birthday", dateParser(dbio.getString("birthday")), true);
             if(!dbio.isNull("gender")) {
-                String gender;
-                switch (dbio.getInt("gender")) {
-                    case 0:
-                        gender = "Male";
-                        break;
-                    case 1:
-                        gender = "Female";
-                        break;
-                    case 2:
-                        gender = "Non-Binary";
-                        break;
-                    case 3:
-                    default:
-                        gender = "Undisclosed";
-                }
+                String gender = switch (dbio.getInt("gender")) {
+                    case 0 -> "Male";
+                    case 1 -> "Female";
+                    case 2 -> "Non-Binary";
+                    default -> "Undisclosed";
+                };
                 e.addField("Gender", gender, true);
             }
             if(!dbio.isNull("location"))

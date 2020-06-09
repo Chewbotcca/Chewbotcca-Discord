@@ -67,76 +67,24 @@ public class ServerInfoCommand extends Command {
 
         e.addField("Server ID", server.getId(), true);
 
-        switch(server.getRegion()) {
-            case VIP_AMSTERDAM:
-                e.addField("Server Region", "<:region_amsterdam:718523705080152136> <:vip_region:718523836823240814> Amsterdam", true);
-                break;
-            case BRAZIL:
-                e.addField("Server Region", "<:region_brazil:718523705055248418> Brazil", true);
-                break;
-            case EU_CENTRAL:
-                e.addField("Server Region", "<:region_eu:718523704979488820> Central Europe", true);
-                break;
-            case HONG_KONG:
-                e.addField("Server Region", "<:region_hongkong:718523705105580103> Hong Kong", true);
-                break;
-            case JAPAN:
-                e.addField("Server Region", "<:region_japan:718523704853790892> Japan", true);
-                break;
-            case RUSSIA:
-                e.addField("Server Region", "<:region_russia:718523705193660486> Russia", true);
-                break;
-            case SINGAPORE:
-                e.addField("Server Region", "<:region_singapore:718523705583730768> Singapore", true);
-                break;
-            case SYDNEY:
-                e.addField("Server Region", "<:region_sydney:718523704879087709> Sydney", true);
-                break;
-            case US_CENTRAL:
-                e.addField("Server Region", "<:region_us:718523704845533227> US Central", true);
-                break;
-            case US_EAST:
-                e.addField("Server Region", "<:region_us:718523704845533227> US East", true);
-                break;
-            case VIP_US_EAST:
-                e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US East", true);
-                break;
-            case US_SOUTH:
-                e.addField("Server Region", "<:region_us:718523704845533227> US South", true);
-                break;
-            case US_WEST:
-                e.addField("Server Region", "<:region_us:718523704845533227> US West", true);
-                break;
-            case VIP_US_WEST:
-                e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US West", true);
-                break;
-            case EU_WEST:
-                e.addField("Server Region", "<:region_eu:718523704979488820> Western Europe", true);
-                break;
-            case INDIA:
-            case EUROPE:
-            case LONDON:
-            case UNKNOWN:
-            case AMSTERDAM:
-            case FRANKFURT:
-            case VIP_JAPAN:
-            case VIP_BRAZIL:
-            case VIP_LONDON:
-            case VIP_SYDNEY:
-            case SOUTH_KOREA:
-            case VIP_EU_WEST:
-            case SOUTH_AFRICA:
-            case VIP_US_SOUTH:
-            case VIP_FRANKFURT:
-            case VIP_SINGAPORE:
-            case VIP_EU_CENTRAL:
-            case VIP_US_CENTRAL:
-                e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US Central", true);
-                break;
-            case VIP_SOUTH_KOREA:
-            case VIP_SOUTH_AFRICA:
-                e.addField("Server Region", server.getRegionRaw(), true);
-                break;
+        switch (server.getRegion()) {
+            case VIP_AMSTERDAM -> e.addField("Server Region", "<:region_amsterdam:718523705080152136> <:vip_region:718523836823240814> Amsterdam", true);
+            case BRAZIL -> e.addField("Server Region", "<:region_brazil:718523705055248418> Brazil", true);
+            case EU_CENTRAL -> e.addField("Server Region", "<:region_eu:718523704979488820> Central Europe", true);
+            case HONG_KONG -> e.addField("Server Region", "<:region_hongkong:718523705105580103> Hong Kong", true);
+            case JAPAN -> e.addField("Server Region", "<:region_japan:718523704853790892> Japan", true);
+            case RUSSIA -> e.addField("Server Region", "<:region_russia:718523705193660486> Russia", true);
+            case SINGAPORE -> e.addField("Server Region", "<:region_singapore:718523705583730768> Singapore", true);
+            case SYDNEY -> e.addField("Server Region", "<:region_sydney:718523704879087709> Sydney", true);
+            case US_CENTRAL -> e.addField("Server Region", "<:region_us:718523704845533227> US Central", true);
+            case US_EAST -> e.addField("Server Region", "<:region_us:718523704845533227> US East", true);
+            case VIP_US_EAST -> e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US East", true);
+            case US_SOUTH -> e.addField("Server Region", "<:region_us:718523704845533227> US South", true);
+            case US_WEST -> e.addField("Server Region", "<:region_us:718523704845533227> US West", true);
+            case VIP_US_WEST -> e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US West", true);
+            case EU_WEST -> e.addField("Server Region", "<:region_eu:718523704979488820> Western Europe", true);
+            case INDIA, EUROPE, LONDON, UNKNOWN, AMSTERDAM, FRANKFURT, VIP_JAPAN, VIP_BRAZIL, VIP_LONDON, VIP_SYDNEY, SOUTH_KOREA, VIP_EU_WEST, SOUTH_AFRICA, VIP_US_SOUTH, VIP_FRANKFURT, VIP_SINGAPORE, VIP_EU_CENTRAL, VIP_US_CENTRAL -> e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US Central", true);
+            case VIP_SOUTH_KOREA, VIP_SOUTH_AFRICA -> e.addField("Server Region", server.getRegionRaw(), true);
         }
 
         try {
@@ -190,7 +138,7 @@ public class ServerInfoCommand extends Command {
         if(perks.length() > 0)
             e.addField("Perks", perks, true);
 
-        e.addField("View More Info", "Roles - `%^sinfo roles`\nBoosts - `%^sinfo boosts`\nBots - `%^sinfo bots", true);
+        e.addField("View More Info", "Roles - `%^sinfo roles`\nBoosts - `%^sinfo boosts`\nBots - `%^sinfo bots", false);
 
         e.setFooter("Server Created on");
         e.setTimestamp(server.getTimeCreated());
@@ -275,28 +223,11 @@ public class ServerInfoCommand extends Command {
         String[] features = server.getFeatures().toArray(new String[0]);
         Arrays.sort(features);
         for(int i = 0; i < server.getFeatures().size(); i++) {
-            switch(features[i]) {
-                case "ANIMATED_ICON":
-                case "COMMERCE":
-                case "DISCOVERABLE":
-                case "MORE_EMOJI":
-                case "NEWS":
-                case "PARTNERED":
-                case "PUBLIC":
-                case "VERIFIED":
-                case "VIP_REGIONS":
-                default:
-                    perks.add(capitalize(features[i]));
-                    break;
-                case "BANNER":
-                    perks.add("[Banner](" + server.getBannerUrl() + ")");
-                    break;
-                case "INVITE_SPLASH":
-                    perks.add("[Invite Splash](" + server.getSplashUrl() + ")");
-                    break;
-                case "VANITY_URL":
-                    perks.add("Vanity URL: " + "[" + server.getVanityCode() + "](https://discord.gg/" + server.getVanityCode() + ")");
-                    break;
+            switch (features[i]) {
+                default -> perks.add(capitalize(features[i]));
+                case "BANNER" -> perks.add("[Banner](" + server.getBannerUrl() + ")");
+                case "INVITE_SPLASH" -> perks.add("[Invite Splash](" + server.getSplashUrl() + ")");
+                case "VANITY_URL" -> perks.add("Vanity URL: " + "[" + server.getVanityCode() + "](https://discord.gg/" + server.getVanityCode() + ")");
             }
         }
 

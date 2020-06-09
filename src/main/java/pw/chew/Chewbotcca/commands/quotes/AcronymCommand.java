@@ -7,6 +7,7 @@ import pw.chew.Chewbotcca.util.RestClient;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 public class AcronymCommand extends Command {
 
@@ -17,11 +18,6 @@ public class AcronymCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
-        try {
-            event.reply("Acronym for " + event.getArgs() + " is " + new JSONObject(RestClient.get("https://api.chew.pro/acronym/" + URLEncoder.encode(event.getArgs(), "UTF-8"))).getString("phrase"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            event.reply("Invalid encoding error? How did this happen...");
-        }
+        event.reply("Acronym for " + event.getArgs() + " is " + new JSONObject(RestClient.get("https://api.chew.pro/acronym/" + URLEncoder.encode(event.getArgs(), StandardCharsets.UTF_8))).getString("phrase"));
     }
 }

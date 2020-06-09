@@ -27,15 +27,10 @@ public class MCStatusCommand extends Command {
         for(int i = 0; i < statusurl.length(); i++) {
             JSONObject data = statusurl.getJSONObject(i);
             String status = data.getString(sites[i]);
-            switch(status) {
-                case "green":
-                    up.append(sites[i]).append("\n");
-                    break;
-                case "yellow":
-                    shakey.append(sites[i]).append("\n");
-                    break;
-                case "red":
-                    red.append(sites[i]).append("\n");
+            switch (status) {
+                case "green" -> up.append(sites[i]).append("\n");
+                case "yellow" -> shakey.append(sites[i]).append("\n");
+                case "red" -> red.append(sites[i]).append("\n");
             }
         }
 

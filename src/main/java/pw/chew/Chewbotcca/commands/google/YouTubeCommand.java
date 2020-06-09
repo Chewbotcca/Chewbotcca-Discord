@@ -10,8 +10,8 @@ import pw.chew.Chewbotcca.Main;
 import pw.chew.Chewbotcca.util.RestClient;
 
 import java.awt.*;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.OffsetDateTime;
@@ -33,13 +33,7 @@ public class YouTubeCommand extends Command {
     @Override
     protected void execute(CommandEvent event) {
         String search = event.getArgs();
-        String findidurl = null;
-        try {
-            findidurl = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=" + URLEncoder.encode(search, "UTF-8") + "&key=" + Main.getProp().getProperty("google");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return;
-        }
+        String findidurl = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=" + URLEncoder.encode(search, StandardCharsets.UTF_8) + "&key=" + Main.getProp().getProperty("google");
         String id;
         try {
             id = new JSONObject(RestClient.get(findidurl)).getJSONArray("items").getJSONObject(0).getJSONObject("id").getString("videoId");

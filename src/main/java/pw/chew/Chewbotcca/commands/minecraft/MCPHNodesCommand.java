@@ -65,7 +65,7 @@ public class MCPHNodesCommand extends Command {
 
     public EmbedBuilder specificNode(String nodeId) {
         try {
-            int id = Integer.parseInt(nodeId);
+            Integer.parseInt(nodeId);
         } catch(NumberFormatException e) {
             return new EmbedBuilder().setTitle("Error occurred!").setDescription("Invalid input!").setColor(Color.decode("#ff0000"));
         }
@@ -78,7 +78,6 @@ public class MCPHNodesCommand extends Command {
             JSONObject loc = data.getJSONObject(i);
             String name = loc.getString("location");
             JSONArray nodes = loc.getJSONArray("nodes");
-            ArrayList<CharSequence> down = new ArrayList<>();
             for(int j = 0; j < nodes.length(); j++) {
                 JSONObject node = nodes.getJSONObject(j);
                 if(node.getInt("id") == Integer.parseInt(nodeId)) {

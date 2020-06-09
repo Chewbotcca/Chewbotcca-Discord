@@ -20,9 +20,8 @@ public class RestClient {
 
     public static String performRequest(Request request) {
         try (Response response = Main.jda.getHttpClient().newCall(request).execute()) {
-            String r = response.body().string();
             // System.out.println(r);
-            return r;
+            return response.body().string();
         } catch (IOException e) {
             e.printStackTrace();
         }

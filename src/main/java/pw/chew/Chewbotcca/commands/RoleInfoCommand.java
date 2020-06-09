@@ -4,7 +4,6 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 
@@ -14,7 +13,8 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 
@@ -30,7 +30,7 @@ public class RoleInfoCommand extends Command {
     @Override
     protected void execute(CommandEvent event) {
         String arg = event.getArgs().replace(" ", "");
-        Role role = null;
+        Role role;
         boolean id;
         try {
             Long.parseLong(arg);
@@ -59,7 +59,6 @@ public class RoleInfoCommand extends Command {
 
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Role Information for: " + role.getName());
-        List<User> memberList = new ArrayList<>();
         event.getChannel().sendTyping().queue();
         try {
             event.getGuild().retrieveMembers().get();
@@ -73,7 +72,7 @@ public class RoleInfoCommand extends Command {
         String percent = df.format((float)members / (float)total * 100);
         embed.addField("Members", NumberFormat.getNumberInstance(Locale.US).format(members) + " / " + NumberFormat.getNumberInstance(Locale.US).format(total) + " (" + percent + "%)", true);
         embed.addField("Mention", role.getAsMention(), true);
-        String info = "";
+        String info;
         if(role.isHoisted()) {
             info = "\uD83D\uDFE2 Hoisted\n";
         } else {

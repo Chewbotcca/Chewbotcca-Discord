@@ -2,21 +2,17 @@ package pw.chew.Chewbotcca.commands.english;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import jdk.nashorn.api.scripting.JSObject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import pw.chew.Chewbotcca.Main;
 import pw.chew.Chewbotcca.util.RestClient;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 public class UrbanDictionaryCommand extends Command {
 
@@ -34,14 +30,7 @@ public class UrbanDictionaryCommand extends Command {
         }
 
         String word = event.getArgs();
-        JSONObject parse = null;
-        try {
-            parse = new JSONObject(RestClient.get("http://api.urbandictionary.com/v0/define?term=" + URLEncoder.encode(word, "UTF-8")));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            event.reply("Bot broke!");
-            return;
-        }
+        JSONObject parse = new JSONObject(RestClient.get("http://api.urbandictionary.com/v0/define?term=" + URLEncoder.encode(word, StandardCharsets.UTF_8)));
         JSONArray list = parse.getJSONArray("list");
         if (list.length() == 0) {
             event.reply("No results found for term `" + word + "`!");
