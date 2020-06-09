@@ -182,14 +182,15 @@ public class ServerInfoCommand extends Command {
                 "Categories: " + categories + " (" + catepercent + "%)\n" +
                 "Store Pages: " + storechans + " (" + storepercent + "%)", true);
 
-        e.addField("Server Boosting", "Level: " + server.getBoostTier().getKey() + "\nBoosters: " + server.getBoostCount() + "\nView more: `%^sinfo boost`", true);
+        if(server.getBoostCount() > 0)
+            e.addField("Server Boosting", "Level: " + server.getBoostTier().getKey() + "\nBoosters: " + server.getBoostCount(), true);
 
         String perks = perkParser(server);
 
         if(perks.length() > 0)
             e.addField("Perks", perks, true);
 
-        e.addField("View More Info", "Roles - `%^sinfo roles`\nBoosts - `%^sinfo boosts`", true);
+        e.addField("View More Info", "Roles - `%^sinfo roles`\nBoosts - `%^sinfo boosts`\nBots - `%^sinfo bots", true);
 
         e.setFooter("Server Created on");
         e.setTimestamp(server.getTimeCreated());
