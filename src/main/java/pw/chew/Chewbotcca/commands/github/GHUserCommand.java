@@ -47,8 +47,15 @@ public class GHUserCommand extends Command {
             boolean isOrg = user.getType().equals("Organization");
             if(!isOrg) {
                 e.setTitle("GitHub profile for " + user.getLogin(), "https://github.com/" + user.getLogin());
+                e.setDescription(user.getBio());
                 e.addField("Followers", String.valueOf(user.getFollowersCount()), true);
                 e.addField("Following", String.valueOf(user.getFollowingCount()), true);
+                if(user.getCompany() != null)
+                    e.addField("Company", user.getCompany(), true);
+                if(!user.getBlog().equals(""))
+                    e.addField("Website", user.getBlog(), true);
+                if(user.getTwitterUsername() != null)
+                    e.addField("Twitter", "[@" + user.getTwitterUsername() + "](https://twitter.com/" + user.getTwitterUsername() + ")", true);
             } else {
                 GHOrganization org = github.getOrganization(user.getLogin());
                 e.setTitle("GitHub profile for Organization " + user.getLogin(), "https://github.com/" + user.getLogin());
