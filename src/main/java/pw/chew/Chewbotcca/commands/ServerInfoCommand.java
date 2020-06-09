@@ -216,11 +216,19 @@ public class ServerInfoCommand extends Command {
             else
                 return -1;
         });
+        int botCount = 0;
         for (Member member : members) {
-            if (member.getUser().isBot())
+            if (member.getUser().isBot()) {
                 bots.add(member.getAsMention() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
+                botCount ++;
+            }
         }
-        embed.setDescription(String.join("\n", bots));
+        String botList = String.join("\n", bots);
+        if(botList.length() > 2000) {
+            botList = botList.substring(0, 1949);
+            botList += "\nThis server has a lot of bots! Only showing a few. Total: " + botCount;
+        }
+        embed.setDescription(botList);
         return embed;
     }
 
