@@ -124,21 +124,28 @@ public class ServerInfoCommand extends Command {
         String catepercent = df.format((float)categories / (float)totalchans * 100);
         String storepercent = df.format((float)storechans / (float)totalchans * 100);
 
-        e.addField("Channel Count", "Total: " + totalchans + "\n" +
-                "Text: " + textchans + " (" + textpercent + "%)\n" +
-                "Voice: " + voicechans + " (" + voicepercent + "%)\n" +
-                "Categories: " + categories + " (" + catepercent + "%)\n" +
-                "Store Pages: " + storechans + " (" + storepercent + "%)", true);
+        List<CharSequence> counts = new ArrayList<>();
+        counts.add("Total: " + totalchans);
+        counts.add("Text: " + textchans + " (" + textpercent + "%)");
+        counts.add("Voice: " + voicechans + " (" + voicepercent + "%)");
+        counts.add("Categories: " + categories + " (" + catepercent + "%)");
+        if(server.getFeatures().contains("COMMERCE"))
+            counts.add("Store Pages: " + storechans + " (" + storepercent + "%)");
+
+        e.addField("Channel Count", String.join("\n", counts), true);
 
         if(server.getBoostCount() > 0)
-            e.addField("Server Boosting", "Level: " + server.getBoostTier().getKey() + "\nBoosters: " + server.getBoostCount(), true);
+            e.addField("Server Boosting",
+                    "Level: " + server.getBoostTier().getKey() +
+                            "\nBoosts: " + server.getBoostCount() +
+                            "\nBoosters: " + server.getBoosters().size(), true);
 
         String perks = perkParser(server);
 
         if(perks.length() > 0)
             e.addField("Perks", perks, true);
 
-        e.addField("View More Info", "Roles - `%^sinfo roles`\nBoosts - `%^sinfo boosts`\nBots - `%^sinfo bots", false);
+        e.addField("View More Info", "Roles - `%^sinfo roles`\nBoosts - `%^sinfo boosts`\nBots - `%^sinfo bots`", false);
 
         e.setFooter("Server Created on");
         e.setTimestamp(server.getTimeCreated());
