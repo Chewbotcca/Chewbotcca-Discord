@@ -71,7 +71,7 @@ public class RoleInfoCommand extends Command {
         DecimalFormat df = new DecimalFormat("#.##");
         String percent = df.format((float)members / (float)total * 100);
         embed.addField("Members", NumberFormat.getNumberInstance(Locale.US).format(members) + " / " + NumberFormat.getNumberInstance(Locale.US).format(total) + " (" + percent + "%)", true);
-        embed.addField("Mention", role.getAsMention(), true);
+        embed.addField("Mention / ID", role.getAsMention() + "\n" + role.getId(), true);
         String info;
         if(role.isHoisted()) {
             info = "\uD83D\uDFE2 Hoisted\n";
@@ -79,14 +79,20 @@ public class RoleInfoCommand extends Command {
             info = "\uD83D\uDD34 Hoisted\n";
         }
         if(role.isMentionable()) {
-            info += "\uD83D\uDFE2 Mentionable";
+            info += "\uD83D\uDFE2 Mentionable\n";
         } else {
-            info += "\uD83D\uDD34 Mentionable";
+            info += "\uD83D\uDD34 Mentionable\n";
+        }
+        if(role.isManaged()) {
+            info += "\uD83D\uDFE2 Managed";
+        } else {
+            info += "\uD83D\uDD34 Managed";
         }
         embed.addField("Information", info, true);
         embed.setColor(role.getColor());
         embed.setFooter("Created");
-        embed.setDescription(generatePermissionList(role.getPermissions()));
+        if(event.getMember().hasPermission(Permission.MANAGE_ROLES))
+            embed.setDescription(generatePermissionList(role.getPermissions()));
         embed.setTimestamp(role.getTimeCreated());
         event.reply(embed.build());
     }
