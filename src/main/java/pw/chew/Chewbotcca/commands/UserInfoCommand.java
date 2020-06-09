@@ -74,7 +74,8 @@ public class UserInfoCommand extends Command {
                 activities.add(activity.getName());
         }
 
-        e.addField("Activities", String.join("\n", activities), true);
+        if(activities.size() > 0)
+            e.addField("Activities", String.join("\n", activities), true);
 
         try {
             JSONObject dbio = new JSONObject(RestClient.get("https://api.discord.bio/v1/user/details/" + member.getId())).getJSONObject("payload").getJSONObject("user").getJSONObject("details");
