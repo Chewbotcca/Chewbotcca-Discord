@@ -12,9 +12,7 @@ import pw.chew.Chewbotcca.util.DateTime;
 
 import java.text.DecimalFormat;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -252,7 +250,16 @@ public class ServerInfoCommand extends Command {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Bots on " + server.getName());
         List<CharSequence> bots = new ArrayList<>();
-        List<Member> members = server.getMembers();
+        bots.add("Newest bots on the bottom");
+        Member[] members = server.getMembers().toArray(new Member[0]);
+        Arrays.sort(members, (o1, o2) -> {
+            if (o1.getTimeJoined().toEpochSecond() > o2.getTimeJoined().toEpochSecond())
+                return 1;
+            else if (o1.getTimeJoined() == o2.getTimeJoined())
+                return 0;
+            else
+                return -1;
+        });
         for (Member member : members) {
             if (member.getUser().isBot())
                 bots.add(member.getAsMention() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
