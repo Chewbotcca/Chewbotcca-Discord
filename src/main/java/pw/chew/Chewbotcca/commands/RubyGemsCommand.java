@@ -31,7 +31,10 @@ public class RubyGemsCommand extends Command {
             event.reply("Invalid ruby gem!");
             return;
         }
-        int rank = new JSONArray(RestClient.get("http://bestgems.org/api/v1/gems/" + event.getArgs() + "/total_ranking.json")).getJSONObject(0).getInt("total_ranking");
+        int rank = -1;
+        try {
+            rank = new JSONArray(RestClient.get("https://bestgems.org/api/v1/gems/" + event.getArgs() + "/total_ranking.json")).getJSONObject(0).getInt("total_ranking");
+        } catch (JSONException ignored) { }
 
         EmbedBuilder e = new EmbedBuilder();
                 e.setTitle(data.getString("name") + " (" + data.getString("version") + ")", data.getString("project_uri"));
@@ -44,7 +47,10 @@ public class RubyGemsCommand extends Command {
                 "Total: " + NumberFormat.getNumberInstance(Locale.US).format(data.getInt("downloads")), true);
 
         e.addField("License", data.getJSONArray("licenses").getString(0), true);
-        e.addField("Rank", "#" + NumberFormat.getNumberInstance(Locale.US).format(rank), true);
+        if(rank > -1)
+            e.addField("Rank", "#" + NumberFormat.getNumberInstance(Locale.US).format(rank), true);
+        else
+            e.addField("Rank", "Not Ranked Yet", true);
 
         StringBuilder links = new StringBuilder();
         links.append("[Project](").append(data.getString("project_uri")).append(")\n");
