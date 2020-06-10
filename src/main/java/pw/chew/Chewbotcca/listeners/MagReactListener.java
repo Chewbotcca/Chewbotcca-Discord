@@ -1,14 +1,20 @@
 package pw.chew.Chewbotcca.listeners;
 
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.json.JSONObject;
+import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.LoggerFactory;
 import pw.chew.Chewbotcca.Main;
+import pw.chew.Chewbotcca.commands.github.GHIssueCommand;
 import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.Chewbotcca.util.RestClient;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 
 public class MagReactListener extends ListenerAdapter {
@@ -19,27 +25,67 @@ public class MagReactListener extends ListenerAdapter {
         }
         String id = event.getMessageId();
         event.getChannel().retrieveMessageById(id).queue((msg) -> {
-            if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
-                LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
-                return;
-            }
-            if(YouTubeCommand.didDescribe(msg.getId())) {
-                LoggerFactory.getLogger(MagReactListener.class).debug("Already described this message!");
-                return;
-            }
-            YouTubeCommand.described(msg.getId());
             String content = msg.getContentStripped().replace(">", "");
-            String video;
-            if(content.contains("youtube.com")) {
-                video = content.split("=")[1];
-            } else if (content.contains("youtu.be")) {
-                video = content.split("/")[content.split("/").length - 1];
+            if(content.contains("youtube.com") || content.contains("youtu.be")) {
+                handleYouTube(content, event, msg);
+            } else if(content.contains("github.com") && (content.contains("/issues") || content.contains("/pull"))) {
+                handleGitHub(content, event, msg);
             } else {
-                return;
             }
-            JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + video + "&key=" + Main.getProp().getProperty("google") + "&part=snippet,contentDetails,statistics"));
-            event.getChannel().sendMessage(new YouTubeCommand().response(url, video).build()).queue();
         });
 
+    }
+
+    public void handleYouTube(String content, GuildMessageReactionAddEvent event, Message msg) {
+        String video;
+        if(content.contains("youtube.com")) {
+            video = content.split("=")[1];
+        } else if (content.contains("youtu.be")) {
+            video = content.split("/")[content.split("/").length - 1];
+        } else {
+            return;
+        }
+        if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
+            LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
+            return;
+        }
+        if(YouTubeCommand.didDescribe(msg.getId())) {
+            LoggerFactory.getLogger(MagReactListener.class).debug("Already described this message!");
+            return;
+        }
+        YouTubeCommand.described(msg.getId());
+        JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + video + "&key=" + Main.getProp().getProperty("google") + "&part=snippet,contentDetails,statistics"));
+        event.getChannel().sendMessage(new YouTubeCommand().response(url, video).build()).queue();
+    }
+
+    public void handleGitHub(String content, GuildMessageReactionAddEvent event, Message msg) {
+        // Example: https://github.com/Chewbotcca/Discord/issues/1
+        // => "https:" "" "github.com" "Chewbotcca" "Discord" "issues" "1"
+        String[] url = content.split("/");
+        String repo = url[3] + "/" + url[4];
+        int issue = Integer.parseInt(url[6]);
+        if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
+            LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
+            return;
+        }
+        if(GHIssueCommand.didDescribe(msg.getId())) {
+            LoggerFactory.getLogger(MagReactListener.class).debug("Already described this message!");
+            return;
+        }
+        GHIssueCommand.described(msg.getId());
+        GitHub github;
+        try {
+            github = new GitHubBuilder().withOAuthToken(Main.getProp().getProperty("github")).build();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        GHIssue ghIssue;
+        try {
+            ghIssue = github.getRepository(repo).getIssue(issue);
+        } catch (IOException e) {
+            return;
+        }
+        event.getChannel().sendMessage(new GHIssueCommand().issueBuilder(ghIssue, repo, github, issue).build()).queue();
     }
 }

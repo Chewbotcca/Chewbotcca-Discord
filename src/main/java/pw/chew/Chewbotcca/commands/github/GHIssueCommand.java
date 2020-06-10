@@ -9,8 +9,10 @@ import pw.chew.Chewbotcca.Main;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class GHIssueCommand extends Command {
+    static ArrayList<String> describedIds = new ArrayList<>();
 
     public GHIssueCommand() {
         this.name = "ghissue";
@@ -50,6 +52,11 @@ public class GHIssueCommand extends Command {
             commandEvent.reply("Invalid issue number or an invalid repository was provided. Please ensure the issue exists and the repository is public.");
             return;
         }
+
+        commandEvent.reply(issueBuilder(issue, repo, github, issueNum).build());
+    }
+
+    public EmbedBuilder issueBuilder(GHIssue issue, String repo, GitHub github, int issueNum) {
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle(issue.getTitle());
         if(issue.getBody() != null) {
@@ -68,8 +75,9 @@ public class GHIssueCommand extends Command {
                 merged = pull.isMerged();
             } catch (IOException ioException) {
                 ioException.printStackTrace();
-                commandEvent.reply("Error occurred initializing Pull request. How did this happen?");
-                return;
+                e.setTitle("Error!");
+                e.setDescription("Error occurred initializing Pull request. How did this happen?");
+                return e;
             }
         } else {
             e.setAuthor("Information for Issue #" + issueNum + " in " + repo, String.valueOf(issue.getUrl()));
@@ -94,7 +102,14 @@ public class GHIssueCommand extends Command {
             e.setFooter("Opened");
             e.setTimestamp(issue.getCreatedAt().toInstant());
         } catch (IOException ignored) { }
-        commandEvent.reply(e.build());
+        return e;
     }
 
+    public static boolean didDescribe(String id) {
+        return describedIds.contains(id);
+    }
+
+    public static void described(String id) {
+        describedIds.add(id);
+    }
 }
