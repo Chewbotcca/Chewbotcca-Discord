@@ -29,10 +29,7 @@ import pw.chew.Chewbotcca.commands.english.UrbanDictionaryCommand;
 import pw.chew.Chewbotcca.commands.github.GHIssueCommand;
 import pw.chew.Chewbotcca.commands.github.GHUserCommand;
 import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
-import pw.chew.Chewbotcca.commands.info.InfoCommand;
-import pw.chew.Chewbotcca.commands.info.RoleInfoCommand;
-import pw.chew.Chewbotcca.commands.info.ServerInfoCommand;
-import pw.chew.Chewbotcca.commands.info.UserInfoCommand;
+import pw.chew.Chewbotcca.commands.info.*;
 import pw.chew.Chewbotcca.commands.minecraft.MCPHNodesCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCStatusCommand;
@@ -101,6 +98,13 @@ public class Main {
                 // Google Module
                 new YouTubeCommand(),
 
+                // Info Module
+                new ChannelInfoCommand(),
+                new InfoCommand(),
+                new RoleInfoCommand(),
+                new ServerInfoCommand(),
+                new UserInfoCommand(),
+
                 // Minecraft Module
                 new MCPHNodesCommand(),
                 new MCServerCommand(),
@@ -121,13 +125,9 @@ public class Main {
 
                 // Everything Else
                 new FeedbackCommand(),
-                new InfoCommand(),
                 new LastFMCommand(),
                 new MixerCommand(),
-                new RoleInfoCommand(),
-                new RubyGemsCommand(),
-                new ServerInfoCommand(),
-                new UserInfoCommand()
+                new RubyGemsCommand()
         );
 
         // Register JDA
