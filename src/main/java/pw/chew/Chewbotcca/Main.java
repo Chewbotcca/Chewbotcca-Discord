@@ -114,6 +114,7 @@ public class Main {
                 new TRBMBCommand(),
 
                 // Everything Else
+                new FeedbackCommand(),
                 new InfoCommand(),
                 new LastFMCommand(),
                 new MixerCommand(),
