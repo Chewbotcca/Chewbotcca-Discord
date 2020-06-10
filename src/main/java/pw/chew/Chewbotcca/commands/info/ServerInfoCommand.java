@@ -1,4 +1,4 @@
-package pw.chew.Chewbotcca.commands;
+package pw.chew.Chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
