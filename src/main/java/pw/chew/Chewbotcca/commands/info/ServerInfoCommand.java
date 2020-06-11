@@ -83,8 +83,8 @@ public class ServerInfoCommand extends Command {
             case US_WEST -> e.addField("Server Region", "<:region_us:718523704845533227> US West", true);
             case VIP_US_WEST -> e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US West", true);
             case EU_WEST -> e.addField("Server Region", "<:region_eu:718523704979488820> Western Europe", true);
-            case INDIA, EUROPE, LONDON, UNKNOWN, AMSTERDAM, FRANKFURT, VIP_JAPAN, VIP_BRAZIL, VIP_LONDON, VIP_SYDNEY, SOUTH_KOREA, VIP_EU_WEST, SOUTH_AFRICA, VIP_US_SOUTH, VIP_FRANKFURT, VIP_SINGAPORE, VIP_EU_CENTRAL, VIP_US_CENTRAL -> e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US Central", true);
-            case VIP_SOUTH_KOREA, VIP_SOUTH_AFRICA -> e.addField("Server Region", server.getRegionRaw(), true);
+            case VIP_US_CENTRAL -> e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US Central", true);
+            default -> e.addField("Server Region", server.getRegionRaw(), true);
         }
 
         try {
