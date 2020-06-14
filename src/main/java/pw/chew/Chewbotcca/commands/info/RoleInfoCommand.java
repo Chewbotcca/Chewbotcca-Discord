@@ -4,6 +4,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 
@@ -29,7 +30,17 @@ public class RoleInfoCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
-        String arg = event.getArgs().replace(" ", "");
+        String arg = event.getArgs();
+
+        String mode = "";
+
+        if(arg.contains("members")) {
+            mode = "members";
+            arg = arg.replace(" members", "");
+            arg = arg.replace("members ", "");
+            arg = arg.replace("members", "");
+        }
+
         Role role;
         boolean id;
         try {
@@ -44,7 +55,7 @@ public class RoleInfoCommand extends Command {
         } else if(id) {
             role = event.getGuild().getRoleById(arg);
         } else {
-            List<Role> roles = event.getGuild().getRolesByName(event.getArgs(), true);
+            List<Role> roles = event.getGuild().getRolesByName(arg, true);
             if(roles.size() > 0) {
                 role = roles.get(0);
             } else {
@@ -57,6 +68,15 @@ public class RoleInfoCommand extends Command {
             return;
         }
 
+
+        if(mode.equals("members")) {
+            event.reply(gatherMembersInfo(event, role).build());
+        } else {
+            event.reply(gatherMaininfo(event, role).build());
+        }
+    }
+
+    public EmbedBuilder gatherMaininfo(CommandEvent event, Role role) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Role Information for: " + role.getName());
         event.getChannel().sendTyping().queue();
@@ -94,7 +114,35 @@ public class RoleInfoCommand extends Command {
         if(event.getMember().hasPermission(Permission.MANAGE_ROLES))
             embed.setDescription(generatePermissionList(role.getPermissions()));
         embed.setTimestamp(role.getTimeCreated());
-        event.reply(embed.build());
+
+        return embed;
+    }
+
+    public EmbedBuilder gatherMembersInfo(CommandEvent event, Role role) {
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Members in role " + role.getName());
+        try {
+            event.getGuild().retrieveMembers().get();
+            await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
+        } catch (InterruptedException | ExecutionException interruptedException) {
+            interruptedException.printStackTrace();
+        }
+        List<Member> memberList = event.getGuild().getMemberCache().asList();
+        int added = 0;
+        int total = 0;
+        List<CharSequence> members = new ArrayList<>();
+        for(Member member : memberList) {
+            if(member.getRoles().contains(role)) {
+                if (added <= 75) {
+                    members.add(member.getAsMention());
+                    added++;
+                }
+                total++;
+            }
+        }
+        embed.setDescription(String.join("\n", members));
+        embed.setFooter("Showing " + added + " out of " + total);
+        return embed;
     }
 
     public String generatePermissionList(EnumSet<Permission> permissions) {
