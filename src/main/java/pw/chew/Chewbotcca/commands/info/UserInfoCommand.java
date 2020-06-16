@@ -10,11 +10,13 @@ import net.dv8tion.jda.api.entities.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
+import pw.chew.Chewbotcca.util.DateTime;
 import pw.chew.Chewbotcca.util.RestClient;
 
 import java.awt.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -204,6 +206,7 @@ public class UserInfoCommand extends Command {
         }
         embed.addField("Display Name", member.getEffectiveName(), true);
         embed.addField("Join Position", String.valueOf(position), true);
+        embed.addField("Joined", DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli()) + " ago", false);
 
         return embed;
     }
