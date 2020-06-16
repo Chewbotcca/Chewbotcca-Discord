@@ -53,7 +53,7 @@ public class YouTubeCommand extends Command {
         JSONObject stats = url.getJSONArray("items").getJSONObject(0).getJSONObject("statistics");
         JSONObject info = url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet");
         String length = url.getJSONArray("items").getJSONObject(0).getJSONObject("contentDetails").getString("duration");
-        int views = Integer.parseInt(stats.getString("viewCount"));
+        long views = Long.parseLong(stats.getString("viewCount"));
         int likes = Integer.parseInt(stats.getString("likeCount"));
         int dislike = Integer.parseInt(stats.getString("dislikeCount"));
         String upload = info.getString("publishedAt");
