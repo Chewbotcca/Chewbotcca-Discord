@@ -27,6 +27,7 @@ import pw.chew.Chewbotcca.commands.cat.DogCommand;
 import pw.chew.Chewbotcca.commands.english.DefineCommand;
 import pw.chew.Chewbotcca.commands.english.UrbanDictionaryCommand;
 import pw.chew.Chewbotcca.commands.github.GHIssueCommand;
+import pw.chew.Chewbotcca.commands.github.GHRepoCommand;
 import pw.chew.Chewbotcca.commands.github.GHUserCommand;
 import pw.chew.Chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.Chewbotcca.commands.info.*;
@@ -93,6 +94,7 @@ public class Main {
 
                 // GitHub Module
                 new GHIssueCommand(),
+                new GHRepoCommand(),
                 new GHUserCommand(),
 
                 // Google Module
