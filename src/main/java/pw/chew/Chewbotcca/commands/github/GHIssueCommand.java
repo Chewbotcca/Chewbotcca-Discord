@@ -10,6 +10,7 @@ import pw.chew.Chewbotcca.Main;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class GHIssueCommand extends Command {
     static ArrayList<String> describedIds = new ArrayList<>();
@@ -101,6 +102,16 @@ public class GHIssueCommand extends Command {
         try {
             e.setFooter("Opened");
             e.setTimestamp(issue.getCreatedAt().toInstant());
+            List<CharSequence> labels = new ArrayList<>();
+            for(GHLabel label : issue.getLabels()) {
+                labels.add(label.getName());
+            }
+            e.addField("Labels", String.join(", ", labels), true);
+            List<CharSequence> assignees = new ArrayList<>();
+            for(GHUser assignee : issue.getAssignees()) {
+                assignees.add(assignee.getLogin());
+            }
+            e.addField("Assignees", String.join(", ", assignees), true);
         } catch (IOException ignored) { }
         return e;
     }
