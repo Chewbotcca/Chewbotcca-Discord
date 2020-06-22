@@ -37,14 +37,16 @@ public class MagReactListener extends ListenerAdapter {
     }
 
     public void handleYouTube(String content, GuildMessageReactionAddEvent event, Message msg) {
-        String video;
-        if(content.contains("youtube.com")) {
-            video = content.split("=")[1];
-        } else if (content.contains("youtu.be")) {
-            video = content.split("/")[content.split("/").length - 1];
-        } else {
-            return;
+        String video = null;
+        for(String query : content.split(" ")) {
+            if (query.contains("youtube.com")) {
+                video = query.split("=")[1];
+            } else if (query.contains("youtu.be")) {
+                video = query.split("/")[query.split("/").length - 1];
+            }
         }
+        if(video == null)
+            return;
         if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
             LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
             return;
