@@ -95,7 +95,10 @@ public class GHIssueCommand extends Command {
         }
         try {
             GHUser author = issue.getUser();
-            e.addField("Author", "[" + author.getLogin() + " (" + author.getName() + ")" + "](https://github.com/" + author.getLogin() + ")", true);
+            if(author.getName() != null)
+                e.addField("Author", "[" + author.getLogin() + " (" + author.getName() + ")" + "](https://github.com/" + author.getLogin() + ")", true);
+            else
+                e.addField("Author", "[" + author.getLogin() + "](https://github.com/" + author.getLogin() + ")", true);
         } catch (IOException ioException) {
             e.addField("Author", "Unknown Author", true);
         }
@@ -106,12 +109,14 @@ public class GHIssueCommand extends Command {
             for(GHLabel label : issue.getLabels()) {
                 labels.add(label.getName());
             }
-            e.addField("Labels", String.join(", ", labels), true);
+            if(labels.size() > 0)
+                e.addField("Labels", String.join(", ", labels), true);
             List<CharSequence> assignees = new ArrayList<>();
             for(GHUser assignee : issue.getAssignees()) {
                 assignees.add(assignee.getLogin());
             }
-            e.addField("Assignees", String.join(", ", assignees), true);
+            if(assignees.size() > 0)
+                e.addField("Assignees", String.join(", ", assignees), true);
         } catch (IOException ignored) { }
         return e;
     }
