@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.discordbots.api.client.DiscordBotListAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pw.chew.Chewbotcca.commands.FeedbackCommand;
@@ -57,11 +58,17 @@ public class Main {
     public static JDA jda;
     public static Instant start;
     public static EventWaiter waiter;
+    public static DiscordBotListAPI topgg;
 
     public static void main(String[] args) throws LoginException, IOException {
         prop.load(new FileInputStream("bot.properties"));
 
         Sentry.init(prop.getProperty("sentry-dsn")).setEnvironment(prop.getProperty("sentry-env"));
+
+        topgg = new DiscordBotListAPI.Builder()
+                .token(prop.getProperty("dbl"))
+                .botId(prop.getProperty("client_id"))
+                .build();
 
         waiter = new EventWaiter();
 
