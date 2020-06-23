@@ -53,7 +53,9 @@ public class YouTubeCommand extends Command {
         JSONObject stats = url.getJSONArray("items").getJSONObject(0).getJSONObject("statistics");
         JSONObject info = url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet");
         String length = url.getJSONArray("items").getJSONObject(0).getJSONObject("contentDetails").getString("duration");
-        long views = Long.parseLong(stats.getString("viewCount"));
+        long views = 0;
+        if(stats.has("viewCount"))
+            views = Long.parseLong(stats.getString("viewCount"));
         int likes = Integer.parseInt(stats.getString("likeCount"));
         int dislike = Integer.parseInt(stats.getString("dislikeCount"));
         String upload = info.getString("publishedAt");
@@ -64,16 +66,21 @@ public class YouTubeCommand extends Command {
 
         String urlpls = "http://youtu.be/" + id;
 
-        return new EmbedBuilder()
-                .setAuthor("YouTube Video Search")
-                .setTitle(info.getString("title"), urlpls)
-                .addField("Uploader", "[" + info.getString("channelTitle") + "](https://youtube.com/channel/" + info.getString("channelId") + ")", true)
-                .addField("Duration", durationParser(length), true)
-                .addField("Views", NumberFormat.getNumberInstance(Locale.US).format(views), true)
-                .addField("Rating", "<:ytup:717600455580188683> **" + NumberFormat.getNumberInstance(Locale.US).format(likes) +  "** *(" + percent + "%)*\n" +
-                        "<:ytdown:717600455353696317> **" + NumberFormat.getNumberInstance(Locale.US).format(dislike) + "** *(" + dispercent + "%)*", true)
-                .addField("Uploaded", dateParser(upload), true)
-                .setColor(Color.decode("#FF0001"));
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setAuthor("YouTube Video Search");
+        embed.setTitle(info.getString("title"), urlpls);
+        embed.addField("Uploader", "[" + info.getString("channelTitle") + "](https://youtube.com/channel/" + info.getString("channelId") + ")", true);
+        embed.addField("Duration", durationParser(length), true);
+        if(stats.has("viewCount"))
+            embed.addField("Views", NumberFormat.getNumberInstance(Locale.US).format(views), true);
+        else
+            embed.addField("Views", "Unknown", true);
+        embed.addField("Rating", "<:ytup:717600455580188683> **" + NumberFormat.getNumberInstance(Locale.US).format(likes) + "** *(" + percent + "%)*\n" +
+                        "<:ytdown:717600455353696317> **" + NumberFormat.getNumberInstance(Locale.US).format(dislike) + "** *(" + dispercent + "%)*", true);
+        embed.addField("Uploaded", dateParser(upload), true);
+        embed.setThumbnail(url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet").getJSONObject("thumbnails").getJSONObject("maxres").getString("url"));
+        embed.setColor(Color.decode("#FF0001"));
+        return embed;
     }
 
     public String durationParser(String duration) {
