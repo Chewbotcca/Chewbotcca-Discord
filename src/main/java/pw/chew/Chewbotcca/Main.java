@@ -109,6 +109,7 @@ public class Main {
                 new YouTubeCommand(),
 
                 // Info Module
+                new BotInfoCommand(),
                 new ChannelInfoCommand(),
                 new InfoCommand(),
                 new RoleInfoCommand(),
