@@ -41,6 +41,7 @@ import pw.chew.Chewbotcca.commands.owner.ShutdownCommand;
 import pw.chew.Chewbotcca.commands.quotes.AcronymCommand;
 import pw.chew.Chewbotcca.commands.quotes.QuoteCommand;
 import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
+import pw.chew.Chewbotcca.commands.settings.ProfileCommand;
 import pw.chew.Chewbotcca.listeners.MagReactListener;
 import pw.chew.Chewbotcca.listeners.SendJoinedOrLeftGuildListener;
 
@@ -124,6 +125,9 @@ public class Main {
                 new AcronymCommand(),
                 new QuoteCommand(),
                 new TRBMBCommand(),
+
+                // Settings Module
+                new ProfileCommand(),
 
                 // Everything Else
                 new FeedbackCommand(),
