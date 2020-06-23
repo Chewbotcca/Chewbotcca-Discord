@@ -14,14 +14,27 @@ public class RestClient {
                 .get()
                 .build();
 
-        LoggerFactory.getLogger(RestClient.class).info("Making call to GET " + url);
+        LoggerFactory.getLogger(RestClient.class).debug("Making call to GET " + url);
+        return performRequest(request);
+    }
+
+    public static String get(String url, String key) {
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", key)
+                .get()
+                .build();
+
+        LoggerFactory.getLogger(RestClient.class).debug("Making call to GET " + url);
         return performRequest(request);
     }
 
     public static String performRequest(Request request) {
         try (Response response = Main.jda.getHttpClient().newCall(request).execute()) {
             // System.out.println(r);
-            return response.body().string();
+            String ye = response.body().string();
+            LoggerFactory.getLogger(RestClient.class).debug("Response is " + ye);
+            return ye;
         } catch (IOException e) {
             e.printStackTrace();
         }
