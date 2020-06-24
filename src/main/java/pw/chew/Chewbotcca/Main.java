@@ -97,6 +97,7 @@ public class Main {
                 new CatFactCommand(),
                 new DogCommand(),
                 new EightBallCommand(),
+                new QRCodeCommand(),
                 new RollCommand(),
 
                 // GitHub Module
