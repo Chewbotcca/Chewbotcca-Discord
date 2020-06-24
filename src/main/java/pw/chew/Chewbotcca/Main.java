@@ -40,6 +40,7 @@ import pw.chew.Chewbotcca.commands.quotes.AcronymCommand;
 import pw.chew.Chewbotcca.commands.quotes.QuoteCommand;
 import pw.chew.Chewbotcca.commands.quotes.TRBMBCommand;
 import pw.chew.Chewbotcca.commands.settings.ProfileCommand;
+import pw.chew.Chewbotcca.commands.settings.ServerSettingsCommand;
 import pw.chew.Chewbotcca.listeners.MagReactListener;
 import pw.chew.Chewbotcca.listeners.SendJoinedOrLeftGuildListener;
 
@@ -133,6 +134,7 @@ public class Main {
 
                 // Settings Module
                 new ProfileCommand(),
+                new ServerSettingsCommand(),
 
                 // Everything Else
                 new FeedbackCommand(),
