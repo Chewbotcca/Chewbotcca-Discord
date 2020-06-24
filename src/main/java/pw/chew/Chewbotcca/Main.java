@@ -24,10 +24,7 @@ import pw.chew.Chewbotcca.commands.about.PingCommand;
 import pw.chew.Chewbotcca.commands.about.StatsCommand;
 import pw.chew.Chewbotcca.commands.english.DefineCommand;
 import pw.chew.Chewbotcca.commands.english.UrbanDictionaryCommand;
-import pw.chew.Chewbotcca.commands.fun.CatCommand;
-import pw.chew.Chewbotcca.commands.fun.CatFactCommand;
-import pw.chew.Chewbotcca.commands.fun.DogCommand;
-import pw.chew.Chewbotcca.commands.fun.RollCommand;
+import pw.chew.Chewbotcca.commands.fun.*;
 import pw.chew.Chewbotcca.commands.github.GHIssueCommand;
 import pw.chew.Chewbotcca.commands.github.GHRepoCommand;
 import pw.chew.Chewbotcca.commands.github.GHUserCommand;
@@ -99,6 +96,7 @@ public class Main {
                 new CatCommand(),
                 new CatFactCommand(),
                 new DogCommand(),
+                new EightBallCommand(),
                 new RollCommand(),
 
                 // GitHub Module
