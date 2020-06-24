@@ -22,11 +22,12 @@ import pw.chew.Chewbotcca.commands.about.HelpCommand;
 import pw.chew.Chewbotcca.commands.about.InviteCommand;
 import pw.chew.Chewbotcca.commands.about.PingCommand;
 import pw.chew.Chewbotcca.commands.about.StatsCommand;
-import pw.chew.Chewbotcca.commands.cat.CatCommand;
-import pw.chew.Chewbotcca.commands.cat.CatFactCommand;
-import pw.chew.Chewbotcca.commands.cat.DogCommand;
 import pw.chew.Chewbotcca.commands.english.DefineCommand;
 import pw.chew.Chewbotcca.commands.english.UrbanDictionaryCommand;
+import pw.chew.Chewbotcca.commands.fun.CatCommand;
+import pw.chew.Chewbotcca.commands.fun.CatFactCommand;
+import pw.chew.Chewbotcca.commands.fun.DogCommand;
+import pw.chew.Chewbotcca.commands.fun.RollCommand;
 import pw.chew.Chewbotcca.commands.github.GHIssueCommand;
 import pw.chew.Chewbotcca.commands.github.GHRepoCommand;
 import pw.chew.Chewbotcca.commands.github.GHUserCommand;
@@ -36,7 +37,6 @@ import pw.chew.Chewbotcca.commands.minecraft.MCPHNodesCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCStatusCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCUserCommand;
-import pw.chew.Chewbotcca.commands.fun.RollCommand;
 import pw.chew.Chewbotcca.commands.owner.NewIssueCommand;
 import pw.chew.Chewbotcca.commands.owner.ShutdownCommand;
 import pw.chew.Chewbotcca.commands.quotes.AcronymCommand;
@@ -91,16 +91,14 @@ public class Main {
                 new PingCommand(),
                 new StatsCommand(),
 
-                // Cat Module
-                new CatCommand(),
-                new CatFactCommand(),
-                new DogCommand(),
-
                 // English Module
                 new DefineCommand(),
                 new UrbanDictionaryCommand(),
 
                 // Fun Module
+                new CatCommand(),
+                new CatFactCommand(),
+                new DogCommand(),
                 new RollCommand(),
 
                 // GitHub Module
