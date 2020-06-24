@@ -36,7 +36,7 @@ import pw.chew.Chewbotcca.commands.minecraft.MCPHNodesCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCServerCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCStatusCommand;
 import pw.chew.Chewbotcca.commands.minecraft.MCUserCommand;
-import pw.chew.Chewbotcca.commands.misc.RollCommand;
+import pw.chew.Chewbotcca.commands.fun.RollCommand;
 import pw.chew.Chewbotcca.commands.owner.NewIssueCommand;
 import pw.chew.Chewbotcca.commands.owner.ShutdownCommand;
 import pw.chew.Chewbotcca.commands.quotes.AcronymCommand;
@@ -100,6 +100,9 @@ public class Main {
                 new DefineCommand(),
                 new UrbanDictionaryCommand(),
 
+                // Fun Module
+                new RollCommand(),
+
                 // GitHub Module
                 new GHIssueCommand(),
                 new GHRepoCommand(),
@@ -121,9 +124,6 @@ public class Main {
                 new MCServerCommand(),
                 new MCStatusCommand(),
                 new MCUserCommand(),
-
-                // Misc Module
-                new RollCommand(),
 
                 // Owner Module
                 new NewIssueCommand(),
