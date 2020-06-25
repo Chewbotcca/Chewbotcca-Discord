@@ -98,6 +98,7 @@ public class Main {
                 new CatFactCommand(),
                 new DogCommand(),
                 new EightBallCommand(),
+                new NumberFactCommand(),
                 new QRCodeCommand(),
                 new RollCommand(),
 
