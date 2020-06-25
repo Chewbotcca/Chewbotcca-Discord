@@ -12,7 +12,9 @@ import pw.chew.Chewbotcca.util.DateTime;
 
 import java.text.DecimalFormat;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -240,9 +242,13 @@ public class ServerInfoCommand extends Command {
         for(int i = 0; i < server.getFeatures().size(); i++) {
             switch (features[i]) {
                 default -> perks.add(capitalize(features[i]));
-                case "BANNER" -> perks.add("[Banner](" + server.getBannerUrl() + ")");
-                case "INVITE_SPLASH" -> perks.add("[Invite Splash](" + server.getSplashUrl() + ")");
+                case "BANNER" -> perks.add("[Banner](" + server.getBannerUrl() + "?size=2048)");
+                case "COMMERCE" -> perks.add("<:store_tag:658538492409806849> Store Channels");
+                case "NEWS" -> perks.add("<:news:658522693058166804> News Channels");
+                case "INVITE_SPLASH" -> perks.add("[Invite Splash](" + server.getSplashUrl() + "?size=2048)");
+                case "PARTNERED" -> perks.add("<:partner:314068430556758017> Partnered");
                 case "VANITY_URL" -> perks.add("Vanity URL: " + "[" + server.getVanityCode() + "](https://discord.gg/" + server.getVanityCode() + ")");
+                case "VERIFIED" -> perks.add("<:verified:585790522677919749> Verified");
             }
         }
 
