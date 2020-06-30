@@ -101,6 +101,7 @@ public class Main {
                 new NumberFactCommand(),
                 new QRCodeCommand(),
                 new RollCommand(),
+                new SpigotDramaCommand(),
 
                 // GitHub Module
                 new GHIssueCommand(),
