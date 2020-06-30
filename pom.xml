@@ -162,7 +162,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>pw.chew.Chewbotcca.Main</mainClass>
+                            <mainClass>pw.chew.chewbotcca.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
