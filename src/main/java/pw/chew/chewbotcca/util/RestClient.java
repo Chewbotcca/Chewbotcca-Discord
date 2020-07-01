@@ -12,6 +12,7 @@ public class RestClient {
         Request request = new Request.Builder()
                 .url(url)
                 .get()
+                .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
                 .build();
 
         LoggerFactory.getLogger(RestClient.class).debug("Making call to GET " + url);
@@ -22,6 +23,7 @@ public class RestClient {
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Authorization", key)
+                .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
                 .get()
                 .build();
 
