@@ -30,10 +30,7 @@ import pw.chew.chewbotcca.commands.github.GHRepoCommand;
 import pw.chew.chewbotcca.commands.github.GHUserCommand;
 import pw.chew.chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.chewbotcca.commands.info.*;
-import pw.chew.chewbotcca.commands.minecraft.MCPHNodesCommand;
-import pw.chew.chewbotcca.commands.minecraft.MCServerCommand;
-import pw.chew.chewbotcca.commands.minecraft.MCStatusCommand;
-import pw.chew.chewbotcca.commands.minecraft.MCUserCommand;
+import pw.chew.chewbotcca.commands.minecraft.*;
 import pw.chew.chewbotcca.commands.owner.NewIssueCommand;
 import pw.chew.chewbotcca.commands.owner.ShutdownCommand;
 import pw.chew.chewbotcca.commands.quotes.AcronymCommand;
@@ -126,6 +123,7 @@ public class Main {
                 new MCServerCommand(),
                 new MCStatusCommand(),
                 new MCUserCommand(),
+                new MCWikiCommand(),
 
                 // Owner Module
                 new NewIssueCommand(),
