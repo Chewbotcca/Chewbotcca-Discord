@@ -79,12 +79,8 @@ public class RoleInfoCommand extends Command {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Role Information for: " + role.getName());
         event.getChannel().sendTyping().queue();
-        try {
-            event.getGuild().retrieveMembers().get();
-            await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        new Thread(() -> event.getGuild().loadMembers().get());
+        await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
         int members = event.getGuild().getMembersWithRoles(role).size();
         int total = event.getGuild().getMemberCount();
         DecimalFormat df = new DecimalFormat("#.##");
@@ -120,12 +116,8 @@ public class RoleInfoCommand extends Command {
     public EmbedBuilder gatherMembersInfo(CommandEvent event, Role role) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Members in role " + role.getName());
-        try {
-            event.getGuild().retrieveMembers().get();
-            await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
-        } catch (InterruptedException | ExecutionException interruptedException) {
-            interruptedException.printStackTrace();
-        }
+        new Thread(() -> event.getGuild().loadMembers().get());
+        await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
         List<Member> memberList = event.getGuild().getMemberCache().asList();
         int added = 0;
         int total = 0;

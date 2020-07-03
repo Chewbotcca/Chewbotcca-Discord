@@ -33,12 +33,8 @@ public class ServerInfoCommand extends Command {
         String args = event.getArgs();
         Guild server = event.getGuild();
 
-        try {
-            event.getGuild().retrieveMembers().get();
-            await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
-        } catch (InterruptedException | ExecutionException interruptedException) {
-            interruptedException.printStackTrace();
-        }
+        new Thread(() -> event.getGuild().loadMembers().get());
+        await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
 
         if(args.contains("boost")) {
             event.reply(gatherBoostInfo(server).build());
@@ -87,13 +83,6 @@ public class ServerInfoCommand extends Command {
             case EU_WEST -> e.addField("Server Region", "<:region_eu:718523704979488820> Western Europe", true);
             case VIP_US_CENTRAL -> e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US Central", true);
             default -> e.addField("Server Region", server.getRegionRaw(), true);
-        }
-
-        try {
-            event.getGuild().retrieveMembers().get();
-            await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
-        } catch (InterruptedException | ExecutionException interruptedException) {
-            interruptedException.printStackTrace();
         }
 
         List<Member> members = server.getMembers();

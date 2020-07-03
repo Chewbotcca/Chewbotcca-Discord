@@ -48,12 +48,8 @@ public class UserInfoCommand extends Command {
             args = args.replace("member", "");
         }
 
-        try {
-            commandEvent.getGuild().retrieveMembers().get();
-            await().atMost(30, TimeUnit.SECONDS).until(() -> commandEvent.getGuild().getMemberCache().size() == commandEvent.getGuild().getMemberCount());
-        } catch (InterruptedException | ExecutionException interruptedException) {
-            interruptedException.printStackTrace();
-        }
+        new Thread(() -> commandEvent.getGuild().loadMembers().get());
+        await().atMost(30, TimeUnit.SECONDS).until(() -> commandEvent.getGuild().getMemberCache().size() == commandEvent.getGuild().getMemberCount());
 
         if(args.length() == 0) {
             user = commandEvent.getAuthor();
