@@ -12,7 +12,7 @@ public class Profile {
     public static Profile retrieveProfile(String id) {
         JSONObject response = new JSONObject(RestClient.get(
                 "https://chew.pw/chewbotcca/discord/profile/" + id + "/api/get",
-                Main.getProp().getProperty("chewkey")
+                PropertiesManager.getChewKey()
         ));
         return new Profile(response);
     }

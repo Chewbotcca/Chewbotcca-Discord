@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.kohsuke.github.*;
 import pw.chew.chewbotcca.Main;
+import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.awt.*;
 import java.io.IOException;
@@ -40,7 +41,7 @@ public class GHIssueCommand extends Command {
         GitHub github;
         commandEvent.getChannel().sendTyping().queue();
         try {
-            github = new GitHubBuilder().withOAuthToken(Main.getProp().getProperty("github")).build();
+            github = new GitHubBuilder().withOAuthToken(PropertiesManager.getGithubToken()).build();
         } catch (IOException e) {
             e.printStackTrace();
             commandEvent.reply("Error occurred initializing GitHub. How did this happen?");

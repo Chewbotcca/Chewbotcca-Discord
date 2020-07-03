@@ -4,6 +4,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import org.kohsuke.github.*;
 import pw.chew.chewbotcca.Main;
+import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.io.IOException;
 
@@ -21,7 +22,7 @@ public class NewIssueCommand extends Command {
         GHRepository repo;
         commandEvent.getChannel().sendTyping().queue();
         try {
-            github = new GitHubBuilder().withOAuthToken(Main.getProp().getProperty("github")).build();
+            github = new GitHubBuilder().withOAuthToken(PropertiesManager.getGithubToken()).build();
             repo = github.getRepository("Chewbotcca/Discord");
         } catch (IOException e) {
             e.printStackTrace();

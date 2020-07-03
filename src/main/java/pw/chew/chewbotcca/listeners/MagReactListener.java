@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.Main;
 import pw.chew.chewbotcca.commands.github.GHIssueCommand;
 import pw.chew.chewbotcca.commands.google.YouTubeCommand;
+import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
 import javax.annotation.Nonnull;
@@ -56,7 +57,7 @@ public class MagReactListener extends ListenerAdapter {
             return;
         }
         YouTubeCommand.described(msg.getId());
-        JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + video + "&key=" + Main.getProp().getProperty("google") + "&part=snippet,contentDetails,statistics"));
+        JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + video + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics"));
         event.getChannel().sendMessage(new YouTubeCommand().response(url, video).build()).queue();
     }
 
@@ -77,7 +78,7 @@ public class MagReactListener extends ListenerAdapter {
         GHIssueCommand.described(msg.getId());
         GitHub github;
         try {
-            github = new GitHubBuilder().withOAuthToken(Main.getProp().getProperty("github")).build();
+            github = new GitHubBuilder().withOAuthToken(PropertiesManager.getGithubToken()).build();
         } catch (IOException e) {
             e.printStackTrace();
             return;

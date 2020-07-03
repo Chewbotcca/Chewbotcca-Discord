@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import pw.chew.chewbotcca.Main;
+import pw.chew.chewbotcca.util.PropertiesManager;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -25,7 +26,7 @@ public class SendJoinedOrLeftGuildListener extends ListenerAdapter {
     private void execute(Guild guild, JDA jda, Object event) {
         boolean joined = event instanceof GuildJoinEvent;
         long servers = jda.getGuildCache().size();
-        if(!Main.getProp().getProperty("sentry-env").equals("development"))
+        if(!PropertiesManager.getSentryEnv().equals("development"))
             Main.topgg.setStats((int) servers);
         EmbedBuilder e = new EmbedBuilder();
         if(joined) {

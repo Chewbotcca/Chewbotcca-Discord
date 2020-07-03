@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.Permission;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.Main;
 import pw.chew.chewbotcca.util.DateTime;
+import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.*;
@@ -22,8 +23,7 @@ public class LastFMCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
-        Properties prop = Main.getProp();
-        String key = prop.getProperty("lastfm");
+        String key = PropertiesManager.getLastfmToken();
         if (key == null) {
             event.reply("This command requires an API key from last.fm!");
             return;

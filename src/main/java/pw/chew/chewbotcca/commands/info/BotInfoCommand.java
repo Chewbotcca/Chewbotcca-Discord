@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.Main;
+import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.*;
@@ -48,7 +49,7 @@ public class BotInfoCommand extends Command {
     }
 
     private EmbedBuilder gatherTopggInfo(String id, CommandEvent event) {
-        JSONObject bot = new JSONObject(RestClient.get("https://top.gg/api/bots/" + id, Main.getProp().getProperty("dbl")));
+        JSONObject bot = new JSONObject(RestClient.get("https://top.gg/api/bots/" + id, PropertiesManager.getTopggToken()));
 
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Bot Information");

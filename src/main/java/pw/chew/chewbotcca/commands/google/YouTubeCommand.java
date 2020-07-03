@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.Permission;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.Main;
+import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.*;
@@ -33,7 +34,7 @@ public class YouTubeCommand extends Command {
     @Override
     protected void execute(CommandEvent event) {
         String search = event.getArgs();
-        String findidurl = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=" + URLEncoder.encode(search, StandardCharsets.UTF_8) + "&key=" + Main.getProp().getProperty("google");
+        String findidurl = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=" + URLEncoder.encode(search, StandardCharsets.UTF_8) + "&key=" + PropertiesManager.getGoogleKey();
         String id;
         try {
             id = new JSONObject(RestClient.get(findidurl)).getJSONArray("items").getJSONObject(0).getJSONObject("id").getString("videoId");
@@ -41,7 +42,7 @@ public class YouTubeCommand extends Command {
             event.reply("No videos found!");
             return;
         }
-        JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + id + "&key=" + Main.getProp().getProperty("google") + "&part=snippet,contentDetails,statistics"));
+        JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + id + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics"));
         if (url.getJSONObject("pageInfo").getInt("totalResults") == 0) {
             event.reply("No results found.");
             return;

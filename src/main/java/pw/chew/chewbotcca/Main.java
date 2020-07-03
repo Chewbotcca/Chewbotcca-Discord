@@ -43,6 +43,7 @@ import pw.chew.chewbotcca.commands.settings.ProfileCommand;
 import pw.chew.chewbotcca.commands.settings.ServerSettingsCommand;
 import pw.chew.chewbotcca.listeners.MagReactListener;
 import pw.chew.chewbotcca.listeners.SendJoinedOrLeftGuildListener;
+import pw.chew.chewbotcca.util.PropertiesManager;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
@@ -52,20 +53,21 @@ import java.util.Properties;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    static Properties prop = new Properties();
     public static JDA jda;
     public static Instant start;
     public static EventWaiter waiter;
     public static DiscordBotListAPI topgg;
 
     public static void main(String[] args) throws LoginException, IOException {
+        Properties prop = new Properties();
         prop.load(new FileInputStream("bot.properties"));
+        PropertiesManager.loadProperties(prop);
 
-        Sentry.init(prop.getProperty("sentry-dsn")).setEnvironment(prop.getProperty("sentry-env"));
+        Sentry.init(PropertiesManager.getSentryDsn()).setEnvironment(PropertiesManager.getSentryEnv());
 
         topgg = new DiscordBotListAPI.Builder()
-                .token(prop.getProperty("dbl"))
-                .botId(prop.getProperty("client_id"))
+                .token(PropertiesManager.getTopggToken())
+                .botId(PropertiesManager.getClientId())
                 .build();
 
         waiter = new EventWaiter();
@@ -73,11 +75,11 @@ public class Main {
         CommandClientBuilder client = new CommandClientBuilder();
 
         client.useDefaultGame();
-        client.setOwnerId(prop.getProperty("owner_id"));
+        client.setOwnerId(PropertiesManager.getOwnerId());
 
         // Set your bot's prefix
-        logger.info("Setting Prefix to " + prop.getProperty("prefix"));
-        client.setPrefix(prop.getProperty("prefix"));
+        logger.info("Setting Prefix to " + PropertiesManager.getPrefix());
+        client.setPrefix(PropertiesManager.getPrefix());
 
         client.useHelpBuilder(false);
 
@@ -172,9 +174,5 @@ public class Main {
 
     public static EventWaiter getWaiter() {
         return waiter;
-    }
-
-    public static Properties getProp() {
-        return prop;
     }
 }

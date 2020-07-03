@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.Permission;
 import org.json.JSONArray;
 import org.json.JSONException;
 import pw.chew.chewbotcca.Main;
+import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
 public class DefineCommand extends Command {
@@ -22,7 +23,7 @@ public class DefineCommand extends Command {
         String word = commandEvent.getArgs();
         JSONArray grabbedword;
         try {
-            grabbedword = new JSONArray(RestClient.get("http://api.wordnik.com/v4/word.json/" + word + "/definitions?limit=1&includeRelated=true&useCanonical=false&includeTags=false&api_key=" + Main.getProp().getProperty("wordnik")));
+            grabbedword = new JSONArray(RestClient.get("http://api.wordnik.com/v4/word.json/" + word + "/definitions?limit=1&includeRelated=true&useCanonical=false&includeTags=false&api_key=" + PropertiesManager.getWordnikToken()));
         } catch(JSONException e) {
             commandEvent.reply("Word not found! Check your local spell-checker!");
             return;

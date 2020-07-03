@@ -12,7 +12,7 @@ public class ServerSettings {
     public static ServerSettings retrieveServer(String id) {
         JSONObject response = new JSONObject(RestClient.get(
                 "https://chew.pw/chewbotcca/discord/server/" + id + "/api/get",
-                Main.getProp().getProperty("chewkey")
+                PropertiesManager.getChewKey()
         ));
         return new ServerSettings(response);
     }

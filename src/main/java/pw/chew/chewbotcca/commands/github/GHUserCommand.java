@@ -9,6 +9,7 @@ import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import pw.chew.chewbotcca.Main;
+import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.io.IOException;
 
@@ -27,7 +28,7 @@ public class GHUserCommand extends Command {
         GitHub github;
         commandEvent.getChannel().sendTyping().queue();
         try {
-            github = new GitHubBuilder().withOAuthToken(Main.getProp().getProperty("github")).build();
+            github = new GitHubBuilder().withOAuthToken(PropertiesManager.getGithubToken()).build();
         } catch (IOException e) {
             e.printStackTrace();
             commandEvent.reply("Error occurred initializing GitHub. How did this happen?");
