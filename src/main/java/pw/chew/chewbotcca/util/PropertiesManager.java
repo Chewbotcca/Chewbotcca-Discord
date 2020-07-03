@@ -23,6 +23,13 @@ public class PropertiesManager {
     }
 
     /**
+     * discord.bots.gg token for info command
+     */
+    public static String getDbotsToken() {
+        return properties.getProperty("dbots");
+    }
+
+    /**
      * Top.gg token for DBL/Top.gg bot info command
      */
     public static String getTopggToken() {

@@ -32,7 +32,7 @@ public class BotInfoCommand extends Command {
             commandEvent.reply("Please specify a bot with either a mention or its ID");
             return;
         }
-        String botId = null;
+        String botId;
         if(args[0].contains("<@")) {
             botId = args[0].replace("<@!", "").replace(">", "");
         } else {
@@ -44,12 +44,17 @@ public class BotInfoCommand extends Command {
         }
         switch (list) {
             case "dbl", "top.gg", "topgg" -> commandEvent.reply(gatherTopggInfo(botId, commandEvent).build());
-            default -> commandEvent.reply("Invalid Bot List! Possible: ```dbl, topgg```");
+            case "dbots" -> commandEvent.reply(gatherDBotsInfo(botId, commandEvent).build());
+            default -> commandEvent.reply("Invalid Bot List! Possible: ```dbots, topgg```");
         }
     }
 
     private EmbedBuilder gatherTopggInfo(String id, CommandEvent event) {
         JSONObject bot = new JSONObject(RestClient.get("https://top.gg/api/bots/" + id, PropertiesManager.getTopggToken()));
+
+        if(bot.has("error")) {
+            return new EmbedBuilder().setTitle("Error!").setDescription(bot.getString("error"));
+        }
 
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Bot Information");
@@ -123,6 +128,57 @@ public class BotInfoCommand extends Command {
 
         e.setFooter("Bot added");
         e.setTimestamp(dateParser(bot.getString("date")));
+
+        e.setColor(Color.decode("#43B581"));
+
+        return e;
+    }
+
+    private EmbedBuilder gatherDBotsInfo(String id, CommandEvent event) {
+        JSONObject bot = new JSONObject(RestClient.get("https://discord.bots.gg/api/v1/bots/" + id, PropertiesManager.getDbotsToken()));
+
+        if(bot.has("message")) {
+            return new EmbedBuilder().setTitle("Error!").setDescription("This bot does not exist on this list!");
+        }
+
+        EmbedBuilder e = new EmbedBuilder();
+        e.setTitle("Bot Information");
+
+        e.setAuthor(bot.getString("username") + "#" + bot.getString("discriminator"), "https://discord.bots.gg/bots/" + bot.getString("userId"));
+
+        e.setThumbnail(bot.getString("avatarURL"));
+
+        e.setDescription(bot.getString("shortDescription"));
+
+        e.addField("Bot ID", bot.getString("userId"), true);
+
+        e.addField("Server Count", String.valueOf(bot.getInt("guildCount")), true);
+
+        e.addField("Prefix", "`" + bot.getString("prefix") + "`", true);
+
+        e.addField("Library", bot.getString("libraryName"), true);
+
+        User user = event.getJDA().getUserById(bot.getJSONObject("owner").getString("userId"));
+        if(user == null)
+            e.addField("Owner", "Unknown", true);
+        else
+            e.addField("Owner", user.getAsTag(), true);
+
+        List<CharSequence> links = new ArrayList<>();
+        links.add("[Bot Page](https://discord.bots.gg/bots/" + id + ")");
+        if(!bot.getString("botInvite").equals(""))
+            links.add("[Invite](" + bot.getString("botInvite") + ")");
+        if(!bot.getString("website").equals(""))
+            links.add("[Website](" + bot.getString("website") + ")");
+        if(!bot.getString("supportInvite").equals(""))
+            links.add("[Support Server](" + bot.getString("supportInvite") + ")");
+        if(!bot.getString("openSource").equals(""))
+            links.add("[Source Code](" + bot.getString("openSource") + ")");
+
+        e.addField("Links", String.join("\n", links), true);
+
+        e.setFooter("Bot added");
+        e.setTimestamp(dateParser(bot.getString("addedDate")));
 
         e.setColor(Color.decode("#43B581"));
 
