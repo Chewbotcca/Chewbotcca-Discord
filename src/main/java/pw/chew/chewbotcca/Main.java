@@ -99,6 +99,7 @@ public class Main {
                 new EightBallCommand(),
                 new NumberFactCommand(),
                 new QRCodeCommand(),
+                new RedditCommand(),
                 new RollCommand(),
                 new SpigotDramaCommand(),
 
