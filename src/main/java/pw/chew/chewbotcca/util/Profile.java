@@ -3,7 +3,7 @@ package pw.chew.chewbotcca.util;
 import org.json.JSONObject;
 
 public class Profile {
-    JSONObject data;
+    final JSONObject data;
     public Profile(JSONObject input) {
         data = input;
     }

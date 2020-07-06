@@ -12,6 +12,7 @@ import pw.chew.chewbotcca.util.DateTime;
 
 import java.text.DecimalFormat;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -152,7 +153,9 @@ public class ServerInfoCommand extends Command {
         List<CharSequence> boostString = new ArrayList<>();
         Instant now = Instant.now();
         for (Member booster : boosters) {
-            boostString.add(booster.getAsMention() + " for " + DateTime.timeAgo(now.toEpochMilli() - booster.getTimeBoosted().toInstant().toEpochMilli()));
+            OffsetDateTime timeBoosted = booster.getTimeBoosted();
+            if(timeBoosted != null)
+                boostString.add(booster.getAsMention() + " for " + DateTime.timeAgo(now.toEpochMilli() - timeBoosted.toInstant().toEpochMilli()));
         }
         embed.setDescription(String.join("\n", boostString));
         if(boostString.size() == 0) {

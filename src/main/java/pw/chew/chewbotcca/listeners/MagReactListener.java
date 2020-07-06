@@ -30,7 +30,6 @@ public class MagReactListener extends ListenerAdapter {
                 handleYouTube(content, event, msg);
             } else if(content.contains("github.com") && (content.contains("/issues") || content.contains("/pull"))) {
                 handleGitHub(content, event, msg);
-            } else {
             }
         });
 

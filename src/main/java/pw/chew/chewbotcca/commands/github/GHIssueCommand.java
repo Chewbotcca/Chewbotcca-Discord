@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GHIssueCommand extends Command {
-    static ArrayList<String> describedIds = new ArrayList<>();
+    final static ArrayList<String> describedIds = new ArrayList<>();
 
     public GHIssueCommand() {
         this.name = "ghissue";

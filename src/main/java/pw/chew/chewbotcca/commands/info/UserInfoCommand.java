@@ -55,7 +55,7 @@ public class UserInfoCommand extends Command {
         } else {
             try {
                 Long.parseLong(commandEvent.getArgs());
-                user = commandEvent.getGuild().getMemberById(args).getUser();
+                user = commandEvent.getJDA().getUserById(args);
             } catch (NullPointerException e) {
                 commandEvent.reply("No user found for the given ID.");
             } catch (NumberFormatException e) {
@@ -139,9 +139,13 @@ public class UserInfoCommand extends Command {
             List<CharSequence> activities = new ArrayList<>();
             for (int i = 0; i < member.getActivities().size(); i++) {
                 Activity activity = member.getActivities().get(i);
-                if (activity.getType() == Activity.ActivityType.CUSTOM_STATUS)
-                    activities.add(activity.getEmoji().getAsMention() + " " + activity.getName());
-                else
+                if (activity.getType() == Activity.ActivityType.CUSTOM_STATUS) {
+                    Activity.Emoji emoji = activity.getEmoji();
+                    if(emoji == null)
+                        activities.add(activity.getName());
+                    else
+                        activities.add(activity.getEmoji().getAsMention() + " " + activity.getName());
+                } else
                     activities.add(activity.getName());
             }
 

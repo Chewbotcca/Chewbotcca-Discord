@@ -110,7 +110,14 @@ public class ChannelInfoCommand extends Command {
             Map.Entry<String, Integer> entry = l.get(i);
             String user = entry.getKey();
             int pinCount = entry.getValue();
-            top.add("#" + (i+1) + ": " + pinCount + " pins - " + commandEvent.getGuild().getMemberById(user).getUser().getAsTag());
+            User userById = commandEvent.getJDA().getUserById(user);
+            String tag;
+            if(userById == null) {
+                tag = "Unknown User";
+            } else {
+                tag = userById.getAsTag();
+            }
+            top.add("#" + (i+1) + ": " + pinCount + " pins - " + tag);
         }
         e.setDescription(String.join("\n", top));
         return e;

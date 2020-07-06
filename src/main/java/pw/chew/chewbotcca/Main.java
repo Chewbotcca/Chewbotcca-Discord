@@ -50,10 +50,9 @@ import java.util.Properties;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    public static JDA jda;
-    public static Instant start;
-    public static EventWaiter waiter;
-    public static DiscordBotListAPI topgg;
+    private static JDA jda;
+    private static Instant start;
+    private static DiscordBotListAPI topgg;
 
     public static void main(String[] args) throws LoginException, IOException {
         Properties prop = new Properties();
@@ -67,7 +66,7 @@ public class Main {
                 .botId(PropertiesManager.getClientId())
                 .build();
 
-        waiter = new EventWaiter();
+        EventWaiter waiter = new EventWaiter();
 
         CommandClientBuilder client = new CommandClientBuilder();
 
@@ -147,7 +146,7 @@ public class Main {
         );
 
         // Register JDA
-        jda = JDABuilder.createDefault(prop.getProperty("token"))
+        jda = JDABuilder.createDefault(PropertiesManager.getToken())
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableIntents(GatewayIntent.GUILD_MEMBERS)
@@ -171,7 +170,11 @@ public class Main {
         return jda;
     }
 
-    public static EventWaiter getWaiter() {
-        return waiter;
+    public static Instant getStart() {
+        return start;
+    }
+
+    public static DiscordBotListAPI getTopgg() {
+        return topgg;
     }
 }

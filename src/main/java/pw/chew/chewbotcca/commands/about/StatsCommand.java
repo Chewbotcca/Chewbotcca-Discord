@@ -24,7 +24,7 @@ public class StatsCommand extends Command {
                 .addField("Author", "<@!476488167042580481>", true)
                 .addField("Code", "[View code on GitHub](http://github.com/Chewbotcca/Discord)", true)
                 .addField("Library", "JDA 4.2.0_172", true)
-                .addField("Uptime", DateTime.timeAgo(Instant.now().toEpochMilli() - Main.start.toEpochMilli()), true)
+                .addField("Uptime", DateTime.timeAgo(Instant.now().toEpochMilli() - Main.getStart().toEpochMilli()), true)
                 .addField("Server Count", String.valueOf(commandEvent.getJDA().getGuildCache().size()), true)
                 .setColor(0xd084)
                 .build()

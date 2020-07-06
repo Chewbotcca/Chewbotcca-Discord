@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class YouTubeCommand extends Command {
-    static ArrayList<String> describedIds = new ArrayList<>();
+    final static ArrayList<String> describedIds = new ArrayList<>();
 
     public YouTubeCommand() {
         this.name = "youtube";

@@ -3,9 +3,11 @@ package pw.chew.chewbotcca.listeners;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.Main;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
@@ -27,7 +29,7 @@ public class SendJoinedOrLeftGuildListener extends ListenerAdapter {
         boolean joined = event instanceof GuildJoinEvent;
         long servers = jda.getGuildCache().size();
         if(!PropertiesManager.getSentryEnv().equals("development"))
-            Main.topgg.setStats((int) servers);
+            Main.getTopgg().setStats((int) servers);
         EmbedBuilder e = new EmbedBuilder();
         if(joined) {
             e.setTitle("I joined a server!");
@@ -40,6 +42,10 @@ public class SendJoinedOrLeftGuildListener extends ListenerAdapter {
         e.addField("ID", guild.getId(), true);
         e.addField("Members", String.valueOf(guild.getMemberCount()), true);
         e.addField("New Server Count", String.valueOf(servers), false);
-        jda.getTextChannelById("718316552272740414").sendMessage(e.build()).queue();
+        TextChannel joinChannel = jda.getTextChannelById("718316552272740414");
+        if(joinChannel == null)
+            LoggerFactory.getLogger(this.getClass()).error("Join Channel not found, this is not good.");
+        else
+            joinChannel.sendMessage(e.build()).queue();
     }
 }

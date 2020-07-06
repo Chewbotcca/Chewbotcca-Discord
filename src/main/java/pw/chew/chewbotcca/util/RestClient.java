@@ -32,11 +32,15 @@ public class RestClient {
     }
 
     public static String performRequest(Request request) {
-        try (Response response = Main.jda.getHttpClient().newCall(request).execute()) {
-            // System.out.println(r);
-            String ye = response.body().string();
-            LoggerFactory.getLogger(RestClient.class).debug("Response is " + ye);
-            return ye;
+        try (Response response = Main.getJDA().getHttpClient().newCall(request).execute()) {
+            String body;
+            if(response.body() == null) {
+                body = null;
+            } else {
+                body = response.body().string();
+            }
+            LoggerFactory.getLogger(RestClient.class).debug("Response is " + body);
+            return body;
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -53,7 +53,7 @@ public class MCWikiCommand extends Command {
             return;
         }
 
-        String articleName = "";
+        String articleName;
         List<String> noSlash = new ArrayList<>();
         for(Object item : j) {
             String str = (String)item;

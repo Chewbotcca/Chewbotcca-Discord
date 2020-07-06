@@ -23,7 +23,6 @@ public class RedditCommand extends Command {
     @Override
     protected void execute(CommandEvent commandEvent) {
         String baseUrl = "http://reddit.com/r/%s/.json";
-        String shortUrl = "http://redd.it/";
         String url;
         int num = -1;
         if(commandEvent.getArgs().length() == 0) {

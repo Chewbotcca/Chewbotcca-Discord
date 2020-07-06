@@ -9,7 +9,7 @@ import java.awt.*;
 import java.util.Random;
 
 public class EightBallCommand extends Command {
-    String[] goodResponses = new String[]{
+    final String[] goodResponses = new String[]{
             "As I see it, yes",
             "It is certain",
             "It is decidedly so",
@@ -23,7 +23,7 @@ public class EightBallCommand extends Command {
             "You may rely on it",
             "You can count on it"
     };
-    String[] neutralResponses = new String[]{
+    final String[] neutralResponses = new String[]{
             "Better not tell you now!",
             "Ask again later.",
             "Cannot predict now",
@@ -32,7 +32,7 @@ public class EightBallCommand extends Command {
             "Rhetorical questions can be answered in solo",
             "Maybe..."
     };
-    String[] badResponses = new String[]{
+    final String[] badResponses = new String[]{
             "You're kidding, right?",
             "Don't count on it.",
             "In your dreams",
@@ -42,7 +42,7 @@ public class EightBallCommand extends Command {
             "One would be wise to think not",
             "Very doubtful"
     };
-    Random rand = new Random();
+    final Random rand = new Random();
 
     public EightBallCommand() {
         this.name = "8ball";
