@@ -10,14 +10,10 @@ import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.yaml.snakeyaml.util.UriEncoder;
 import pw.chew.chewbotcca.util.RestClient;
 
-import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;

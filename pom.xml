@@ -42,7 +42,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.2.0_172</version>
+            <version>4.2.0_173</version>
             <scope>compile</scope>
         </dependency>
 
@@ -67,7 +67,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>3.12.1</version>
+            <version>3.14.9</version>
             <scope>compile</scope>
         </dependency>
 
@@ -75,15 +75,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20190722</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <!-- SnakeYAML to persist data across bot reboots -->
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.23</version>
+            <version>20200518</version>
             <scope>compile</scope>
         </dependency>
 
@@ -105,7 +97,7 @@
         <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
-            <version>1.113</version>
+            <version>1.114</version>
             <scope>compile</scope>
         </dependency>
 
