@@ -47,7 +47,8 @@ public class GHRepoCommand extends Command {
         try {
             e.setTitle("GitHub Repository Info for " + repo.getFullName(), "https://github.com/" + repo.getFullName());
             e.setDescription(repo.getDescription());
-            e.addField("URL", String.valueOf(repo.getHtmlUrl()), true);
+            if(repo.getHomepage() != null)
+                e.addField("URL", String.valueOf(repo.getHomepage()), true);
             if(repo.getLicense() != null)
                 e.addField("License", repo.getLicense().getName(), true);
             e.addField("Open Issues/PRs", String.valueOf(repo.getOpenIssueCount()), true);
