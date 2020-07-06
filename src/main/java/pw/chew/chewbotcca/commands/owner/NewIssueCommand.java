@@ -3,7 +3,6 @@ package pw.chew.chewbotcca.commands.owner;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import org.kohsuke.github.*;
-import pw.chew.chewbotcca.Main;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.io.IOException;

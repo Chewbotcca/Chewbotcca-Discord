@@ -8,7 +8,6 @@ import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
-import pw.chew.chewbotcca.Main;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.io.IOException;

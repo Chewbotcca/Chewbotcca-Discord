@@ -8,7 +8,6 @@ import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.LoggerFactory;
-import pw.chew.chewbotcca.Main;
 import pw.chew.chewbotcca.commands.github.GHIssueCommand;
 import pw.chew.chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.chewbotcca.util.PropertiesManager;

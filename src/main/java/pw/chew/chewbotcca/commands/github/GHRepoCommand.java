@@ -4,8 +4,9 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import org.kohsuke.github.*;
-import pw.chew.chewbotcca.Main;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.io.IOException;

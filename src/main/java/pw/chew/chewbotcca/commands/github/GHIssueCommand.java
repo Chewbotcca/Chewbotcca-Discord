@@ -5,7 +5,6 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.kohsuke.github.*;
-import pw.chew.chewbotcca.Main;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.awt.*;

@@ -5,13 +5,11 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.Main;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.*;
-import java.util.Properties;
 
 public class LastFMCommand extends Command {
 

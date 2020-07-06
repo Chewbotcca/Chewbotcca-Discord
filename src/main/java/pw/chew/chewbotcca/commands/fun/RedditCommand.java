@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Random;
 
 public class RedditCommand extends Command {

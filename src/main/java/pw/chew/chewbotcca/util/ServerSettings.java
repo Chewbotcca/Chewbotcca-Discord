@@ -1,7 +1,6 @@
 package pw.chew.chewbotcca.util;
 
 import org.json.JSONObject;
-import pw.chew.chewbotcca.Main;
 
 public class ServerSettings {
     JSONObject data;
