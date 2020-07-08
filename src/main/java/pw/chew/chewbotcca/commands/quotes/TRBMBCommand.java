@@ -2,8 +2,7 @@ package pw.chew.chewbotcca.commands.quotes;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import org.json.JSONArray;
-import pw.chew.chewbotcca.util.RestClient;
+import pro.chew.api.ChewAPI;
 
 public class TRBMBCommand extends Command {
 
@@ -14,6 +13,6 @@ public class TRBMBCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
-        event.reply(new JSONArray(RestClient.get("https://api.chew.pro/trbmb")).getString(0));
+        event.reply(new ChewAPI().getTRBMBPhrase());
     }
 }

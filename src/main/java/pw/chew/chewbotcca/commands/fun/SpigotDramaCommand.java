@@ -4,8 +4,8 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import org.json.JSONObject;
-import pw.chew.chewbotcca.util.RestClient;
+import pro.chew.api.ChewAPI;
+import pro.chew.api.objects.SpigotDrama;
 
 public class SpigotDramaCommand extends Command {
 
@@ -17,11 +17,11 @@ public class SpigotDramaCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        JSONObject response = new JSONObject(RestClient.get("https://chew.pw/api/spigotdrama"));
+        SpigotDrama response = new ChewAPI().generateSpigotDrama();
         EmbedBuilder embed = new EmbedBuilder();
         embed.setAuthor("md678685", "https://github.com/md678685/spigot-drama-generator", "https://avatars0.githubusercontent.com/u/1917406");
         embed.setTitle("Spigot Drama Generator", "https://drama.essentialsx.net/");
-        embed.setDescription(response.getString("response") + "\n\n" + "[Permalink](" + response.getString("permalink") + ")");
+        embed.setDescription(response.getPhrase() + "\n\n" + "[Permalink](" + response.getPermalink() + ")");
 
         commandEvent.reply(embed.build());
     }
