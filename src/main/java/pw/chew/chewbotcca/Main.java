@@ -107,7 +107,6 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
             logger.error("Error occurred initializing GitHub. How did this happen?");
-            return;
         }
 
         // Register commands
@@ -172,11 +171,12 @@ public class Main {
         );
 
         // Add GitHub commands only if it properly initiated
-        client.addCommands(
-                new GHIssueCommand(github),
-                new GHRepoCommand(github),
-                new GHUserCommand(github)
-        );
+        if(github != null)
+            client.addCommands(
+                    new GHIssueCommand(github),
+                    new GHRepoCommand(github),
+                    new GHUserCommand(github)
+            );
 
         // Register JDA
         jda = JDABuilder.createDefault(PropertiesManager.getToken())
