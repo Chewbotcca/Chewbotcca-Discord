@@ -57,6 +57,7 @@ public class RollCommand extends Command {
         // If the args are invalid, let them know
         if(dice < 1) {
             commandEvent.reply("You must roll at least 1 die.");
+            return;
         }
         if(sides < 1) {
             commandEvent.reply("Sides cannot be less than 1!");

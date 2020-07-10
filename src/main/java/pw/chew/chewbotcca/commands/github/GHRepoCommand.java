@@ -44,6 +44,7 @@ public class GHRepoCommand extends Command {
         String repoName = commandEvent.getArgs();
         if(!repoName.contains("/")) {
             commandEvent.reply("Make sure your input contains a UserOrOrg/RepositoryName (e.g. Chewbotcca/Discord).");
+            return;
         }
         // Initialize GitHub
         GitHub github;
