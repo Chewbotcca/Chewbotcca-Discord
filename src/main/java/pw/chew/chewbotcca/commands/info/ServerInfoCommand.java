@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Chewbotcca
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.Command;
@@ -20,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 
+// %^sinfo command
 public class ServerInfoCommand extends Command {
     public ServerInfoCommand() {
         this.name = "serverinfo";
@@ -30,12 +47,15 @@ public class ServerInfoCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
+        // Get args and the guild
         String args = event.getArgs();
         Guild server = event.getGuild();
 
+        // Load members
         new Thread(() -> event.getGuild().loadMembers().get());
         await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
 
+        // Find the method they want
         if(args.contains("boost")) {
             event.reply(gatherBoostInfo(server).build());
         } else if(args.contains("role")) {
@@ -45,8 +65,16 @@ public class ServerInfoCommand extends Command {
         } else {
             event.reply(gatherMainInfo(event, server).build());
         }
+
+        event.getGuild().pruneMemberCache();
     }
 
+    /**
+     * Gather basic info about a server
+     * @param event the command event
+     * @param server the server
+     * @return the embed
+     */
     public EmbedBuilder gatherMainInfo(CommandEvent event, Guild server) {
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Server Information");
@@ -54,6 +82,7 @@ public class ServerInfoCommand extends Command {
 
         e.setThumbnail(server.getIconUrl());
 
+        // Retrieve the owner in sync
         server.retrieveOwner(true).queue();
         try {
             await().atMost(3, TimeUnit.SECONDS).until(() -> server.getOwner() != null);
@@ -65,6 +94,7 @@ public class ServerInfoCommand extends Command {
 
         e.addField("Server ID", server.getId(), true);
 
+        // Set region emoji if parsed
         switch (server.getRegion()) {
             case VIP_AMSTERDAM -> e.addField("Server Region", "<:region_amsterdam:718523705080152136> <:vip_region:718523836823240814> Amsterdam", true);
             case BRAZIL -> e.addField("Server Region", "<:region_brazil:718523705055248418> Brazil", true);
@@ -85,6 +115,7 @@ public class ServerInfoCommand extends Command {
             default -> e.addField("Server Region", server.getRegionRaw(), true);
         }
 
+        // Get bot / member count
         List<Member> members = server.getMembers();
         int bots = 0;
         for (Member member : members) {
@@ -99,11 +130,12 @@ public class ServerInfoCommand extends Command {
 
         String botpercent = df.format((float)bots / (float)membercount * 100);
         String humanpercent = df.format((float)humans / (float)membercount * 100);
-
+        
         e.addField("Member Count", "Total: " + membercount + "\n" +
                 "Bots: " + bots + " - (" + botpercent + "%)\n" +
                 "Users: " + humans + " - (" + humanpercent + "%)", true);
-
+        
+        // Channel counts
         int totalchans = server.getChannels().size();
         int textchans = server.getTextChannels().size();
         int voicechans = server.getVoiceChannels().size();
@@ -125,14 +157,15 @@ public class ServerInfoCommand extends Command {
 
         e.addField("Channel Count", String.join("\n", counts), true);
 
+        // Server Boosting Stats
         if(server.getBoostCount() > 0)
             e.addField("Server Boosting",
                     "Level: " + server.getBoostTier().getKey() +
                             "\nBoosts: " + server.getBoostCount() +
                             "\nBoosters: " + server.getBoosters().size(), true);
 
+        // Gather perk info
         String perks = perkParser(server);
-
         if(perks.length() > 0)
             e.addField("Perks", perks, true);
 
@@ -146,14 +179,22 @@ public class ServerInfoCommand extends Command {
         return e;
     }
 
+    /**
+     * Gathers info about boosters and how long they've been boosting
+     * @param server the server
+     * @return an embed
+     */
     public EmbedBuilder gatherBoostInfo(Guild server) {
+        // Get boosters
         List<Member> boosters = server.getBoosters();
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Boosters for " + server.getName());
         List<CharSequence> boostString = new ArrayList<>();
+        // Get a now time for a basis of comparison
         Instant now = Instant.now();
         for (Member booster : boosters) {
             OffsetDateTime timeBoosted = booster.getTimeBoosted();
+            // If they're still boosting (in case they stop boosting between gathering boosters and finding how long they're boosting
             if(timeBoosted != null)
                 boostString.add(booster.getAsMention() + " for " + DateTime.timeAgo(now.toEpochMilli() - timeBoosted.toInstant().toEpochMilli()));
         }
@@ -164,6 +205,11 @@ public class ServerInfoCommand extends Command {
         return embed;
     }
 
+    /**
+     * Gather role information
+     * @param server the server
+     * @return an embed
+     */
     public EmbedBuilder gatherRoles(Guild server) {
         EmbedBuilder e = new EmbedBuilder();
 
@@ -174,11 +220,13 @@ public class ServerInfoCommand extends Command {
         roleNames.append("Members - Role Mention").append("\n");
         roleNames.append("Note: Roles that are integrations are skipped!").append("\n");
 
+        // Gather roles and iterate over each to find stats
         List<Role> roles = server.getRoles();
         for (int i=0; i < roles.size() && i < 50; i++) {
             Role role = roles.get(i);
             List<Member> membersWithRole = server.getMembersWithRoles(role);
             int members = membersWithRole.size();
+            // Skip if it's a bot role
             boolean skip = false;
             if(role.isManaged() && members == 1 && membersWithRole.get(0).getUser().isBot())
                 skip = true;
@@ -195,11 +243,17 @@ public class ServerInfoCommand extends Command {
         return e;
     }
 
+    /**
+     * Gather server bots
+     * @param server the server
+     * @return an embed
+     */
     public EmbedBuilder gatherBots(Guild server) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Bots on " + server.getName());
         List<CharSequence> bots = new ArrayList<>();
         bots.add("Newest bots on the bottom");
+        // Get all members as an array an sort it by join time
         Member[] members = server.getMembers().toArray(new Member[0]);
         Arrays.sort(members, (o1, o2) -> {
             if (o1.getTimeJoined().toEpochSecond() > o2.getTimeJoined().toEpochSecond())
@@ -209,6 +263,7 @@ public class ServerInfoCommand extends Command {
             else
                 return -1;
         });
+        // Iterate over each bot to find how long they've been on
         int botCount = 0;
         for (Member member : members) {
             if (member.getUser().isBot()) {
@@ -225,8 +280,12 @@ public class ServerInfoCommand extends Command {
         return embed;
     }
 
+    /**
+     * Parse the perk list and make it fancy if necessary
+     * @param server the server
+     * @return an embed
+     */
     public String perkParser(Guild server) {
-
         List<CharSequence> perks = new ArrayList<>();
         String[] features = server.getFeatures().toArray(new String[0]);
         Arrays.sort(features);
@@ -248,6 +307,7 @@ public class ServerInfoCommand extends Command {
 
     /*
     Source: https://github.com/ChewMC/TransmuteIt/blob/2b86/src/pw/chew/transmuteit/DiscoveriesCommand.java#L174-L186
+    Capitalizes a String, e.g. "BRUH_MOMENT" -> "Bruh Moment"
      */
     public String capitalize(String to) {
         if(to.equals("")) {

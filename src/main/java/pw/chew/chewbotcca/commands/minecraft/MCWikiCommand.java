@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Chewbotcca
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package pw.chew.chewbotcca.commands.minecraft;
 
 import com.jagrosh.jdautilities.command.Command;
@@ -24,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+// %^mcwiki command
 public class MCWikiCommand extends Command {
 
     public MCWikiCommand() {
@@ -37,10 +54,9 @@ public class MCWikiCommand extends Command {
         String apiUrl = "http://minecraft.gamepedia.com/api.php?action=opensearch&search=";
         String mcUrl = "http://minecraft.gamepedia.com/";
 
-        // """mcwiki <phrase> - gets the first paragraph of the Minecraft Wiki article on <phrase>"""
-
         JSONArray j;
 
+        // Try and find a result
         try {
             j = new JSONArray(RestClient.get(apiUrl + URLEncoder.encode(commandEvent.getArgs().strip(), StandardCharsets.UTF_8))).getJSONArray(1);
         } catch(JSONException e) {
@@ -53,6 +69,7 @@ public class MCWikiCommand extends Command {
             return;
         }
 
+        // If there's a result, find the right article
         String articleName;
         List<String> noSlash = new ArrayList<>();
         for(Object item : j) {
@@ -70,8 +87,10 @@ public class MCWikiCommand extends Command {
 
         String url = mcUrl + articleName.replace(" ", "_");
 
+        // Actually get the page
         String page = RestClient.get(url);
 
+        // Configure parser for later
         TagNode tagNode = new HtmlCleaner().clean(page);
         Document doc;
         try {
@@ -82,6 +101,7 @@ public class MCWikiCommand extends Command {
             return;
         }
 
+        // Find the summary text and image (if there is one)
         XPath xPath = XPathFactory.newInstance().newXPath();
         String summary = null;
         String img = null;
@@ -96,6 +116,7 @@ public class MCWikiCommand extends Command {
             return;
         }
 
+        // Return the results
         commandEvent.reply(new EmbedBuilder()
                 .setAuthor("Minecraft Wiki Search Results")
                 .setTitle(articleName.replace("_", " "), url)

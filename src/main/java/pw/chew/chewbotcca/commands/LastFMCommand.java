@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Chewbotcca
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package pw.chew.chewbotcca.commands;
 
 import com.jagrosh.jdautilities.command.Command;
@@ -11,6 +27,7 @@ import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.*;
 
+// %^lastfm command
 public class LastFMCommand extends Command {
 
     public LastFMCommand() {
@@ -21,29 +38,31 @@ public class LastFMCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
+        // Make sure last.fm token exists
+        // not sure why i only do this here
         String key = PropertiesManager.getLastfmToken();
         if (key == null) {
             event.reply("This command requires an API key from last.fm!");
             return;
         }
 
+        // Get args, assume it's a username, and find their stats
         String args = event.getArgs();
-
         JSONObject parse = new JSONObject(RestClient.get("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&limit=1&user=" + args + "&api_key=" + key + "&format=json"));
-
+        // But if I got bamboozled
         if(parse.has("message") && parse.getString("message").equals("User not found")) {
             event.reply("No user found for the provided input!");
             return;
         }
 
+        // Get user recent tracks and its info
         JSONObject base = parse.getJSONObject("recenttracks").getJSONArray("track").getJSONObject(0);
-
         String user = parse.getJSONObject("recenttracks").getJSONObject("@attr").getString("user");
-
         String artist = base.getJSONObject("artist").getString("#text");
         String track = base.getString("name");
         String album = base.getJSONObject("album").getString("#text");
 
+        // if now playing
         boolean playing;
         String timeago = null;
         if (base.has("@attr")) {
@@ -55,6 +74,7 @@ public class LastFMCommand extends Command {
             playing = false;
         }
 
+        // Generate and send info
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("Last.fm status for " + user)
                 .addField("Track", track, true)

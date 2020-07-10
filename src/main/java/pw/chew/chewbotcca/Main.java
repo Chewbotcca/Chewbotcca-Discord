@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Chewbotcca
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package pw.chew.chewbotcca;
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
@@ -48,33 +64,36 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Properties;
 
+// The Main Bot class. Where all the magic happens!
 public class Main {
+    // Instance variables
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     private static JDA jda;
     private static Instant start;
     private static DiscordBotListAPI topgg;
 
     public static void main(String[] args) throws LoginException, IOException {
+        // Load properties into the PropertiesManager
         Properties prop = new Properties();
         prop.load(new FileInputStream("bot.properties"));
         PropertiesManager.loadProperties(prop);
 
+        // Initialize Sentry to catch errors
         Sentry.init(PropertiesManager.getSentryDsn()).setEnvironment(PropertiesManager.getSentryEnv());
 
+        // Initialize Top.gg for stats posting
         topgg = new DiscordBotListAPI.Builder()
                 .token(PropertiesManager.getTopggToken())
                 .botId(PropertiesManager.getClientId())
                 .build();
 
+        // Initialize the waiter and client
         EventWaiter waiter = new EventWaiter();
-
         CommandClientBuilder client = new CommandClientBuilder();
 
+        // Set the client settings
         client.useDefaultGame();
         client.setOwnerId(PropertiesManager.getOwnerId());
-
-        // Set your bot's prefix
-        logger.info("Setting Prefix to " + PropertiesManager.getPrefix());
         client.setPrefix(PropertiesManager.getPrefix());
 
         client.useHelpBuilder(false);
@@ -157,6 +176,7 @@ public class Main {
                 .addEventListeners(waiter, client.build())
                 .build();
 
+        // Set the start time (for the stats command)
         start = Instant.now();
 
         // Register listeners
@@ -166,14 +186,17 @@ public class Main {
         );
     }
 
+    // Get the JDA if needed
     public static JDA getJDA() {
         return jda;
     }
 
+    // Get the start time when needed
     public static Instant getStart() {
         return start;
     }
 
+    // Get the Topgg API when needed
     public static DiscordBotListAPI getTopgg() {
         return topgg;
     }

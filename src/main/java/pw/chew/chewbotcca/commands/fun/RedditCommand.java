@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Chewbotcca
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package pw.chew.chewbotcca.commands.fun;
 
 import com.jagrosh.jdautilities.command.Command;
@@ -12,6 +28,7 @@ import pw.chew.chewbotcca.util.RestClient;
 import java.time.Instant;
 import java.util.Random;
 
+// %^reddit command
 public class RedditCommand extends Command {
 
     public RedditCommand() {
@@ -25,9 +42,11 @@ public class RedditCommand extends Command {
         String baseUrl = "http://reddit.com/r/%s/.json";
         String url;
         int num = -1;
+        // If no args, just use the front page json
         if(commandEvent.getArgs().length() == 0) {
             url = "https://reddit.com/.json";
         } else {
+            // Otherwise, a subreddit was probably specified, so use that
             String[] args = commandEvent.getArgs().split(" ");
             url = String.format(baseUrl, args[0]);
             if(args.length > 1) {
@@ -35,11 +54,13 @@ public class RedditCommand extends Command {
             }
         }
 
+        // Get data from reddit
         JSONObject reddit = new JSONObject(RestClient.get(url));
         JSONArray data = reddit.getJSONObject("data").getJSONArray("children");
 
         JSONObject post;
 
+        // If the specified post is greater than the actual amount of posts
         if(num >= 0 && data.length() >= num) {
             post = data.getJSONObject(num);
         } else if(num >= 0) {
@@ -49,8 +70,10 @@ public class RedditCommand extends Command {
             post = getRandom(data);
         }
 
+        // Get the post data
         JSONObject postData = post.getJSONObject("data");
 
+        // If it's over 18 and it's not an NSFW channel, don't show it
         if(postData.getBoolean("over_18") && commandEvent.getChannelType() == ChannelType.TEXT && !commandEvent.getTextChannel().isNSFW()) {
             commandEvent.reply("This post is marked as NSFW and must be ran in a NSFW channel!");
             return;
@@ -59,6 +82,7 @@ public class RedditCommand extends Command {
         commandEvent.reply(generatePostEmbed(postData).build());
     }
 
+    // Code to generate a post embed based off of a post json object
     public EmbedBuilder generatePostEmbed(JSONObject post) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle(post.getString("title"), post.getString("url"));
@@ -71,6 +95,7 @@ public class RedditCommand extends Command {
         return embed;
     }
 
+    // Method to get a random JSONObject from a JSONArray
     public JSONObject getRandom(JSONArray array) {
         int rnd = new Random().nextInt(array.length());
         return array.getJSONObject(rnd);

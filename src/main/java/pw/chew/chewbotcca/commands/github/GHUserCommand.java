@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Chewbotcca
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package pw.chew.chewbotcca.commands.github;
 
 import com.jagrosh.jdautilities.command.Command;
@@ -12,6 +28,7 @@ import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.io.IOException;
 
+// %^ghuser command
 public class GHUserCommand extends Command {
 
     public GHUserCommand() {
@@ -23,7 +40,9 @@ public class GHUserCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
+        // Get the input
         String username = commandEvent.getArgs();
+        // Initialize GitHub
         GitHub github;
         commandEvent.getChannel().sendTyping().queue();
         try {
@@ -33,6 +52,7 @@ public class GHUserCommand extends Command {
             commandEvent.reply("Error occurred initializing GitHub. How did this happen?");
             return;
         }
+        // Find the GitHub user and notify if errored
         GHUser user;
         try {
             user = github.getUser(username);
@@ -40,12 +60,16 @@ public class GHUserCommand extends Command {
             commandEvent.reply("Invalid username. Please make sure this user exists!");
             return;
         }
+        // Generate Embed
         EmbedBuilder e = new EmbedBuilder();
         try {
+            // Set repo count and thumbnail
             e.setThumbnail(user.getAvatarUrl());
             e.addField("Repositories", String.valueOf(user.getPublicRepoCount()), true);
+            // If it's actually an org, handle it differently
             boolean isOrg = user.getType().equals("Organization");
             if(!isOrg) {
+                // If it's not an org, it's a profile!
                 e.setTitle("GitHub profile for " + user.getLogin(), "https://github.com/" + user.getLogin());
                 e.setDescription(user.getBio());
                 e.addField("Followers", String.valueOf(user.getFollowersCount()), true);
@@ -57,6 +81,7 @@ public class GHUserCommand extends Command {
                 if(user.getTwitterUsername() != null)
                     e.addField("Twitter", "[@" + user.getTwitterUsername() + "](https://twitter.com/" + user.getTwitterUsername() + ")", true);
             } else {
+                // If it is an org, list other stuff instead
                 GHOrganization org = github.getOrganization(user.getLogin());
                 e.setTitle("GitHub profile for Organization " + user.getLogin(), "https://github.com/" + user.getLogin());
                 e.addField("Public Members", String.valueOf(org.listMembers().toArray().length), true);

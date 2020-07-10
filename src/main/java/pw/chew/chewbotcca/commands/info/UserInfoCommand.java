@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Chewbotcca
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.Command;
@@ -24,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 
+// %^uinfo command
 public class UserInfoCommand extends Command {
 
     public UserInfoCommand() {
@@ -35,11 +52,13 @@ public class UserInfoCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
+        // gather args
         String args = commandEvent.getArgs();
         User user = null;
 
         String mode = "";
 
+        // If they want member info
         if(args.contains("member")) {
             mode = "member";
             args = args.replace(" member", "");
@@ -47,9 +66,11 @@ public class UserInfoCommand extends Command {
             args = args.replace("member", "");
         }
 
+        // Get server members (in sync) for join position
         new Thread(() -> commandEvent.getGuild().loadMembers().get());
         await().atMost(30, TimeUnit.SECONDS).until(() -> commandEvent.getGuild().getMemberCache().size() == commandEvent.getGuild().getMemberCount());
 
+        // Attempt to find the author if they exist
         if(args.length() == 0) {
             user = commandEvent.getAuthor();
         } else {
@@ -76,6 +97,7 @@ public class UserInfoCommand extends Command {
             return;
         }
 
+        // Generate and respond
         Member member = commandEvent.getGuild().getMemberById(user.getId());
         if(member != null && mode.equals("member")) {
             commandEvent.reply(gatherMemberInfo(commandEvent, member).build());
@@ -86,7 +108,14 @@ public class UserInfoCommand extends Command {
         }
     }
 
+    /**
+     * Gather main info, the main info. main
+     * @param commandEvent the command event
+     * @param user the user
+     * @return an embed
+     */
     public EmbedBuilder gatherMainInfo(CommandEvent commandEvent, User user) {
+        // Get the member
         Member member = commandEvent.getGuild().getMemberById(user.getId());
         boolean onServer = false;
         if(member != null) {
@@ -95,6 +124,7 @@ public class UserInfoCommand extends Command {
         boolean self = user == commandEvent.getAuthor();
 
         EmbedBuilder e = new EmbedBuilder();
+        // If executor == member
         if (self)
             e.setTitle("User info for you!");
         else
@@ -103,6 +133,7 @@ public class UserInfoCommand extends Command {
         e.addField("Name#Discrim", user.getAsTag(), true);
         e.addField("User ID", user.getId(), true);
 
+        // If they're on the server, we can get their presence
         if(onServer) {
             String status;
             switch (member.getOnlineStatus()) {
@@ -130,12 +161,13 @@ public class UserInfoCommand extends Command {
                     e.setColor(Color.decode("#747F8D"));
                 }
             }
-
             e.addField("Status", status, true);
+            // And their nick
             if (member.getNickname() != null) {
                 e.addField("Nickname", member.getNickname(), true);
             }
 
+            // And their activities
             List<CharSequence> activities = new ArrayList<>();
             for (int i = 0; i < member.getActivities().size(); i++) {
                 Activity activity = member.getActivities().get(i);
@@ -153,6 +185,7 @@ public class UserInfoCommand extends Command {
                 e.addField("Activities", String.join("\n", activities), true);
         }
 
+        // Get their bio from discord.bio, if they have one.
         try {
             JSONObject dbio = new JSONObject(RestClient.get("https://api.discord.bio/v1/user/details/" + user.getId())).getJSONObject("payload").getJSONObject("user").getJSONObject("details");
 
@@ -181,9 +214,16 @@ public class UserInfoCommand extends Command {
         return e;
     }
 
+    /**
+     * Gather server specific info
+     * @param commandEvent the command event
+     * @param member the member
+     * @return an embed
+     */
     public EmbedBuilder gatherMemberInfo(CommandEvent commandEvent, Member member) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Member info for " + member.getEffectiveName());
+        // Find their join position
         int position = 0;
         List<Member> members = commandEvent.getGuild().getMemberCache().asList();
         Member[] bruh = members.toArray(new Member[0]);
@@ -209,6 +249,12 @@ public class UserInfoCommand extends Command {
         return embed;
     }
 
+    /**
+     * Date parser beause java is weird
+     * @param date the date
+     * @return a parsed date
+     * @throws ParseException if a parse exception is thrown idk
+     */
     public String dateParser(String date) throws ParseException {
         SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat outputFormat = new SimpleDateFormat("EEEE, MMM dd, yyyy");

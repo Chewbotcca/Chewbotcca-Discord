@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Chewbotcca
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package pw.chew.chewbotcca.commands;
 
 import com.jagrosh.jdautilities.command.Command;
@@ -9,6 +25,7 @@ import java.awt.*;
 import java.time.Instant;
 import java.util.Objects;
 
+// %^feedback command
 public class FeedbackCommand extends Command {
 
     public FeedbackCommand() {
@@ -19,6 +36,7 @@ public class FeedbackCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
+        // Get args
         var feedback = commandEvent.getArgs();
         var embed = new EmbedBuilder();
         embed.setTitle("New Feedback!");
@@ -32,6 +50,7 @@ public class FeedbackCommand extends Command {
         } else {
             embed.addField("Server", "Name: " + commandEvent.getGuild().getName() + "\n" + commandEvent.getGuild().getId(), true);
         }
+        // Get the feedback channel and send
         Objects.requireNonNull(commandEvent.getJDA().getTextChannelById("720118610785468446")).sendMessage(embed.build()).queue();
         commandEvent.reply("I have successfully sent the feedback! Feel free to see it on the help server with `%^invite`");
     }
