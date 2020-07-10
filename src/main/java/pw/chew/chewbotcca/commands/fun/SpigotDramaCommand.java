@@ -25,17 +25,19 @@ import pro.chew.api.objects.SpigotDrama;
 
 // %^spigotdrama command
 public class SpigotDramaCommand extends Command {
+    final ChewAPI chew;
 
-    public SpigotDramaCommand() {
+    public SpigotDramaCommand(ChewAPI chew) {
         this.name = "spigotdrama";
         this.guildOnly = false;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.chew = chew;
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
         // Get a SpigotDrama response
-        SpigotDrama response = new ChewAPI().generateSpigotDrama();
+        SpigotDrama response = chew.generateSpigotDrama();
         // Make an embed and send it off
         EmbedBuilder embed = new EmbedBuilder();
         embed.setAuthor("md678685", "https://github.com/md678685/spigot-drama-generator", "https://avatars0.githubusercontent.com/u/1917406");

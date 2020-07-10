@@ -22,15 +22,17 @@ import pro.chew.api.ChewAPI;
 
 // %^trbmb command
 public class TRBMBCommand extends Command {
+    final ChewAPI chew;
 
-    public TRBMBCommand() {
+    public TRBMBCommand(ChewAPI chewAPI) {
         this.name = "trbmb";
         this.guildOnly = false;
+        this.chew = chewAPI;
     }
 
     @Override
     protected void execute(CommandEvent event) {
         // Get and send TRBMB Phrase
-        event.reply(new ChewAPI().getTRBMBPhrase());
+        event.reply(chew.getTRBMBPhrase());
     }
 }

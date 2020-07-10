@@ -22,17 +22,19 @@ import pro.chew.api.ChewAPI;
 
 // %^acronym command
 public class AcronymCommand extends Command {
+    final ChewAPI chew;
 
-    public AcronymCommand() {
+    public AcronymCommand(ChewAPI chewAPI) {
         this.name = "acronym";
         this.guildOnly = false;
+        this.chew = chewAPI;
     }
 
     @Override
     protected void execute(CommandEvent event) {
         // Get acronym and send if the acronym is valid
         try {
-            String phrase = new ChewAPI().generateAcronym(event.getArgs());
+            String phrase = chew.generateAcronym(event.getArgs());
             event.reply("Acronym for " + event.getArgs() + " is " + phrase);
         } catch (IllegalArgumentException e) {
             event.reply("Args must only contain letters!");

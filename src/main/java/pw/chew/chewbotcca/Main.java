@@ -32,6 +32,7 @@ import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pro.chew.api.ChewAPI;
 import pw.chew.chewbotcca.commands.FeedbackCommand;
 import pw.chew.chewbotcca.commands.LastFMCommand;
 import pw.chew.chewbotcca.commands.MixerCommand;
@@ -109,6 +110,9 @@ public class Main {
             logger.error("Error occurred initializing GitHub. How did this happen?");
         }
 
+        // Initialize ChewAPI
+        ChewAPI chew = new ChewAPI();
+
         // Register commands
         client.addCommands(
                 // About Module
@@ -130,7 +134,7 @@ public class Main {
                 new QRCodeCommand(),
                 new RedditCommand(),
                 new RollCommand(),
-                new SpigotDramaCommand(),
+                new SpigotDramaCommand(chew),
 
                 // Google Module
                 new YouTubeCommand(),
@@ -155,9 +159,9 @@ public class Main {
                 new ShutdownCommand(),
 
                 // Quotes Module
-                new AcronymCommand(),
+                new AcronymCommand(chew),
                 new QuoteCommand(),
-                new TRBMBCommand(),
+                new TRBMBCommand(chew),
 
                 // Settings Module
                 new ProfileCommand(),
