@@ -22,20 +22,20 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
-import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 
 // %^ghrepo command
 public class GHRepoCommand extends Command {
+    final GitHub github;
 
-    public GHRepoCommand() {
+    public GHRepoCommand(GitHub github) {
         this.name = "ghrepo";
         this.aliases = new String[]{"githubrepo", "ghrepository"};
         this.guildOnly = false;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.github = github;
     }
 
     @Override
@@ -46,16 +46,7 @@ public class GHRepoCommand extends Command {
             commandEvent.reply("Make sure your input contains a UserOrOrg/RepositoryName (e.g. Chewbotcca/Discord).");
             return;
         }
-        // Initialize GitHub
-        GitHub github;
         commandEvent.getChannel().sendTyping().queue();
-        try {
-            github = new GitHubBuilder().withOAuthToken(PropertiesManager.getGithubToken()).build();
-        } catch (IOException e) {
-            e.printStackTrace();
-            commandEvent.reply("Error occurred initializing GitHub. How did this happen?");
-            return;
-        }
         // Find the repo
         GHRepository repo;
         try {

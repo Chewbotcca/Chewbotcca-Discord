@@ -23,35 +23,26 @@ import net.dv8tion.jda.api.Permission;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
-import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.io.IOException;
 
 // %^ghuser command
 public class GHUserCommand extends Command {
+    final GitHub github;
 
-    public GHUserCommand() {
+    public GHUserCommand(GitHub github) {
         this.name = "ghuser";
         this.aliases = new String[]{"ghorg"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.github = github;
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
         // Get the input
         String username = commandEvent.getArgs();
-        // Initialize GitHub
-        GitHub github;
         commandEvent.getChannel().sendTyping().queue();
-        try {
-            github = new GitHubBuilder().withOAuthToken(PropertiesManager.getGithubToken()).build();
-        } catch (IOException e) {
-            e.printStackTrace();
-            commandEvent.reply("Error occurred initializing GitHub. How did this happen?");
-            return;
-        }
         // Find the GitHub user and notify if errored
         GHUser user;
         try {

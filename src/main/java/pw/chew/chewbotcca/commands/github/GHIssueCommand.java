@@ -21,7 +21,6 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.kohsuke.github.*;
-import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.awt.*;
 import java.io.IOException;
@@ -30,13 +29,15 @@ import java.util.List;
 
 // %^ghissue command
 public class GHIssueCommand extends Command {
+    final GitHub github;
     final static ArrayList<String> describedIds = new ArrayList<>();
 
-    public GHIssueCommand() {
+    public GHIssueCommand(GitHub github) {
         this.name = "ghissue";
         this.aliases = new String[]{"ghpull"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.github = github;
     }
 
     @Override
@@ -56,16 +57,7 @@ public class GHIssueCommand extends Command {
             commandEvent.reply("Invalid number provided for issue number. Must be a number. Make sure you're doing Repo then Number!");
             return;
         }
-        // Initialize GitHub
-        GitHub github;
         commandEvent.getChannel().sendTyping().queue();
-        try {
-            github = new GitHubBuilder().withOAuthToken(PropertiesManager.getGithubToken()).build();
-        } catch (IOException e) {
-            e.printStackTrace();
-            commandEvent.reply("Error occurred initializing GitHub. How did this happen?");
-            return;
-        }
         // Find the GitHub issue
         GHIssue issue;
         try {

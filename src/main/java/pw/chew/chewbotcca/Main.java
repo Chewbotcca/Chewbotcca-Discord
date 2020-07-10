@@ -28,6 +28,8 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.discordbots.api.client.DiscordBotListAPI;
+import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.commands.FeedbackCommand;
@@ -98,6 +100,16 @@ public class Main {
 
         client.useHelpBuilder(false);
 
+        // Initialize GitHub for GitHub commands
+        GitHub github = null;
+        try {
+            github = new GitHubBuilder().withOAuthToken(PropertiesManager.getGithubToken()).build();
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("Error occurred initializing GitHub. How did this happen?");
+            return;
+        }
+
         // Register commands
         client.addCommands(
                 // About Module
@@ -120,11 +132,6 @@ public class Main {
                 new RedditCommand(),
                 new RollCommand(),
                 new SpigotDramaCommand(),
-
-                // GitHub Module
-                new GHIssueCommand(),
-                new GHRepoCommand(),
-                new GHUserCommand(),
 
                 // Google Module
                 new YouTubeCommand(),
@@ -162,6 +169,13 @@ public class Main {
                 new LastFMCommand(),
                 new MixerCommand(),
                 new RubyGemsCommand()
+        );
+
+        // Add GitHub commands only if it properly initiated
+        client.addCommands(
+                new GHIssueCommand(github),
+                new GHRepoCommand(github),
+                new GHUserCommand(github)
         );
 
         // Register JDA
