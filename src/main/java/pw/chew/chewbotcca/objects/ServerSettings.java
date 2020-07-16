@@ -14,9 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package pw.chew.chewbotcca.util;
+package pw.chew.chewbotcca.objects;
 
 import org.json.JSONObject;
+import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.util.RestClient;
 
 // Server settings
 public class ServerSettings {
