@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import pro.chew.api.ChewAPI;
 import pw.chew.chewbotcca.commands.FeedbackCommand;
 import pw.chew.chewbotcca.commands.LastFMCommand;
-import pw.chew.chewbotcca.commands.MixerCommand;
 import pw.chew.chewbotcca.commands.RubyGemsCommand;
 import pw.chew.chewbotcca.commands.about.HelpCommand;
 import pw.chew.chewbotcca.commands.about.InviteCommand;
@@ -170,7 +169,6 @@ public class Main {
                 // Everything Else
                 new FeedbackCommand(),
                 new LastFMCommand(),
-                new MixerCommand(),
                 new RubyGemsCommand()
         );
 
