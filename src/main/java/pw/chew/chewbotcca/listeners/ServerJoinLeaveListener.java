@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
 import java.awt.*;
 
 // Listen to server joins
-public class SendJoinedOrLeftGuildListener extends ListenerAdapter {
+public class ServerJoinLeaveListener extends ListenerAdapter {
     @Override
     public void onGuildJoin(@Nonnull GuildJoinEvent event) {
         execute(event.getGuild(), event.getJDA(), event);

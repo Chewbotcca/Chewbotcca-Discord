@@ -57,7 +57,7 @@ import pw.chew.chewbotcca.commands.quotes.TRBMBCommand;
 import pw.chew.chewbotcca.commands.settings.ProfileCommand;
 import pw.chew.chewbotcca.commands.settings.ServerSettingsCommand;
 import pw.chew.chewbotcca.listeners.MagReactListener;
-import pw.chew.chewbotcca.listeners.SendJoinedOrLeftGuildListener;
+import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import javax.security.auth.login.LoginException;
@@ -198,7 +198,7 @@ public class Main {
         // Register listeners
         jda.addEventListener(
                 new MagReactListener(),
-                new SendJoinedOrLeftGuildListener()
+                new ServerJoinLeaveListener()
         );
     }
 
