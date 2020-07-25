@@ -40,7 +40,7 @@ public class StatsCommand extends Command {
                 .setTitle("Chewbotcca - A basic, yet functioning, discord bot")
                 .addField("Author", "<@!476488167042580481>", true)
                 .addField("Code", "[View code on GitHub](http://github.com/Chewbotcca/Discord)", true)
-                .addField("Library", "JDA 4.2.0_172", true)
+                .addField("Library", "JDA 4.2.0_181", true)
                 // Convert the time difference into a time ago
                 .addField("Uptime", DateTime.timeAgo(Instant.now().toEpochMilli() - Main.getStart().toEpochMilli()), true)
                 // Get the server count. NOT GUILD NOT GUILD NOT GUILD
