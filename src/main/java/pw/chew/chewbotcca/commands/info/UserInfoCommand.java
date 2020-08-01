@@ -243,7 +243,7 @@ public class UserInfoCommand extends Command {
                 position = i + 1;
             }
         }
-        embed.addField("Display Name", member.getEffectiveName(), true);
+        embed.addField("Display Name", member.getEffectiveName() + "\n" + member.getAsMention(), true);
         embed.addField("Join Position", String.valueOf(position), true);
         embed.addField("Joined", DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli()) + " ago", false);
 
