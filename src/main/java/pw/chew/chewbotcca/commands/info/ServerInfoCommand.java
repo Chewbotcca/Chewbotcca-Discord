@@ -63,7 +63,7 @@ public class ServerInfoCommand extends Command {
         } else if(args.contains("bot")) {
             event.reply(gatherBots(server).build());
         } else if(args.contains("member")) {
-            event.reply(gatherMemberByJoin(server, Integer.parseInt(args.split(" ")[1])).build());
+            event.reply(gatherMemberByJoin(server, args.split(" ")[1]).build());
         } else {
             event.reply(gatherMainInfo(event, server).build());
         }
@@ -282,10 +282,16 @@ public class ServerInfoCommand extends Command {
         return embed;
     }
 
-    public EmbedBuilder gatherMemberByJoin(Guild server, int position) {
-        // Get server members (in sync) for join position
-        new Thread(() -> server.loadMembers().get());
-        await().atMost(30, TimeUnit.SECONDS).until(() -> server.getMemberCache().size() == server.getMemberCount());
+    public EmbedBuilder gatherMemberByJoin(Guild server, String positionString) {
+        int position;
+        try {
+            position = Integer.parseInt(positionString);
+        } catch (NumberFormatException e) {
+            return new EmbedBuilder().setTitle("Error occurred!").setDescription("Invalid input! Must be an integer!");
+        }
+
+        if (position > server.getMemberCache().size() || position <= 0)
+            return new EmbedBuilder().setTitle("Error occurred!").setDescription("Invalid input! Must be 1 <= x <=" + server.getMemberCache().size());
 
         List<Member> members = server.getMemberCache().asList();
         Member[] bruh = members.toArray(new Member[0]);

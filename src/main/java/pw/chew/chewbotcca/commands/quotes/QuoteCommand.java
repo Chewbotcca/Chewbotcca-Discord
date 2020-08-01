@@ -56,6 +56,7 @@ public class QuoteCommand extends Command {
         } else {
             // Get the second (channel id) arg
             String chanId = args[1];
+            chanId = chanId.replace("<#", "").replace(">", "");
             TextChannel channel;
             // Get the text channel
             channel = event.getJDA().getTextChannelById(chanId);
