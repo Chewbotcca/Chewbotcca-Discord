@@ -21,6 +21,7 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import org.json.JSONException;
@@ -100,7 +101,7 @@ public class UserInfoCommand extends Command {
         // Generate and respond
         Member member = commandEvent.getGuild().getMemberById(user.getId());
         if(member != null && mode.equals("member")) {
-            commandEvent.reply(gatherMemberInfo(commandEvent, member).build());
+            commandEvent.reply(gatherMemberInfo(commandEvent.getGuild(), member).build());
         } else if(member == null && mode.equals("member")) {
             commandEvent.reply("This user is not on this server!");
         } else {
@@ -216,16 +217,16 @@ public class UserInfoCommand extends Command {
 
     /**
      * Gather server specific info
-     * @param commandEvent the command event
+     * @param server the server
      * @param member the member
      * @return an embed
      */
-    public EmbedBuilder gatherMemberInfo(CommandEvent commandEvent, Member member) {
+    public EmbedBuilder gatherMemberInfo(Guild server, Member member) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Member info for " + member.getEffectiveName());
         // Find their join position
         int position = 0;
-        List<Member> members = commandEvent.getGuild().getMemberCache().asList();
+        List<Member> members = server.getMemberCache().asList();
         Member[] bruh = members.toArray(new Member[0]);
         Arrays.sort(bruh, (o1, o2) -> {
             if (o1.getTimeJoined().toEpochSecond() > o2.getTimeJoined().toEpochSecond())

@@ -62,6 +62,8 @@ public class ServerInfoCommand extends Command {
             event.reply(gatherRoles(server).build());
         } else if(args.contains("bot")) {
             event.reply(gatherBots(server).build());
+        } else if(args.contains("member")) {
+            event.reply(gatherMemberByJoin(server, Integer.parseInt(args.split(" ")[1])).build());
         } else {
             event.reply(gatherMainInfo(event, server).build());
         }
@@ -279,6 +281,25 @@ public class ServerInfoCommand extends Command {
         embed.setDescription(botList);
         return embed;
     }
+
+    public EmbedBuilder gatherMemberByJoin(Guild server, int position) {
+        // Get server members (in sync) for join position
+        new Thread(() -> server.loadMembers().get());
+        await().atMost(30, TimeUnit.SECONDS).until(() -> server.getMemberCache().size() == server.getMemberCount());
+
+        List<Member> members = server.getMemberCache().asList();
+        Member[] bruh = members.toArray(new Member[0]);
+        Arrays.sort(bruh, (o1, o2) -> {
+            if (o1.getTimeJoined().toEpochSecond() > o2.getTimeJoined().toEpochSecond())
+                return 1;
+            else if (o1.getTimeJoined() == o2.getTimeJoined())
+                return 0;
+            else
+                return -1;
+        });
+        return new UserInfoCommand().gatherMemberInfo(server, bruh[position - 1]);
+    }
+
 
     /**
      * Parse the perk list and make it fancy if necessary
