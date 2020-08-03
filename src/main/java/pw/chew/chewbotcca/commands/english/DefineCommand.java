@@ -47,6 +47,11 @@ public class DefineCommand extends Command {
             return;
         }
 
+        if(!grabbedword.getJSONObject(0).has("text")) {
+            commandEvent.reply("Word has no definition! Why does it exist then!");
+            return;
+        }
+
         // Build the definition embed
         EmbedBuilder e = new EmbedBuilder()
                 .setTitle("Definition for " + word)
