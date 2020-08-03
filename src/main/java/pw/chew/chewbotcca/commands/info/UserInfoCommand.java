@@ -188,7 +188,7 @@ public class UserInfoCommand extends Command {
 
         // Get their bio from discord.bio, if they have one.
         try {
-            JSONObject dbio = new JSONObject(RestClient.get("https://api.discord.bio/v1/user/details/" + user.getId())).getJSONObject("payload").getJSONObject("user").getJSONObject("details");
+            JSONObject dbio = new JSONObject(RestClient.get("https://api.discord.bio/user/details/" + user.getId())).getJSONObject("payload").getJSONObject("user").getJSONObject("details");
 
             e.setDescription(dbio.getString("description"));
             if(!dbio.isNull("birthday"))
