@@ -19,9 +19,15 @@ It's mostly fun commands like `%^roll`ing some dice, getting cats with `%^cat`, 
 
 However, it can also be used to find information like getting RubyGem information with `%^rubygem`, ironic considering this is a Java bot now.
 
-It also has powerful server info commands, for example, you can run `%^sinfo bot` to find all bots on the server, and when they got added.
+It also has powerful server info commands, 
+for example, you can run `%^sinfo bot` to find all bots on the server and when they got added,
+being able to find role and member counts (`%^sinfo roles`), 
+finding a member by join position (`%^sinfo member [position]`), 
+finding boosters and boost time (`%^sinfo boost`),
+and more!
 
-There's also commands such as `%^mixer` to get Mixer profiles, `%^youtube` to find YouTube videos, and `%^ghuser` to detail your favorite developers on GitHub.
+There's also commands such as `%^youtube` to find YouTube videos, 
+and `%^ghuser` to detail your favorite developers on GitHub.
 
 I'm always open to suggestions on what to add, please let me know what you would like to see!
 
