@@ -44,3 +44,9 @@ You can view the GitHub repository @ [Chewbotcca/Discord](https://github.com/Che
 ## Licensing
 
 This project is licensed under GPL-3.0. As a result, any modifications must use the same license and any changes you make to this project must be disclosed. Read more [here](https://choosealicense.com/licenses/gpl-3.0/).
+
+## Sponsored
+
+Chewbotcca is sponsored by SkySilk Cloud Services. [Click here to get $25.00 credit (valid for 60 days)](https://www.skysilk.com/ref/4PRQpuQraD?utm_source=Sponsorship&utm_medium=Discord&utm_campaign=Chewbotcca)
+
+![SkySilk Cloud Services logo](https://www.skysilk.com/res/default/default/public/images/layout/logo/logo-inversed-blue.svg?v=6)
