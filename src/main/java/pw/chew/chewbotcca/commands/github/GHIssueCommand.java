@@ -96,7 +96,7 @@ public class GHIssueCommand extends Command {
         boolean merged = false;
         if(issue.isPullRequest()) {
             // If it's a pull request, treat it as such
-            e.setAuthor("Information for Pull Request #" + issueNum + " in " + repo, String.valueOf(issue.getUrl()));
+            e.setAuthor("Information for Pull Request #" + issueNum + " in " + repo, String.valueOf(issue.getHtmlUrl()));
             try {
                 GHPullRequest pull = github.getRepository(repo).getPullRequest(issueNum);
                 merged = pull.isMerged();
@@ -109,7 +109,7 @@ public class GHIssueCommand extends Command {
             }
         } else {
             // Otherwise it's just an issue, do nothing special.
-            e.setAuthor("Information for Issue #" + issueNum + " in " + repo, String.valueOf(issue.getUrl()));
+            e.setAuthor("Information for Issue #" + issueNum + " in " + repo, String.valueOf(issue.getHtmlUrl()));
         }
         // Set status and color based on issue status
         if(merged) {
