@@ -18,31 +18,33 @@ package pw.chew.chewbotcca.commands.owner;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import org.kohsuke.github.*;
-import pw.chew.chewbotcca.util.PropertiesManager;
+import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHIssueBuilder;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
 
 import java.io.IOException;
 
 // %^newissue command
 public class NewIssueCommand extends Command {
+    final GitHub github;
 
-    public NewIssueCommand() {
+    public NewIssueCommand(GitHub github) {
         this.name = "issue";
         this.guildOnly = false;
         this.ownerCommand = true;
+        this.github = github;
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        GitHub github;
         GHRepository repo;
         commandEvent.getChannel().sendTyping().queue();
         try {
-            github = new GitHubBuilder().withOAuthToken(PropertiesManager.getGithubToken()).build();
             repo = github.getRepository("Chewbotcca/Discord");
         } catch (IOException e) {
             e.printStackTrace();
-            commandEvent.reply("Error occurred initializing GitHub. How did this happen?");
+            System.out.println("Error occurred getting repo!");
             return;
         }
 
@@ -72,7 +74,7 @@ public class NewIssueCommand extends Command {
             if(hasLabel)
                 issueBuilder.label(label);
             GHIssue issue = issueBuilder.create();
-            commandEvent.reply("Issue created @ " + issue.getUrl().toString().replace("api.github.com/repos", "github.com"));
+            commandEvent.reply("Issue created @ " + issue.getHtmlUrl());
         } catch (IOException e) {
             e.printStackTrace();
             commandEvent.reply("Error occurred creating Issue, check console for more information.");

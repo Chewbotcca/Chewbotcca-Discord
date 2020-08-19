@@ -154,7 +154,6 @@ public class Main {
                 new MCWikiCommand(),
 
                 // Owner Module
-                new NewIssueCommand(),
                 new ShutdownCommand(),
 
                 // Quotes Module
@@ -175,6 +174,9 @@ public class Main {
         // Add GitHub commands only if it properly initiated
         if(github != null)
             client.addCommands(
+                    // From Owner Module
+                    new NewIssueCommand(github),
+
                     new GHIssueCommand(github),
                     new GHRepoCommand(github),
                     new GHUserCommand(github)

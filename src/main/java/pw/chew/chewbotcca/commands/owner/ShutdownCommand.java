@@ -31,6 +31,4 @@ public class ShutdownCommand extends Command {
         // whee
         commandEvent.getChannel().sendMessage("Shutting down....").queue((msg) -> System.exit(0));
     }
-
-
 }
