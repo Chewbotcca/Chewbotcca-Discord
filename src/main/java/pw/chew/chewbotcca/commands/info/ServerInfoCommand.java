@@ -82,7 +82,7 @@ public class ServerInfoCommand extends Command {
         e.setTitle("Server Information");
         e.setAuthor(server.getName(), null,server.getIconUrl());
 
-        e.setThumbnail(server.getIconUrl());
+        e.setThumbnail(server.getIconUrl() + "?size=2048");
 
         // Retrieve the owner in sync
         server.retrieveOwner(true).queue();
