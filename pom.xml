@@ -153,6 +153,7 @@
                                     <!-- You may add jars to exclude from shading -->
                                 </excludes>
                             </artifactSet>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
                     </execution>
                 </executions>

@@ -6,3 +6,4 @@ target/
 bot.properties
 *.rb
 *Example*
+*.iml
