@@ -117,6 +117,8 @@ public class ServerInfoCommand extends Command {
             default -> e.addField("Server Region", server.getRegionRaw(), true);
         }
 
+        e.addField("Locale", server.getLocale().getDisplayName(), true);
+
         // Get bot / member count
         List<Member> members = server.getMembers();
         int bots = 0;
