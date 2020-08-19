@@ -34,7 +34,7 @@ public class InviteCommand extends Command {
         commandEvent.reply(new EmbedBuilder()
                 .setTitle("Invite me!")
                 .setDescription("[Click me to invite me to your server](https://discord.com/oauth2/authorize?client_id=604362556668248095&scope=bot&permissions=0)!\n" +
-                        "[Click me to join my help server](https://discord.gg/r583nHA)!\n" +
+                        "[Click me to join my help server](https://discord.gg/UjxQ3Bh)!\n" +
                         "[Sponsored: Click me to get a VPS from SkySilk Cloud Services](https://www.skysilk.com/ref/4PRQpuQraD)!").build());
     }
 }
