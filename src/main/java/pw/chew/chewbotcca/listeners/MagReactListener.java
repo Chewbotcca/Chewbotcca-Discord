@@ -134,6 +134,6 @@ public class MagReactListener extends ListenerAdapter {
         } catch (IOException e) {
             return;
         }
-        event.getChannel().sendMessage(new GHIssueCommand(github).issueBuilder(ghIssue, repo, github, issue).build()).queue();
+        event.getChannel().sendMessage(new GHIssueCommand(github).issueBuilder(ghIssue).build()).queue();
     }
 }

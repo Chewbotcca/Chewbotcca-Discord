@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.ChannelType;
 import org.kohsuke.github.*;
 
 import java.awt.*;
@@ -42,51 +43,31 @@ public class GHIssueCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        // Needs a repo and an issue/pr number. If there's not both, let them know.
-        String[] args = commandEvent.getArgs().split(" ");
-        if(args.length < 2) {
-            commandEvent.reply("Please provide a Repository and an Issue Number!");
-            return;
-        }
-        String repo = args[0];
-        // Make sure the issue number is valid
-        int issueNum;
-        try {
-            issueNum = Integer.parseInt(args[1]);
-        } catch (NumberFormatException e) {
-            commandEvent.reply("Invalid number provided for issue number. Must be a number. Make sure you're doing Repo then Number!");
-            return;
-        }
         commandEvent.getChannel().sendTyping().queue();
-        // Find the GitHub issue
-        GHIssue issue;
-        try {
-            issue = github.getRepository(repo).getIssue(issueNum);
-        } catch (IOException e) {
-            commandEvent.reply("Invalid issue number or an invalid repository was provided. Please ensure the issue exists and the repository is public.");
+
+        GHIssue issue = parseMessage(commandEvent);
+        if(issue == null)
             return;
-        }
 
         // Create and send off an issue embed
-        commandEvent.reply(issueBuilder(issue, repo, github, issueNum).build());
-    }
+        commandEvent.reply(issueBuilder(issue).build());
 
+        if(commandEvent.getChannelType() == ChannelType.TEXT && commandEvent.getSelfMember().hasPermission(Permission.MESSAGE_MANAGE))
+            commandEvent.getMessage().suppressEmbeds(true).queue();
+    }
 
     /**
      * Method to make an issue embed
      * @param issue the issue to parse
-     * @param repo the repo the issue is on
-     * @param github a github object
-     * @param issueNum the issue to grab
      * @return an EmbedBuilder with all the data
      */
-    public EmbedBuilder issueBuilder(GHIssue issue, String repo, GitHub github, int issueNum) {
+    public EmbedBuilder issueBuilder(GHIssue issue) {
         EmbedBuilder e = new EmbedBuilder();
         // Set the title and body to the issue title and body
         e.setTitle(issue.getTitle());
         if(issue.getBody() != null) {
-            if (issue.getBody().length() > 200) {
-                e.setDescription(issue.getBody().substring(0, 199) + "...");
+            if (issue.getBody().length() > 400) {
+                e.setDescription(issue.getBody().substring(0, 399) + "...");
             } else {
                 e.setDescription(issue.getBody());
             }
@@ -96,9 +77,9 @@ public class GHIssueCommand extends Command {
         boolean merged = false;
         if(issue.isPullRequest()) {
             // If it's a pull request, treat it as such
-            e.setAuthor("Information for Pull Request #" + issueNum + " in " + repo, String.valueOf(issue.getHtmlUrl()));
+            e.setAuthor("Information for Pull Request #" + issue.getNumber() + " in " + issue.getRepository().getFullName(), String.valueOf(issue.getHtmlUrl()));
             try {
-                GHPullRequest pull = github.getRepository(repo).getPullRequest(issueNum);
+                GHPullRequest pull = issue.getRepository().getPullRequest(issue.getNumber());
                 merged = pull.isMerged();
             } catch (IOException ioException) {
                 // If an IOException ever occurs, we're prepared.
@@ -109,7 +90,7 @@ public class GHIssueCommand extends Command {
             }
         } else {
             // Otherwise it's just an issue, do nothing special.
-            e.setAuthor("Information for Issue #" + issueNum + " in " + repo, String.valueOf(issue.getHtmlUrl()));
+            e.setAuthor("Information for Issue #" + issue.getNumber() + " in " + issue.getRepository().getFullName(), String.valueOf(issue.getHtmlUrl()));
         }
         // Set status and color based on issue status
         if(merged) {
@@ -150,6 +131,37 @@ public class GHIssueCommand extends Command {
                 e.addField("Assignees", String.join(", ", assignees), true);
         } catch (IOException ignored) { }
         return e;
+    }
+
+    public GHIssue parseMessage(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split(" ");
+        if(commandEvent.getArgs().contains("github.com/")) {
+            String[] url = commandEvent.getArgs().split("/");
+            if(url.length >= 7)
+            args = new String[]{url[3] + "/" + url[4], url[6]};
+        }
+        if(args.length < 2) {
+            commandEvent.reply("Please provide a Repository and an Issue Number!");
+            return null;
+        }
+        String repo = args[0];
+        // Make sure the issue number is valid
+        int issueNum;
+        try {
+            issueNum = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            commandEvent.reply("Invalid number provided for issue number. Must be a number. Make sure you're doing Repo then Number!");
+            return null;
+        }
+        // Find the GitHub issue
+        GHIssue issue;
+        try {
+            issue = github.getRepository(repo).getIssue(issueNum);
+        } catch (IOException e) {
+            commandEvent.reply("Invalid issue number or an invalid repository was provided. Please ensure the issue exists and the repository is public.");
+            return null;
+        }
+        return issue;
     }
 
     // Method used in MagReact to deduce if it's been handled already
