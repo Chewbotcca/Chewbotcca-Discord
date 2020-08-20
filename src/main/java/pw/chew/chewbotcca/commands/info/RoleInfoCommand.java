@@ -90,7 +90,7 @@ public class RoleInfoCommand extends Command {
         if(mode.equals("members")) {
             event.reply(gatherMembersInfo(event, role).build());
         } else {
-            event.reply(gatherMaininfo(event, role).build());
+            event.reply(gatherMainInfo(event, role).build());
         }
     }
 
@@ -100,7 +100,7 @@ public class RoleInfoCommand extends Command {
      * @param role the role
      * @return an embed to be build
      */
-    public EmbedBuilder gatherMaininfo(CommandEvent event, Role role) {
+    public EmbedBuilder gatherMainInfo(CommandEvent event, Role role) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Role Information for: " + role.getName());
         // Send typing, it'll be a while

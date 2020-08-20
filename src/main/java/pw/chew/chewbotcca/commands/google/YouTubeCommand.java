@@ -76,7 +76,7 @@ public class YouTubeCommand extends Command {
      * @return an embedbuilder ready to be built
      */
     public EmbedBuilder response(JSONObject url, String id) {
-        // Gatger stats and info objects
+        // Gather stats and info objects
         JSONObject stats = url.getJSONArray("items").getJSONObject(0).getJSONObject("statistics");
         JSONObject info = url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet");
         // Get other stuff as well

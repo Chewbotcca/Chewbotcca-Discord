@@ -103,7 +103,7 @@ public class PropertiesManager {
     }
 
     /**
-     * Sentry Enviornment for error tracking
+     * Sentry Environment for error tracking
      */
     public static String getSentryEnv() {
         return properties.getProperty("sentry-env");

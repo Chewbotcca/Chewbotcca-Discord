@@ -100,7 +100,7 @@ public class BotInfoCommand extends Command {
         // Set the author to the bot name
         e.setAuthor(bot.getString("username") + "#" + bot.getString("discriminator"), "https://top.gg/bot/" + id, certified);
 
-        // Set the thumbanil to the bot avatar
+        // Set the thumbnail to the bot avatar
         e.setThumbnail(String.format("https://cdn.discordapp.com/avatars/%s/%s.%s", id, bot.getString("avatar"), "png"));
 
         // Set the description to the short description

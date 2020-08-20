@@ -251,7 +251,7 @@ public class UserInfoCommand extends Command {
     }
 
     /**
-     * Date parser beause java is weird
+     * Date parser because java is weird
      * @param date the date
      * @return a parsed date
      * @throws ParseException if a parse exception is thrown idk
