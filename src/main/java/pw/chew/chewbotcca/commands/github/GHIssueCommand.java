@@ -75,12 +75,14 @@ public class GHIssueCommand extends Command {
         // Find the state
         boolean open = issue.getState() == GHIssueState.OPEN;
         boolean merged = false;
+        boolean draft = false;
         if(issue.isPullRequest()) {
             // If it's a pull request, treat it as such
             e.setAuthor("Information for Pull Request #" + issue.getNumber() + " in " + issue.getRepository().getFullName(), String.valueOf(issue.getHtmlUrl()));
             try {
                 GHPullRequest pull = issue.getRepository().getPullRequest(issue.getNumber());
                 merged = pull.isMerged();
+                draft = pull.isDraft();
             } catch (IOException ioException) {
                 // If an IOException ever occurs, we're prepared.
                 ioException.printStackTrace();
@@ -92,16 +94,19 @@ public class GHIssueCommand extends Command {
             // Otherwise it's just an issue, do nothing special.
             e.setAuthor("Information for Issue #" + issue.getNumber() + " in " + issue.getRepository().getFullName(), String.valueOf(issue.getHtmlUrl()));
         }
-        // Set status and color based on issue status
-        if(merged) {
-            e.setColor(Color.decode("#6f42c1"));
-            e.addField("Status", "Merged", true);
-        } else if(open) {
-            e.setColor(Color.decode("#2cbe4e"));
-            e.addField("Status", "Open", true);
-        } else {
+        // Set status and color based on issue/pull request status
+        if(!open) {
             e.setColor(Color.decode("#cb2431"));
             e.addField("Status", "Closed", true);
+        } else if(draft) {
+            e.setColor(Color.decode("#ffffff"));
+            e.addField("Status", "Draft", true);
+        } else if(merged) {
+            e.setColor(Color.decode("#6f42c1"));
+            e.addField("Status", "Merged", true);
+        } else {
+            e.setColor(Color.decode("#2cbe4e"));
+            e.addField("Status", "Open", true);
         }
         // Try and find the author and set the author field accordingly.
         try {
