@@ -20,9 +20,16 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.Main;
 import pw.chew.chewbotcca.util.RestClient;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class MCStatusCommand extends Command {
 
@@ -34,9 +41,11 @@ public class MCStatusCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
+        commandEvent.getChannel().sendTyping().queue();
         // Get stats
         JSONArray statusurl = new JSONArray(RestClient.get("https://status.mojang.com/check"));
         String[] sites = new String[]{"minecraft.net", "session.minecraft.net", "account.mojang.com", "authserver.mojang.com", "sessionserver.mojang.com", "api.mojang.com", "textures.minecraft.net", "mojang.com"};
+        List<String> forbiddenSites = Arrays.asList("minecraft.net", "sessionserver.mojang.com", "mojang.com");
         StringBuilder up = new StringBuilder();
         StringBuilder shakey = new StringBuilder();
         StringBuilder red = new StringBuilder();
@@ -45,6 +54,8 @@ public class MCStatusCommand extends Command {
         for(int i = 0; i < statusurl.length(); i++) {
             JSONObject data = statusurl.getJSONObject(i);
             String status = data.getString(sites[i]);
+            if(forbiddenSites.contains(sites[i]))
+                continue;
             switch (status) {
                 case "green" -> up.append(sites[i]).append("\n");
                 case "yellow" -> shakey.append(sites[i]).append("\n");
@@ -52,10 +63,22 @@ public class MCStatusCommand extends Command {
             }
         }
 
+        if(isUp("https://www.minecraft.net/en-us/")) {
+            up.append("minecraft.net").append("\n");
+        } else {
+            red.append("minecraft.net").append("\n");
+        }
+
+        if(isUp("https://sessionserver.mojang.com/blockedservers")) {
+            up.append("sessionserver.mojang.com").append("\n");
+        } else {
+            red.append("sessionserver.mojang.com").append("\n");
+        }
+
         // Return gathered info
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Minecraft/Mojang Statuses");
-        e.setDescription("Status reports may be inaccurate, see [WEB-2303](https://bugs.mojang.com/browse/WEB-2303).");
+        e.setDescription("minecraft.net and sessionserver.mojang.com were manually checked, see [WEB-2303](https://bugs.mojang.com/browse/WEB-2303).");
         if(!up.toString().equals("")) {
             e.addField("Up", up.toString(), true);
         }
@@ -67,5 +90,20 @@ public class MCStatusCommand extends Command {
         }
 
         commandEvent.reply(e.build());
+    }
+
+    public boolean isUp(String url) {
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+                .get()
+                .build();
+
+        try (Response response = Main.getJDA().getHttpClient().newCall(request).execute()) {
+            return response.code() == 200;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
