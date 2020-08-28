@@ -23,6 +23,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.awaitility.core.ConditionTimeoutException;
 import pw.chew.chewbotcca.util.DateTime;
 
@@ -145,11 +146,20 @@ public class ServerInfoCommand extends Command {
         int voicechans = server.getVoiceChannels().size();
         int categories = server.getCategories().size();
         int storechans = server.getStoreChannels().size();
+        int newschans = 0;
+
+        for(TextChannel channel : server.getTextChannels()) {
+            if(channel.isNews()) {
+                newschans++;
+                textchans--;
+            }
+        }
 
         String textpercent = df.format((float)textchans / (float)totalchans * 100);
         String voicepercent = df.format((float)voicechans / (float)totalchans * 100);
         String catepercent = df.format((float)categories / (float)totalchans * 100);
         String storepercent = df.format((float)storechans / (float)totalchans * 100);
+        String newspercent = df.format((float)newschans / (float)totalchans * 100);
 
         List<CharSequence> counts = new ArrayList<>();
         counts.add("Total: " + totalchans);
@@ -158,6 +168,8 @@ public class ServerInfoCommand extends Command {
         counts.add("Categories: " + categories + " (" + catepercent + "%)");
         if(server.getFeatures().contains("COMMERCE"))
             counts.add("Store Pages: " + storechans + " (" + storepercent + "%)");
+        if(server.getFeatures().contains("NEWS"))
+            counts.add("News: " + newschans + " (" + newspercent + "%)");
 
         e.addField("Channel Count", String.join("\n", counts), true);
 
