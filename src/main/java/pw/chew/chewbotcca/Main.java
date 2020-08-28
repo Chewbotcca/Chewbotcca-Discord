@@ -49,6 +49,7 @@ import pw.chew.chewbotcca.commands.github.GHUserCommand;
 import pw.chew.chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.chewbotcca.commands.info.*;
 import pw.chew.chewbotcca.commands.minecraft.*;
+import pw.chew.chewbotcca.commands.moderation.RoleCommand;
 import pw.chew.chewbotcca.commands.owner.NewIssueCommand;
 import pw.chew.chewbotcca.commands.owner.ShutdownCommand;
 import pw.chew.chewbotcca.commands.quotes.AcronymCommand;
@@ -152,6 +153,9 @@ public class Main {
                 new MCStatusCommand(),
                 new MCUserCommand(),
                 new MCWikiCommand(),
+
+                // Moderation Commands
+                new RoleCommand(),
 
                 // Owner Module
                 new ShutdownCommand(),
