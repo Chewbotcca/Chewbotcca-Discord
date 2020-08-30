@@ -21,6 +21,7 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.objects.Profile;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
@@ -48,6 +49,10 @@ public class LastFMCommand extends Command {
 
         // Get args, assume it's a username, and find their stats
         String args = event.getArgs();
+        Profile profile = Profile.getProfile(event.getAuthor().getId());
+        if(profile.getLastFm() != null && args.length() == 0) {
+            args = profile.getLastFm();
+        }
         JSONObject parse = new JSONObject(RestClient.get("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&limit=1&user=" + args + "&api_key=" + key + "&format=json"));
         // But if I got bamboozled
         if(parse.has("message") && parse.getString("message").equals("User not found")) {

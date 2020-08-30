@@ -37,11 +37,30 @@ public class ProfileCommand extends Command {
         commandEvent.getChannel().sendTyping().queue();
         // Get Bot Profile details and send
         Profile profile = Profile.retrieveProfile(commandEvent.getAuthor().getId());
-        commandEvent.reply(new EmbedBuilder()
-                .setTitle("Your Chewbotcca Profile")
-                .setDescription("The profile system is a work in progress! More details will appear soon!")
-                .setFooter("ID: " + profile.getId())
-                .build()
-        );
+        if(!commandEvent.getArgs().contains("set")) {
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setTitle("Your Chewbotcca Profile")
+                    .setDescription("The profile system is a work in progress! More details will appear soon!")
+                    .setFooter("ID: " + profile.getId());
+
+            if(profile.getLastFm() == null) {
+                embed.addField("Lastfm Username", "Set with `%^profile set lastfm [name]`", true);
+            } else {
+                embed.addField("Lastfm Username", profile.getLastFm(), true);
+            }
+
+            commandEvent.reply(embed.build());
+            return;
+        }
+        String[] args = commandEvent.getArgs().split(" ");
+        if(args.length < 3) {
+            commandEvent.reply("You are missing arguments! Must have `set`, `key`, `value`. Possible keys:\n" +
+                    "```\n" +
+                    "lastfm - Your last.fm username for %^lastfm\n" +
+                    "```");
+            return;
+        }
+        profile.saveData(args[1].toLowerCase(), args[2]);
+        commandEvent.reply("If you see this message, then it saved successfully... hopefully.");
     }
 }

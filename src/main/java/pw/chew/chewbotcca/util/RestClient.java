@@ -16,12 +16,16 @@
  */
 package pw.chew.chewbotcca.util;
 
+import okhttp3.FormBody;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.Main;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 // Off brand RestClient based on the ruby gem of the same name
 public class RestClient {
@@ -60,6 +64,24 @@ public class RestClient {
     }
 
     /**
+     * Make an Authenticated POST Request
+     * @param url the url
+     * @param args the arguments to pass
+     * @param key the auth key
+     * @return a response
+     */
+    public static String post(String url, HashMap<String, Object> args, String key) {
+        Request request = new Request.Builder()
+                .url(url)
+                .post(bodyFromHash(args))
+                .addHeader("Authorization", key)
+                .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+                .build();
+
+        return performRequest(request);
+    }
+
+    /**
      * Actually perform the request
      * @param request a request
      * @return a response
@@ -78,5 +100,13 @@ public class RestClient {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static RequestBody bodyFromHash(HashMap<String, Object> args) {
+        FormBody.Builder bodyArgs = new FormBody.Builder();
+        for(Map.Entry<String, Object> entry : args.entrySet()) {
+            bodyArgs.add(entry.getKey(), String.valueOf(entry.getValue()));
+        }
+        return bodyArgs.build();
     }
 }

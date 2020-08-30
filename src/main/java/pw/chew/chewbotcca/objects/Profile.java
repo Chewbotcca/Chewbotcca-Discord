@@ -80,4 +80,12 @@ public class Profile {
     public String getId() {
         return String.valueOf(data.getLong("userid"));
     }
+
+    /**
+     * The user's last.fm username, used for %^lastfm
+     * @return their last.fm username
+     */
+    public String getLastFm() {
+        return data.getString("lastfm");
+    }
 }
