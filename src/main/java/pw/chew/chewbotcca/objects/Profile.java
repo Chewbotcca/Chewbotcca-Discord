@@ -17,14 +17,32 @@
 package pw.chew.chewbotcca.objects;
 
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
+import java.util.HashMap;
+
 // Bot Profile class
 public class Profile {
+    static HashMap<String, Profile> cache = new HashMap<>();
     final JSONObject data;
     public Profile(JSONObject input) {
         data = input;
+    }
+
+    /**
+     * Get a profile from the cache, or retrieve it if not set.
+     * Can't use getOrDefault() because it always retrieves, even if it's in the cache.
+     * @param id the user id
+     * @return a Profile
+     */
+    public static Profile getProfile(String id) {
+        if(cache.containsKey(id)) {
+            return cache.get(id);
+        } else {
+            return retrieveProfile(id);
+        }
     }
 
     /**
@@ -37,7 +55,23 @@ public class Profile {
                 "https://chew.pw/chewbotcca/discord/profile/" + id + "/api/get",
                 PropertiesManager.getChewKey()
         ));
+        cache.put(id, new Profile(response));
+        LoggerFactory.getLogger(Profile.class).debug("Saving " + id + " to Profile cache");
         return new Profile(response);
+    }
+
+    public void saveData(String key, String value) {
+        HashMap<String, Object> inputMap = new HashMap<>();
+        inputMap.put(key, value);
+        JSONObject response = new JSONObject(
+                RestClient.post(
+                        "https://chew.pw/chewbotcca/discord/profile/" + getId() + "/api/post",
+                        inputMap,
+                        PropertiesManager.getChewKey()
+                )
+        );
+        cache.put(getId(), new Profile(response));
+        LoggerFactory.getLogger(Profile.class).debug("Saving " + getId() + " to Profile cache");
     }
 
     /**
