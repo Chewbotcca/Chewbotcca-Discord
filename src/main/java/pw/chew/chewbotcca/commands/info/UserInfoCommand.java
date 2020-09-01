@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.entities.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.DateTime;
+import pw.chew.chewbotcca.util.Mention;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.*;
@@ -62,9 +63,8 @@ public class UserInfoCommand extends Command {
         // If they want member info
         if(args.contains("member")) {
             mode = "member";
-            args = args.replace(" member", "");
-            args = args.replace("member ", "");
             args = args.replace("member", "");
+            args = args.replace(" ", "");
         }
 
         // Get server members (in sync) for join position
@@ -75,21 +75,23 @@ public class UserInfoCommand extends Command {
         if(args.length() == 0) {
             user = commandEvent.getAuthor();
         } else {
-            try {
-                Long.parseLong(commandEvent.getArgs());
-                user = commandEvent.getJDA().getUserById(args);
-            } catch (NullPointerException e) {
-                commandEvent.reply("No user found for the given ID.");
-            } catch (NumberFormatException e) {
-                List<Member> users = commandEvent.getGuild().getMembersByName(args, true);
-                List<Member> byNick = commandEvent.getGuild().getMembersByEffectiveName(args, true);
-                if(users.size() == 0 && byNick.size() == 0) {
-                    commandEvent.reply("No members found for the given input");
-                    return;
-                } else if(users.size() > 0 && byNick.size() == 0) {
-                    user = users.get(0).getUser();
-                } else {
-                    user = byNick.get(0).getUser();
+            Object mention = Mention.parseMention(args, commandEvent.getGuild(), commandEvent.getJDA());
+            if(mention != null) {
+                user = (User)mention;
+            } else {
+                try {
+                    user = commandEvent.getJDA().getUserById(args);
+                } catch (NullPointerException | NumberFormatException e) {
+                    List<Member> users = commandEvent.getGuild().getMembersByName(args, true);
+                    List<Member> byNick = commandEvent.getGuild().getMembersByEffectiveName(args, true);
+                    if (users.size() == 0 && byNick.size() == 0) {
+                        commandEvent.reply("No members found for the given input");
+                        return;
+                    } else if (users.size() > 0 && byNick.size() == 0) {
+                        user = users.get(0).getUser();
+                    } else {
+                        user = byNick.get(0).getUser();
+                    }
                 }
             }
         }
@@ -130,7 +132,7 @@ public class UserInfoCommand extends Command {
             e.setTitle("User info for you!");
         else
             e.setTitle("User info for " + user.getAsTag());
-        e.setThumbnail(user.getAvatarUrl());
+        e.setThumbnail(user.getAvatarUrl() + "?size=2048");
         e.addField("Name#Discrim", user.getAsTag(), true);
         e.addField("User ID", user.getId(), true);
 
