@@ -16,6 +16,7 @@
  */
 package pw.chew.chewbotcca.commands.info;
 
+import bio.discord.api.DBioAPI;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -24,14 +25,10 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
-import org.json.JSONException;
-import org.json.JSONObject;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.Mention;
-import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.*;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -41,6 +38,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
+import static pw.chew.chewbotcca.commands.info.ServerInfoCommand.capitalize;
 
 // %^uinfo command
 public class UserInfoCommand extends Command {
@@ -54,6 +52,7 @@ public class UserInfoCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
+        commandEvent.getChannel().sendTyping().queue();
         // gather args
         String args = commandEvent.getArgs();
         User user = null;
@@ -185,31 +184,22 @@ public class UserInfoCommand extends Command {
             }
 
             if (activities.size() > 0)
-                e.addField("Activities", String.join("\n", activities), true);
+                e.addField("Activities - " + activities.size(), String.join("\n", activities), true);
         }
 
         // Get their bio from discord.bio, if they have one.
-        try {
-            JSONObject dbio = new JSONObject(RestClient.get("https://api.discord.bio/user/details/" + user.getId())).getJSONObject("payload").getJSONObject("user").getJSONObject("details");
-
-            e.setDescription(dbio.getString("description"));
-            if(!dbio.isNull("birthday"))
-                e.addField("Birthday", dateParser(dbio.getString("birthday")), true);
-            if(!dbio.isNull("gender")) {
-                String gender = switch (dbio.getInt("gender")) {
-                    case 0 -> "Male";
-                    case 1 -> "Female";
-                    case 2 -> "Non-Binary";
-                    default -> "Undisclosed";
-                };
-                e.addField("Gender", gender, true);
-            }
-            if(!dbio.isNull("location"))
-                e.addField("Location", dbio.getString("location"), true);
-            if(!dbio.isNull("occupation"))
-                e.addField("Occupation", dbio.getString("occupation"), true);
+        var dbio = new DBioAPI().getUser(user.getId());
+        if(dbio != null) {
+            e.setDescription(dbio.getDescription());
+            if(dbio.getBirthday() != null)
+                e.addField("Birthday", dateParser(dbio.getBirthday()), true);
+            e.addField("Gender", capitalize(dbio.getGender().name()), true);
+            if(dbio.getLocation() != null)
+                e.addField("Location", dbio.getLocation(), true);
+            if(dbio.getOccupation() != null)
+                e.addField("Occupation", dbio.getOccupation(), true);
             e.setFooter("Profile info provided by discord.bio");
-        } catch (JSONException | ParseException ignored) { }
+        }
 
         if(onServer)
             e.addField("More Information", "Add `member` to see more about this Member.", true);
@@ -256,12 +246,9 @@ public class UserInfoCommand extends Command {
      * Date parser because java is weird
      * @param date the date
      * @return a parsed date
-     * @throws ParseException if a parse exception is thrown idk
      */
-    public String dateParser(String date) throws ParseException {
-        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+    public String dateParser(Date date) {
         SimpleDateFormat outputFormat = new SimpleDateFormat("EEEE, MMM dd, yyyy");
-        Date date1 = inputFormat.parse(date);
-        return outputFormat.format(date1);
+        return outputFormat.format(date);
     }
 }
