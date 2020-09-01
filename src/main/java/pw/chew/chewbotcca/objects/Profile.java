@@ -86,6 +86,8 @@ public class Profile {
      * @return their last.fm username
      */
     public String getLastFm() {
+        if(data.isNull("lastfm"))
+            return null;
         return data.getString("lastfm");
     }
 }
