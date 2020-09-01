@@ -350,7 +350,7 @@ public class ServerInfoCommand extends Command {
     Source: https://github.com/ChewMC/TransmuteIt/blob/2b86/src/pw/chew/transmuteit/DiscoveriesCommand.java#L174-L186
     Capitalizes a String, e.g. "BRUH_MOMENT" -> "Bruh Moment"
      */
-    public String capitalize(String to) {
+    public static String capitalize(String to) {
         if(to.equals("")) {
             return "";
         }
