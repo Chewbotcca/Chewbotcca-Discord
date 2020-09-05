@@ -38,8 +38,8 @@ public class MagReactListener extends ListenerAdapter {
     // Listen for all reactions
     @Override
     public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
-        // Ignore if it's not a mac
-        if(!event.getReactionEmote().getName().equals("\uD83D\uDD0D")) {
+        // Ignore if it's not a mag
+        if(!event.getReactionEmote().getName().equals("\uD83D\uDD0D") && !event.getReactionEmote().getName().equals("\uD83D\uDD0E")) {
             return;
         }
         // Get the message id
