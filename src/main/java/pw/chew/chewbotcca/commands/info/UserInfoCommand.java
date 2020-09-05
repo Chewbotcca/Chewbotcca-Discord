@@ -55,7 +55,7 @@ public class UserInfoCommand extends Command {
         commandEvent.getChannel().sendTyping().queue();
         // gather args
         String args = commandEvent.getArgs();
-        User user = null;
+        User user;
 
         String mode = "";
 

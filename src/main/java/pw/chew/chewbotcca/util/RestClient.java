@@ -16,10 +16,7 @@
  */
 package pw.chew.chewbotcca.util;
 
-import okhttp3.FormBody;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import okhttp3.*;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.Main;
 
@@ -89,10 +86,11 @@ public class RestClient {
     public static String performRequest(Request request) {
         try (Response response = Main.getJDA().getHttpClient().newCall(request).execute()) {
             String body;
-            if(response.body() == null) {
+            ResponseBody responseBody = response.body();
+            if(responseBody == null) {
                 body = null;
             } else {
-                body = response.body().string();
+                body = responseBody.string();
             }
             LoggerFactory.getLogger(RestClient.class).debug("Response is " + body);
             return body;

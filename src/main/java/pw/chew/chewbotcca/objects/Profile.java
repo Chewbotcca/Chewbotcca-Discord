@@ -25,7 +25,7 @@ import java.util.HashMap;
 
 // Bot Profile class
 public class Profile {
-    static HashMap<String, Profile> cache = new HashMap<>();
+    static final HashMap<String, Profile> cache = new HashMap<>();
     final JSONObject data;
     public Profile(JSONObject input) {
         data = input;
