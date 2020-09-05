@@ -148,6 +148,7 @@ public class Main {
                 new UserInfoCommand(),
 
                 // Minecraft Module
+                new MCIssueCommand(),
                 new MCPHNodesCommand(),
                 new MCServerCommand(),
                 new MCStatusCommand(),

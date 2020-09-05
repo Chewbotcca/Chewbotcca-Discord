@@ -26,6 +26,7 @@ import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.commands.github.GHIssueCommand;
 import pw.chew.chewbotcca.commands.google.YouTubeCommand;
+import pw.chew.chewbotcca.commands.minecraft.MCIssueCommand;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
@@ -53,6 +54,9 @@ public class MagReactListener extends ListenerAdapter {
             } else if(content.contains("github.com") && (content.contains("/issues") || content.contains("/pull"))) {
                 // If it's a github issue or pr
                 handleGitHub(content, event, msg);
+            } else if(content.contains("bugs.mojang.com") || content.contains("hub.spigotmc.org/jira")) {
+                // If it's a mojira/spigot jira link
+                handleMcIssue(content, event, msg);
             }
         });
 
@@ -135,5 +139,37 @@ public class MagReactListener extends ListenerAdapter {
             return;
         }
         event.getChannel().sendMessage(new GHIssueCommand(github).issueBuilder(ghIssue).build()).queue();
+    }
+
+    /**
+     * Handle a Mojira / Spigot JIRA link
+     * @param content the message content
+     * @param event the reaction event
+     * @param msg the message itself
+     */
+    public void handleMcIssue(String content, GuildMessageReactionAddEvent event, Message msg) {
+        // Get PROJECT-NUM from URL
+        String[] url = content.split("/");
+        String issue = url[url.length - 1];
+        // Ignore if message >= 15 minutes old
+        if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
+            LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
+            return;
+        }
+        // Ignore if already described to avoid spam
+        if(MCIssueCommand.didDescribe(msg.getId())) {
+            LoggerFactory.getLogger(MagReactListener.class).debug("Already described this message!");
+            return;
+        }
+        // Ignore if described
+        MCIssueCommand.described(msg.getId());
+        // Ensure we actually track this
+        String apiUrl = MCIssueCommand.getApiUrl(issue.split("-")[0]);
+        if(apiUrl == null)
+            return;
+        // Get response
+        JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
+        // Initialize GitHub and the response
+        event.getChannel().sendMessage(MCIssueCommand.generateEmbed(data, issue, apiUrl).build()).queue();
     }
 }
