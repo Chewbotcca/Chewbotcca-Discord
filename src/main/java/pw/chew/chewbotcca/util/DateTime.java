@@ -49,15 +49,25 @@ public class DateTime {
         long elapsedSeconds = different / secondsInMilli;
 
         ArrayList<String> output = new ArrayList<>();
-        if(elapsedYears > 0)
+        if(elapsedYears > 1)
             output.add(elapsedYears + " years");
-        if(elapsedDays > 0)
+        else if(elapsedYears > 0)
+            output.add(elapsedYears + " year");
+        if(elapsedDays > 1)
             output.add(elapsedDays + " days");
-        if(elapsedHours > 0)
+        else if(elapsedDays > 0)
+            output.add(elapsedDays + " days");
+        if(elapsedHours > 1)
             output.add(elapsedHours + " hours");
-        if(elapsedMinutes > 0)
+        else if(elapsedHours > 0)
+            output.add(elapsedHours + " hours");
+        if(elapsedMinutes > 1)
             output.add(elapsedMinutes + " minutes");
-        if(elapsedSeconds > 0 && useSeconds)
+        else if(elapsedMinutes > 0)
+            output.add(elapsedMinutes + " minutes");
+        if(elapsedSeconds > 1 && useSeconds)
+            output.add(elapsedSeconds + " seconds");
+        else if(elapsedSeconds > 0 && useSeconds)
             output.add(elapsedSeconds + " seconds");
 
         StringBuilder response = new StringBuilder();
