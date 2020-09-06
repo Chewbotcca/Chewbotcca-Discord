@@ -81,7 +81,7 @@ public class ServerInfoCommand extends Command {
     public EmbedBuilder gatherMainInfo(CommandEvent event, Guild server) {
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Server Information");
-        e.setAuthor(server.getName(), null,server.getIconUrl());
+        e.setAuthor(server.getName(), null, server.getIconUrl());
 
         e.setThumbnail(server.getIconUrl() + "?size=2048");
 
@@ -96,28 +96,7 @@ public class ServerInfoCommand extends Command {
         }
 
         e.addField("Server ID", server.getId(), true);
-
-        // Set region emoji if parsed
-        switch (server.getRegion()) {
-            case VIP_AMSTERDAM -> e.addField("Server Region", "<:region_amsterdam:718523705080152136> <:vip_region:718523836823240814> Amsterdam", true);
-            case BRAZIL -> e.addField("Server Region", "<:region_brazil:718523705055248418> Brazil", true);
-            case EU_CENTRAL -> e.addField("Server Region", "<:region_eu:718523704979488820> Central Europe", true);
-            case HONG_KONG -> e.addField("Server Region", "<:region_hongkong:718523705105580103> Hong Kong", true);
-            case JAPAN -> e.addField("Server Region", "<:region_japan:718523704853790892> Japan", true);
-            case RUSSIA -> e.addField("Server Region", "<:region_russia:718523705193660486> Russia", true);
-            case SINGAPORE -> e.addField("Server Region", "<:region_singapore:718523705583730768> Singapore", true);
-            case SYDNEY -> e.addField("Server Region", "<:region_sydney:718523704879087709> Sydney", true);
-            case US_CENTRAL -> e.addField("Server Region", "<:region_us:718523704845533227> US Central", true);
-            case US_EAST -> e.addField("Server Region", "<:region_us:718523704845533227> US East", true);
-            case VIP_US_EAST -> e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US East", true);
-            case US_SOUTH -> e.addField("Server Region", "<:region_us:718523704845533227> US South", true);
-            case US_WEST -> e.addField("Server Region", "<:region_us:718523704845533227> US West", true);
-            case VIP_US_WEST -> e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US West", true);
-            case EU_WEST -> e.addField("Server Region", "<:region_eu:718523704979488820> Western Europe", true);
-            case VIP_US_CENTRAL -> e.addField("Server Region", "<:region_us:718523704845533227> <:vip_region:718523836823240814> US Central", true);
-            default -> e.addField("Server Region", server.getRegionRaw(), true);
-        }
-
+        e.addField("Voice Region", server.getRegion().getEmoji() + " " + server.getRegion().getName(), true);
         e.addField("Locale", server.getLocale().getDisplayName(), true);
 
         // Get bot / member count
@@ -183,7 +162,7 @@ public class ServerInfoCommand extends Command {
         // Gather perk info
         String perks = perkParser(server);
         if(perks.length() > 0)
-            e.addField("Perks", perks, true);
+            e.addField("Features", perks, true);
 
         e.addField("View More Info", "Roles - `%^sinfo roles`\nBoosts - `%^sinfo boosts`\nBots - `%^sinfo bots`", false);
 
@@ -324,15 +303,15 @@ public class ServerInfoCommand extends Command {
     /**
      * Parse the perk list and make it fancy if necessary
      * @param server the server
-     * @return an embed
+     * @return the perks as nice list
      */
     public String perkParser(Guild server) {
         List<CharSequence> perks = new ArrayList<>();
         String[] features = server.getFeatures().toArray(new String[0]);
         Arrays.sort(features);
-        for(int i = 0; i < server.getFeatures().size(); i++) {
-            switch (features[i]) {
-                default -> perks.add(capitalize(features[i]));
+        for(String feature : features) {
+            switch (feature) {
+                default -> perks.add(capitalize(feature));
                 case "BANNER" -> perks.add("[Banner](" + server.getBannerUrl() + "?size=2048)");
                 case "COMMERCE" -> perks.add("<:store_tag:725504846924611584> Store Channels");
                 case "NEWS" -> perks.add("<:news:725504846937063595> News Channels");
