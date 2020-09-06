@@ -131,7 +131,8 @@ public class UserInfoCommand extends Command {
             e.setTitle("User info for you!");
         else
             e.setTitle("User info for " + user.getAsTag());
-        e.setThumbnail(user.getAvatarUrl() + "?size=2048");
+        if(user.getAvatarUrl() != null)
+            e.setThumbnail(user.getAvatarUrl() + "?size=2048");
         e.addField("Name#Discrim", user.getAsTag(), true);
         e.addField("User ID", user.getId(), true);
 
