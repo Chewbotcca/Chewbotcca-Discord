@@ -22,6 +22,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import pw.chew.chewbotcca.util.Mention;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -59,7 +60,7 @@ public class RoleInfoCommand extends Command {
         }
 
         // Parse and find the role
-        Role role;
+        Role role = null;
         boolean id;
         try {
             Long.parseLong(arg);
@@ -68,17 +69,13 @@ public class RoleInfoCommand extends Command {
             id = false;
         }
         if(arg.contains("<")) {
-            String roleId = arg.replace("<@&", "").replace(">", "");
-            role = event.getGuild().getRoleById(roleId);
+            role = (Role) Mention.parseMention(arg, event.getGuild(), event.getJDA());
         } else if(id) {
             role = event.getGuild().getRoleById(arg);
         } else {
             List<Role> roles = event.getGuild().getRolesByName(arg, true);
             if(roles.size() > 0) {
                 role = roles.get(0);
-            } else {
-                event.reply("No roles found for the given input.");
-                return;
             }
         }
         if(role == null) {
