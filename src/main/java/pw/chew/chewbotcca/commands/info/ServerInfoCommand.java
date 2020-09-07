@@ -214,6 +214,7 @@ public class ServerInfoCommand extends Command {
 
     /**
      * Gather role information
+     * @param event the command event
      * @param server the server
      */
     public void gatherRoles(CommandEvent event, Guild server) {
@@ -249,6 +250,7 @@ public class ServerInfoCommand extends Command {
 
     /**
      * Gather server bots
+     * @param event the command event
      * @param server the server
      * @param renderMention whether or not to render a mention
      */
