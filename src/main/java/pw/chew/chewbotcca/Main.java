@@ -64,7 +64,6 @@ import pw.chew.chewbotcca.util.PropertiesManager;
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Properties;
 
 // The Main Bot class. Where all the magic happens!
@@ -72,7 +71,6 @@ public class Main {
     // Instance variables
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     private static JDA jda;
-    private static Instant start;
     private static DiscordBotListAPI topgg;
 
     public static void main(String[] args) throws LoginException, IOException {
@@ -200,9 +198,6 @@ public class Main {
                 .addEventListeners(waiter, client.build())
                 .build();
 
-        // Set the start time (for the stats command)
-        start = Instant.now();
-
         // Register listeners
         jda.addEventListener(
                 new MagReactListener(),
@@ -213,11 +208,6 @@ public class Main {
     // Get the JDA if needed
     public static JDA getJDA() {
         return jda;
-    }
-
-    // Get the start time when needed
-    public static Instant getStart() {
-        return start;
     }
 
     // Get the Topgg API when needed

@@ -20,13 +20,13 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import pw.chew.chewbotcca.Main;
 import pw.chew.chewbotcca.util.DateTime;
 
 import java.time.Instant;
 
 // %^stats command
 public class StatsCommand extends Command {
+    private final static Instant startTime = Instant.now();
 
     public StatsCommand() {
         this.name = "stats";
@@ -40,9 +40,9 @@ public class StatsCommand extends Command {
                 .setTitle("Chewbotcca - A basic, yet functioning, discord bot")
                 .addField("Author", "<@!476488167042580481>", true)
                 .addField("Code", "[View code on GitHub](http://github.com/Chewbotcca/Discord)", true)
-                .addField("Library", "JDA 4.2.0_198", true)
+                .addField("Library", "JDA 4.2.0_204", true)
                 // Convert the time difference into a time ago
-                .addField("Uptime", DateTime.timeAgo(Instant.now().toEpochMilli() - Main.getStart().toEpochMilli()), true)
+                .addField("Uptime", DateTime.timeAgo(Instant.now().toEpochMilli() - startTime.toEpochMilli()), true)
                 // Get the server count. NOT GUILD NOT GUILD NOT GUILD
                 .addField("Servers", String.valueOf(commandEvent.getJDA().getGuildCache().size()), true)
                 .setColor(0xd084)
