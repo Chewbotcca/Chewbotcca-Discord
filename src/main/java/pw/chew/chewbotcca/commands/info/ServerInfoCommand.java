@@ -18,12 +18,15 @@ package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.exceptions.PermissionException;
 import org.awaitility.core.ConditionTimeoutException;
 import pw.chew.chewbotcca.util.DateTime;
 
@@ -39,11 +42,14 @@ import static org.awaitility.Awaitility.await;
 
 // %^sinfo command
 public class ServerInfoCommand extends Command {
-    public ServerInfoCommand() {
+    private final EventWaiter waiter;
+
+    public ServerInfoCommand(EventWaiter waiter) {
         this.name = "serverinfo";
         this.aliases = new String[]{"sinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = true;
+        this.waiter = waiter;
     }
 
     @Override
@@ -56,13 +62,19 @@ public class ServerInfoCommand extends Command {
         new Thread(() -> event.getGuild().loadMembers().get());
         await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
 
+        boolean renderMention = false;
+        if(args.contains(" --mention")) {
+            args = args.replace(" --mention", "");
+            renderMention = true;
+        }
+
         // Find the method they want
         if(args.contains("boost")) {
             event.reply(gatherBoostInfo(server).build());
         } else if(args.contains("role")) {
-            event.reply(gatherRoles(server).build());
+            gatherRoles(event, server);
         } else if(args.contains("bot")) {
-            event.reply(gatherBots(server).build());
+            gatherBots(event, server, renderMention);
         } else if(args.contains("member")) {
             event.reply(gatherMemberByJoin(server, args.split(" ")[1]).build());
         } else {
@@ -203,51 +215,47 @@ public class ServerInfoCommand extends Command {
     /**
      * Gather role information
      * @param server the server
-     * @return an embed
      */
-    public EmbedBuilder gatherRoles(Guild server) {
-        EmbedBuilder e = new EmbedBuilder();
+    public void gatherRoles(CommandEvent event, Guild server) {
+        Paginator.Builder pbuilder = makePaginator().clearItems();
 
-        e.setTitle("Role List for " + server.getName());
+        List<CharSequence> roleNames = new ArrayList<>();
 
-        StringBuilder roleNames = new StringBuilder();
-
-        roleNames.append("Members - Role Mention").append("\n");
-        roleNames.append("Note: Roles that are integrations are skipped!").append("\n");
+        roleNames.add("Role List for " + server.getName());
+        roleNames.add("Members - Role Mention");
+        roleNames.add("Note: Roles that are integrations are skipped!");
 
         // Gather roles and iterate over each to find stats
         List<Role> roles = server.getRoles();
-        for (int i=0; i < roles.size() && i < 50; i++) {
-            Role role = roles.get(i);
+        for (Role role : roles) {
             List<Member> membersWithRole = server.getMembersWithRoles(role);
             int members = membersWithRole.size();
             // Skip if it's a bot role
             boolean skip = false;
-            if(role.isManaged() && members == 1 && membersWithRole.get(0).getUser().isBot())
+            if (role.isManaged() && members == 1 && membersWithRole.get(0).getUser().isBot())
                 skip = true;
-            if(role.isPublicRole())
+            if (role.isPublicRole())
                 skip = true;
 
-            if(!skip)
-                roleNames.append(membersWithRole.size()).append(" - ").append(role.getAsMention()).append("\n");
+            if (!skip)
+                pbuilder.addItems(membersWithRole.size() + " - " + role.getAsMention());
         }
 
-        String roleName = roleNames.toString();
-        e.setDescription(roleName);
+        Paginator p = pbuilder.setText(String.join("\n", roleNames))
+                .build();
 
-        return e;
+        p.paginate(event.getChannel(), 1);
     }
 
     /**
      * Gather server bots
      * @param server the server
-     * @return an embed
+     * @param renderMention whether or not to render a mention
      */
-    public EmbedBuilder gatherBots(Guild server) {
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Bots on " + server.getName());
-        List<CharSequence> bots = new ArrayList<>();
-        bots.add("Newest bots on the bottom");
+    public void gatherBots(CommandEvent event, Guild server, boolean renderMention) {
+        Paginator.Builder pbuilder = makePaginator().clearItems();
+
+        pbuilder.setText("Bots on " + server.getName() + "\n" + "Newest bots on the bottom");
         // Get all members as an array an sort it by join time
         Member[] members = server.getMembers().toArray(new Member[0]);
         Arrays.sort(members, (o1, o2) -> {
@@ -259,22 +267,27 @@ public class ServerInfoCommand extends Command {
                 return -1;
         });
         // Iterate over each bot to find how long they've been on
-        int botCount = 0;
         for (Member member : members) {
             if (member.getUser().isBot()) {
-                bots.add(member.getAsMention() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
-                botCount ++;
+                if(renderMention) {
+                    pbuilder.addItems(member.getAsMention() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
+                } else {
+                    pbuilder.addItems(member.getUser().getAsTag() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
+                }
             }
         }
-        String botList = String.join("\n", bots);
-        if(botList.length() > 2000) {
-            botList = botList.substring(0, 1949);
-            botList += "\nThis server has a lot of bots! Only showing a few. Total: " + botCount;
-        }
-        embed.setDescription(botList);
-        return embed;
+
+        pbuilder.setUsers(event.getAuthor())
+                .build()
+                .paginate(event.getChannel(), 1);
     }
 
+    /**
+     * Get a member by join position
+     * @param server the server
+     * @param positionString the join position
+     * @return an embed
+     */
     public EmbedBuilder gatherMemberByJoin(Guild server, String positionString) {
         int position;
         try {
@@ -299,7 +312,6 @@ public class ServerInfoCommand extends Command {
         return new UserInfoCommand().gatherMemberInfo(server, bruh[position - 1]);
     }
 
-
     /**
      * Parse the perk list and make it fancy if necessary
      * @param server the server
@@ -323,6 +335,25 @@ public class ServerInfoCommand extends Command {
         }
 
         return String.join("\n", perks);
+    }
+
+    /**
+     * @return a Paginator.Builder object
+     */
+    public Paginator.Builder makePaginator() {
+        return new Paginator.Builder().setColumns(1)
+                .setItemsPerPage(10)
+                .showPageNumbers(true)
+                .waitOnSinglePage(false)
+                .useNumberedItems(false)
+                .setFinalAction(m -> {
+                    try {
+                        m.clearReactions().queue();
+                    } catch(PermissionException ignored) { }
+                })
+                .setEventWaiter(waiter)
+                .setTimeout(1, TimeUnit.MINUTES)
+                .clearItems();
     }
 
     /*

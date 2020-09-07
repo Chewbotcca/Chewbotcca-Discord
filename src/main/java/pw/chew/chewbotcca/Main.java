@@ -144,7 +144,7 @@ public class Main {
                 new ChannelInfoCommand(),
                 new InfoCommand(),
                 new RoleInfoCommand(),
-                new ServerInfoCommand(),
+                new ServerInfoCommand(waiter),
                 new UserInfoCommand(),
 
                 // Minecraft Module
@@ -177,7 +177,7 @@ public class Main {
         );
 
         // Add GitHub commands only if it properly initiated
-        if(github != null)
+        if(github != null) {
             client.addCommands(
                     // From Owner Module
                     new NewIssueCommand(github),
@@ -186,6 +186,7 @@ public class Main {
                     new GHRepoCommand(github),
                     new GHUserCommand(github)
             );
+        }
 
         // Register JDA
         jda = JDABuilder.createDefault(PropertiesManager.getToken())
