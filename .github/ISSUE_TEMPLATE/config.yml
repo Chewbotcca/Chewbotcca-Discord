@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Chewbotcca Help Server
+    url: https://discord.gg/UjxQ3Bh
+    about: Join the support server if you're having issues, we can help!
+  - name: Command List
+    url: https://chew.pw/chewbotcca/discord/commands
+    about: If you're considering suggesting a new command, be sure it doesn't already exist.
