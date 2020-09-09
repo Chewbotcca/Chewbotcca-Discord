@@ -20,6 +20,9 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import org.json.JSONException;
+import org.json.JSONObject;
+import pw.chew.chewbotcca.util.RestClient;
 
 // %^cat command
 public class CatCommand extends Command {
@@ -32,10 +35,22 @@ public class CatCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        commandEvent.reply(new EmbedBuilder()
-                .setTitle("Adorable.")
-                .setImage("https://cataas.com/cat?nocache" + Math.random())
+        // Try to gather a cat from the Cat API
+        try {
+            String showcat = new JSONObject(RestClient.get("http://aws.random.cat/meow")).getString("file");
+
+            commandEvent.reply(new EmbedBuilder()
+                .setTitle("Adorable.", showcat)
+                .setImage(showcat)
                 .build()
-        );
+            );
+        } catch (JSONException e) {
+            // If cat collecting failed :(
+            commandEvent.reply(new EmbedBuilder()
+                .setTitle("Sad mews!")
+                .setDescription("The Cat API is not working. :( Try again later? :3")
+                .build()
+            );
+        }
     }
 }
