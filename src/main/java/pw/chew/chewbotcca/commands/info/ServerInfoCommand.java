@@ -26,9 +26,9 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.exceptions.PermissionException;
 import org.awaitility.core.ConditionTimeoutException;
 import pw.chew.chewbotcca.util.DateTime;
+import pw.chew.chewbotcca.util.JDAUtilUtil;
 
 import java.text.DecimalFormat;
 import java.time.Instant;
@@ -218,7 +218,7 @@ public class ServerInfoCommand extends Command {
      * @param server the server
      */
     public void gatherRoles(CommandEvent event, Guild server) {
-        Paginator.Builder pbuilder = makePaginator().clearItems();
+        Paginator.Builder pbuilder = JDAUtilUtil.makePaginator(waiter).clearItems();
 
         List<CharSequence> roleNames = new ArrayList<>();
 
@@ -255,7 +255,7 @@ public class ServerInfoCommand extends Command {
      * @param renderMention whether or not to render a mention
      */
     public void gatherBots(CommandEvent event, Guild server, boolean renderMention) {
-        Paginator.Builder pbuilder = makePaginator().clearItems();
+        Paginator.Builder pbuilder = JDAUtilUtil.makePaginator(waiter).clearItems();
 
         pbuilder.setText("Bots on " + server.getName() + "\n" + "Newest bots on the bottom");
         // Get all members as an array an sort it by join time
@@ -337,25 +337,6 @@ public class ServerInfoCommand extends Command {
         }
 
         return String.join("\n", perks);
-    }
-
-    /**
-     * @return a Paginator.Builder object
-     */
-    public Paginator.Builder makePaginator() {
-        return new Paginator.Builder().setColumns(1)
-                .setItemsPerPage(10)
-                .showPageNumbers(true)
-                .waitOnSinglePage(false)
-                .useNumberedItems(false)
-                .setFinalAction(m -> {
-                    try {
-                        m.clearReactions().queue();
-                    } catch(PermissionException ignored) { }
-                })
-                .setEventWaiter(waiter)
-                .setTimeout(1, TimeUnit.MINUTES)
-                .clearItems();
     }
 
     /*

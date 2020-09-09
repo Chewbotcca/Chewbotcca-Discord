@@ -141,7 +141,7 @@ public class Main {
                 new BotInfoCommand(),
                 new ChannelInfoCommand(),
                 new InfoCommand(),
-                new RoleInfoCommand(),
+                new RoleInfoCommand(waiter),
                 new ServerInfoCommand(waiter),
                 new UserInfoCommand(),
 

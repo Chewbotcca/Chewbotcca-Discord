@@ -18,10 +18,13 @@ package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.Mention;
 
 import java.text.DecimalFormat;
@@ -36,12 +39,14 @@ import static org.awaitility.Awaitility.await;
 
 // %^rinfo command
 public class RoleInfoCommand extends Command {
+    private final EventWaiter waiter;
 
-    public RoleInfoCommand() {
+    public RoleInfoCommand(EventWaiter waiter) {
         this.name = "roleinfo";
         this.aliases = new String[]{"rinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = true;
+        this.waiter = waiter;
     }
 
     @Override
@@ -57,6 +62,12 @@ public class RoleInfoCommand extends Command {
             arg = arg.replace(" members", "");
             arg = arg.replace("members ", "");
             arg = arg.replace("members", "");
+        }
+
+        boolean mention = false;
+        if(arg.contains(" --mention")) {
+            mention = true;
+            arg = arg.replace(" --mention", "");
         }
 
         // Parse and find the role
@@ -85,7 +96,7 @@ public class RoleInfoCommand extends Command {
 
         // Make a response depending on the mode
         if(mode.equals("members")) {
-            event.reply(gatherMembersInfo(event, role).build());
+            gatherMembersInfo(event, role, mention);
         } else {
             event.reply(gatherMainInfo(event, role).build());
         }
@@ -145,32 +156,28 @@ public class RoleInfoCommand extends Command {
      * Gather members of a role
      * @param event the command event
      * @param role the role
-     * @return an embed to be built
+     * @param mention should render mentions or not
      */
-    public EmbedBuilder gatherMembersInfo(CommandEvent event, Role role) {
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Members in role " + role.getName());
+    public void gatherMembersInfo(CommandEvent event, Role role, boolean mention) {
+        Paginator.Builder paginator = JDAUtilUtil.makePaginator(waiter).clearItems();
+        paginator.setText("Members in role " + role.getName());
         // Get members
         new Thread(() -> event.getGuild().loadMembers().get());
         // Put response back in sync
         await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
         // Get the member list and find how members actually with the role
         List<Member> memberList = event.getGuild().getMemberCache().asList();
-        int added = 0;
-        int total = 0;
-        List<CharSequence> members = new ArrayList<>();
         for(Member member : memberList) {
             if(member.getRoles().contains(role)) {
-                if (added <= 75) {
-                    members.add(member.getAsMention());
-                    added++;
-                }
-                total++;
+                if (mention)
+                    paginator.addItems(member.getAsMention());
+                else
+                    paginator.addItems(member.getUser().getAsTag());
             }
         }
-        embed.setDescription(String.join("\n", members));
-        embed.setFooter("Showing " + added + " out of " + total);
-        return embed;
+        Paginator p = paginator.setUsers(event.getAuthor()).build();
+
+        p.paginate(event.getChannel(), 1);
     }
 
     /**
