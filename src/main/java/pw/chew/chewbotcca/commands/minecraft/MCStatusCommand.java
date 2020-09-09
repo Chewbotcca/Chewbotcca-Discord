@@ -28,6 +28,7 @@ import pw.chew.chewbotcca.Main;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,49 +45,49 @@ public class MCStatusCommand extends Command {
         commandEvent.getChannel().sendTyping().queue();
         // Get stats
         JSONArray statusurl = new JSONArray(RestClient.get("https://status.mojang.com/check"));
-        String[] sites = new String[]{"minecraft.net", "session.minecraft.net", "account.mojang.com", "authserver.mojang.com", "sessionserver.mojang.com", "api.mojang.com", "textures.minecraft.net", "mojang.com"};
         List<String> forbiddenSites = Arrays.asList("minecraft.net", "sessionserver.mojang.com", "mojang.com");
-        StringBuilder up = new StringBuilder();
-        StringBuilder shakey = new StringBuilder();
-        StringBuilder red = new StringBuilder();
+        List<CharSequence> up = new ArrayList<>();
+        List<CharSequence> shakey = new ArrayList<>();
+        List<CharSequence> red = new ArrayList<>();
 
         // Iterate through each site
-        for(int i = 0; i < statusurl.length(); i++) {
-            JSONObject data = statusurl.getJSONObject(i);
-            String status = data.getString(sites[i]);
-            if(forbiddenSites.contains(sites[i]))
+        for(Object site : statusurl) {
+            JSONObject siteData = (JSONObject)site;
+            String url = siteData.keys().next();
+            if(forbiddenSites.contains(url))
                 continue;
+            String status = siteData.getString(url);
             switch (status) {
-                case "green" -> up.append(sites[i]).append("\n");
-                case "yellow" -> shakey.append(sites[i]).append("\n");
-                case "red" -> red.append(sites[i]).append("\n");
+                case "green" -> up.add(url);
+                case "yellow" -> shakey.add(url);
+                case "red" -> red.add(url);
             }
         }
 
         if(isUp("https://www.minecraft.net/en-us/")) {
-            up.append("minecraft.net").append("\n");
+            up.add("minecraft.net");
         } else {
-            red.append("minecraft.net").append("\n");
+            red.add("minecraft.net");
         }
 
         if(isUp("https://sessionserver.mojang.com/blockedservers")) {
-            up.append("sessionserver.mojang.com").append("\n");
+            up.add("sessionserver.mojang.com");
         } else {
-            red.append("sessionserver.mojang.com").append("\n");
+            red.add("sessionserver.mojang.com");
         }
 
         // Return gathered info
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Minecraft/Mojang Statuses");
         e.setDescription("minecraft.net and sessionserver.mojang.com were manually checked, see [WEB-2303](https://bugs.mojang.com/browse/WEB-2303).");
-        if(!up.toString().equals("")) {
-            e.addField("Up", up.toString(), true);
+        if(!up.isEmpty()) {
+            e.addField("Up", String.join("\n", up), true);
         }
-        if(!shakey.toString().equals("")) {
-            e.addField("Unstable", shakey.toString(), true);
+        if(!shakey.isEmpty()) {
+            e.addField("Unstable", String.join("\n", shakey), true);
         }
-        if(!red.toString().equals("")) {
-            e.addField("Down", red.toString(), true);
+        if(!red.isEmpty()) {
+            e.addField("Down", String.join("\n", red), true);
         }
 
         commandEvent.reply(e.build());
