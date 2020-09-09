@@ -156,13 +156,14 @@ public class ChannelInfoCommand extends Command {
             String user = entry.getKey();
             int pinCount = entry.getValue();
             User userById = commandEvent.getJDA().getUserById(user);
-            String tag;
+            AtomicReference<String> tag = new AtomicReference<>();
             if(userById == null) {
-                tag = "Unknown User";
+                commandEvent.getJDA().retrieveUserById(user).queue(bruh -> tag.set(bruh.getAsTag()), error -> tag.set("Deleted User"));
             } else {
-                tag = userById.getAsTag();
+                tag.set(userById.getAsTag());
             }
-            top.add("#" + (i+1) + ": " + pinCount + " pins - " + tag);
+            await().atMost(5, TimeUnit.SECONDS).until(() -> tag.get() != null);
+            top.add("#" + (i+1) + ": " + pinCount + " pins - " + tag.get());
         }
         e.setDescription(String.join("\n", top));
         return e;
