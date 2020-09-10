@@ -330,9 +330,9 @@ public class ServerInfoCommand extends Command {
                 case "COMMERCE" -> perks.add("<:store_tag:725504846924611584> Store Channels");
                 case "NEWS" -> perks.add("<:news:725504846937063595> News Channels");
                 case "INVITE_SPLASH" -> perks.add("[Invite Splash](" + server.getSplashUrl() + "?size=2048)");
-                case "PARTNERED" -> perks.add("<:partner:725504846878343308> Partnered");
+                case "PARTNERED" -> perks.add("<:partner:753433398005071872> Partnered Server");
                 case "VANITY_URL" -> perks.add("Vanity URL: " + "[" + server.getVanityCode() + "](https://discord.gg/" + server.getVanityCode() + ")");
-                case "VERIFIED" -> perks.add("<:verified:725504846928543844> Verified");
+                case "VERIFIED" -> perks.add("<:verifiedserver:753433397933899826> Verified");
             }
         }
 
