@@ -159,6 +159,10 @@ public class RoleInfoCommand extends Command {
      * @param mention should render mentions or not
      */
     public void gatherMembersInfo(CommandEvent event, Role role, boolean mention) {
+        if(role == event.getGuild().getPublicRole()) {
+            event.reply("Finding all members is unsupported.");
+            return;
+        }
         Paginator.Builder paginator = JDAUtilUtil.makePaginator(waiter).clearItems();
         paginator.setText("Members in role " + role.getName());
         // Get members
@@ -167,14 +171,19 @@ public class RoleInfoCommand extends Command {
         await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
         // Get the member list and find how members actually with the role
         List<Member> memberList = event.getGuild().getMemberCache().asList();
+        int total = 0;
         for(Member member : memberList) {
             if(member.getRoles().contains(role)) {
                 if (mention)
                     paginator.addItems(member.getAsMention());
                 else
                     paginator.addItems(member.getUser().getAsTag());
+                total++;
             }
         }
+        if (total == 0)
+            paginator.addItems("No one has this role!");
+
         Paginator p = paginator.setUsers(event.getAuthor()).build();
 
         p.paginate(event.getChannel(), 1);
