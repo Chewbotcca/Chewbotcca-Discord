@@ -18,6 +18,7 @@ package pw.chew.chewbotcca;
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import com.mcprohosting.MCProHostingAPI;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -108,8 +109,9 @@ public class Main {
             logger.error("Error occurred initializing GitHub. How did this happen?");
         }
 
-        // Initialize ChewAPI
+        // Initialize APIs
         ChewAPI chew = new ChewAPI();
+        MCProHostingAPI mcpro = new MCProHostingAPI();
 
         // Register commands
         client.addCommands(
@@ -147,7 +149,7 @@ public class Main {
 
                 // Minecraft Module
                 new MCIssueCommand(),
-                new MCPHNodesCommand(),
+                new MCPHNodesCommand(mcpro),
                 new MCServerCommand(),
                 new MCStatusCommand(),
                 new MCUserCommand(),

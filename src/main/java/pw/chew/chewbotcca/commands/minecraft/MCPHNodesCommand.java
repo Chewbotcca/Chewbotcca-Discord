@@ -18,31 +18,34 @@ package pw.chew.chewbotcca.commands.minecraft;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.mcprohosting.MCProHostingAPI;
+import com.mcprohosting.objects.Node;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.*;
-import java.text.DecimalFormat;
-import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 // %^mcphnodes command
 public class MCPHNodesCommand extends Command {
+    final MCProHostingAPI mcpro;
 
-    public MCPHNodesCommand() {
+    public MCPHNodesCommand(MCProHostingAPI mcpro) {
         this.name = "mcphnodes";
-        this.aliases = new String[]{"mcphnode", "nodestatus"};
+        this.aliases = new String[]{"mcphnode", "mcpronodes"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.mcpro = mcpro;
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
         // If they specified a node or not
-        if(commandEvent.getArgs().length() == 0) {
+        if (commandEvent.getArgs().length() == 0) {
             commandEvent.reply(allNodes().build());
         } else {
             commandEvent.reply(specificNode(commandEvent.getArgs()).build());
@@ -51,91 +54,89 @@ public class MCPHNodesCommand extends Command {
 
     /**
      * Gather info on all nodes
+     *
      * @return an embed
      */
     public EmbedBuilder allNodes() {
         // Gather info
-        JSONArray data = new JSONArray(RestClient.get("https://chew.pw/mc/pro/status"));
+        List<Node> downNodes = mcpro.getNodeStatuses().stream().filter(Node::isOnline).collect(Collectors.toList());
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("MCProHosting Node Statuses", "https://panel.mcprohosting.com/status");
         embed.setDescription("Only showing status for locations with at least 1 down node.");
-        // Iterate through each location
-        for(int i = 0; i < data.length(); i++) {
-            JSONObject loc = data.getJSONObject(i);
-            String name = loc.getString("location");
-            JSONArray nodes = loc.getJSONArray("nodes");
-            int nodeCount = nodes.length();
-            int downCount = 0;
-            // Go through each node in this location and see if they're online
-            ArrayList<CharSequence> down = new ArrayList<>();
-            for(int j = 0; j < nodes.length(); j++) {
-                JSONObject node = nodes.getJSONObject(j);
-                if(!node.getBoolean("online")) {
-                    downCount++;
-                    down.add(String.valueOf(node.getInt("id")));
-                }
-            }
-            DecimalFormat df = new DecimalFormat("#.##");
-            int upCount = nodeCount - downCount;
-            String upPercent = df.format((float)upCount / (float)nodeCount * 100);
+        if (downNodes.isEmpty()) {
+            embed.setDescription("All Nodes are currently functional and responding!");
+            return embed;
+        }
+        Map<String, List<Node>> nodeMap = new HashMap<>();
+        // Iterate through each down node
+        for (Node node : downNodes) {
+            String location = node.getLocation();
+            List<Node> list = nodeMap.getOrDefault(location, new ArrayList<>());
+            list.add(node);
+            nodeMap.put(location, list);
+        }
+        for (String location : nodeMap.keySet()) {
+            List<Node> down = nodeMap.get(location);
             // If there's more than one down node
-            if(upCount != nodeCount) {
-                embed.addField(name, "Status: " + upCount + "/" + nodeCount + " (" + upPercent + "%)\n" +
-                        "Outages: " + String.join(", ", down), true);
+            List<CharSequence> nodeList = new ArrayList<>();
+            for (Node downNode : down) {
+                nodeList.add(String.valueOf(downNode.getId()));
             }
-
-
+            embed.addField(name, "Outages: " + String.join(", ", nodeList), true);
         }
         return embed;
     }
 
     /**
      * Find info on a specific node
-     * @param nodeId the node id
+     *
+     * @param input the node id
      * @return an embed
      */
-    public EmbedBuilder specificNode(String nodeId) {
+    public EmbedBuilder specificNode(String input) {
         // Make sure the input is valid
+        int nodeId;
         try {
-            Integer.parseInt(nodeId);
-        } catch(NumberFormatException e) {
+            nodeId = Integer.parseInt(input);
+        } catch (NumberFormatException e) {
             return new EmbedBuilder().setTitle("Error occurred!").setDescription("Invalid input!").setColor(Color.decode("#ff0000"));
         }
         // Gather info
-        JSONArray data = new JSONArray(RestClient.get("https://chew.pw/mc/pro/status"));
+        List<Node> nodes = mcpro.getNodeStatuses();
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("MCProHosting Status for Node " + nodeId, "https://panel.mcprohosting.com/status");
-        JSONObject requestedNode = null;
-        String location = null;
-        // Iterate through each location to find the requested node, if it exists
-        for(int i = 0; i < data.length(); i++) {
-            JSONObject loc = data.getJSONObject(i);
-            String name = loc.getString("location");
-            JSONArray nodes = loc.getJSONArray("nodes");
-            for(int j = 0; j < nodes.length(); j++) {
-                JSONObject node = nodes.getJSONObject(j);
-                if(node.getInt("id") == Integer.parseInt(nodeId)) {
-                    requestedNode = node;
-                    location = name;
-                }
-            }
-        }
+        Node node = getNode(nodes, nodeId);
         // If it doesn't exist
-        if(requestedNode == null) {
+        if (node == null) {
             return new EmbedBuilder().setTitle("Error occurred!").setDescription("Invalid node!").setColor(Color.decode("#ff0000"));
         }
         // Otherwise return info for it
-        embed.addField("Location", location, true);
-        if(requestedNode.getBoolean("online")) {
+        embed.addField("Location", node.getLocation(), true);
+        if (node.isOnline()) {
             embed.addField("Status", "Online", true);
             embed.setColor(Color.decode("#00ff00"));
         } else {
             embed.addField("Status", "Offline", true);
             embed.setColor(Color.decode("#ff0000"));
-            embed.setDescription(requestedNode.getString("message"));
+            embed.setDescription(node.getMessage());
         }
         embed.setFooter("Last Heartbeat");
-        embed.setTimestamp(Instant.ofEpochSecond(requestedNode.getLong("last_heartbeat_epoch_seconds")));
+        embed.setTimestamp(node.getLastHeartbeat());
         return embed;
+    }
+
+    /**
+     * Get a specific node from a list of nodes
+     *
+     * @param nodes  the node list
+     * @param nodeId the node you want to get
+     * @return the node if exists, otherwise null
+     */
+    public Node getNode(List<Node> nodes, int nodeId) {
+        for (Node requestedNode : nodes) {
+            if (requestedNode.getId() == nodeId)
+                return requestedNode;
+        }
+        return null;
     }
 }

@@ -121,6 +121,12 @@
             <artifactId>dbio4j</artifactId>
             <version>0.1.0_5</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.mcprohosting</groupId>
+            <artifactId>mcprohosting-api</artifactId>
+            <version>0.1.0-b3</version>
+        </dependency>
     </dependencies>
 
     <build>
