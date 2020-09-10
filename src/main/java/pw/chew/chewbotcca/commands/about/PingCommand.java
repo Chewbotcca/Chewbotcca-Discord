@@ -40,7 +40,5 @@ public class PingCommand extends Command {
             EmbedBuilder eb = new EmbedBuilder().setDescription("Ping is " + (msg.getTimeCreated().toInstant().toEpochMilli() - time) + "ms");
             msg.editMessage(eb.build()).queue();
         });
-        // Not sure why this is here. Probably why i'm commenting now
-        commandEvent.getChannel().getLatestMessageId();
     }
 }
