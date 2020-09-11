@@ -93,6 +93,8 @@ public class ServerInfoCommand extends Command {
     public EmbedBuilder gatherMainInfo(CommandEvent event, Guild server) {
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Server Information");
+        if(server.getDescription() != null)
+            e.setDescription(server.getDescription());
         e.setAuthor(server.getName(), null, server.getIconUrl());
 
         e.setThumbnail(server.getIconUrl() + "?size=2048");
