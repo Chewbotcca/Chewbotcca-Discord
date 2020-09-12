@@ -209,11 +209,11 @@ public class BotInfoCommand extends Command {
         links.add("[Bot Page](https://discord.bots.gg/bots/" + id + ")");
         if(!bot.getString("botInvite").equals(""))
             links.add("[Invite](" + bot.getString("botInvite") + ")");
-        if(!bot.getString("website").equals(""))
+        if(!bot.isNull("website"))
             links.add("[Website](" + bot.getString("website") + ")");
-        if(!bot.getString("supportInvite").equals(""))
+        if(!bot.isNull("supportInvite"))
             links.add("[Support Server](" + bot.getString("supportInvite") + ")");
-        if(!bot.getString("openSource").equals(""))
+        if(!bot.isNull("openSource"))
             links.add("[Source Code](" + bot.getString("openSource") + ")");
 
         e.addField("Links", String.join("\n", links), true);
