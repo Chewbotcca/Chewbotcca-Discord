@@ -21,8 +21,6 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
@@ -42,7 +40,7 @@ public class UrbanDictionaryCommand extends Command {
     @Override
     protected void execute(CommandEvent event) {
         // Top.gg requires %^urban to be NSFW only. I hate them but I gotta agree, it can be a bit edgy at times
-        if(event.getChannelType() == ChannelType.TEXT && !toTextChannel(event.getChannel()).isNSFW()) {
+        if(event.getChannelType() == ChannelType.TEXT && !event.getTextChannel().isNSFW()) {
             event.reply("This command is a little bit too edgy and may only be ran in NSFW channels or DMs. Sorry!");
             return;
         }
@@ -77,10 +75,5 @@ public class UrbanDictionaryCommand extends Command {
                 .addField("URL", url, false)
                 .build()
         );
-
-    }
-
-    public TextChannel toTextChannel(MessageChannel channel) {
-        return (TextChannel)channel;
     }
 }
