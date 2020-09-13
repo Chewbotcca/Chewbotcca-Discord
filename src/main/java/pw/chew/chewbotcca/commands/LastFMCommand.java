@@ -49,9 +49,11 @@ public class LastFMCommand extends Command {
 
         // Get args, assume it's a username, and find their stats
         String args = event.getArgs();
-        Profile profile = Profile.getProfile(event.getAuthor().getId());
-        if(profile.getLastFm() != null && args.length() == 0) {
-            args = profile.getLastFm();
+        if(args.length() == 0) {
+            Profile profile = Profile.getProfile(event.getAuthor().getId());
+            if (profile.getLastFm() != null) {
+                args = profile.getLastFm();
+            }
         }
         JSONObject parse = new JSONObject(RestClient.get("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&limit=1&user=" + args + "&api_key=" + key + "&format=json"));
         // But if I got bamboozled
