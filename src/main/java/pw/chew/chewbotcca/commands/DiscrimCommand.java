@@ -35,8 +35,9 @@ public class DiscrimCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
+        event.getChannel().sendTyping().queue();
         String discrim = event.getAuthor().getDiscriminator();
-        if (event.getArgs().length() == 4) {
+        if (event.getArgs().length() == 4 && event.getArgs().matches("[0-9]{4}")) {
             discrim = event.getArgs();
         }
 
