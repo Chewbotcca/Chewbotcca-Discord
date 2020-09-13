@@ -24,10 +24,7 @@ import java.util.ArrayList;
 
 // Find time difference between 2 date in words
 public class DateTime {
-    static boolean useSeconds = true;
-
-    public static String timeAgo(long different) {
-
+    public static String timeAgo(long different, boolean useSeconds) {
         long secondsInMilli = 1000;
         long minutesInMilli = secondsInMilli * 60;
         long hoursInMilli = minutesInMilli * 60;
@@ -49,26 +46,16 @@ public class DateTime {
         long elapsedSeconds = different / secondsInMilli;
 
         ArrayList<String> output = new ArrayList<>();
-        if(elapsedYears > 1)
-            output.add(elapsedYears + " years");
-        else if(elapsedYears > 0)
-            output.add(elapsedYears + " year");
-        if(elapsedDays > 1)
-            output.add(elapsedDays + " days");
-        else if(elapsedDays > 0)
-            output.add(elapsedDays + " days");
-        if(elapsedHours > 1)
-            output.add(elapsedHours + " hours");
-        else if(elapsedHours > 0)
-            output.add(elapsedHours + " hours");
-        if(elapsedMinutes > 1)
-            output.add(elapsedMinutes + " minutes");
-        else if(elapsedMinutes > 0)
-            output.add(elapsedMinutes + " minutes");
-        if(elapsedSeconds > 1 && useSeconds)
-            output.add(elapsedSeconds + " seconds");
-        else if(elapsedSeconds > 0 && useSeconds)
-            output.add(elapsedSeconds + " seconds");
+        if(elapsedYears > 0)
+            output.add(elapsedYears + " year" + (elapsedYears > 1 ? "s" : ""));
+        if(elapsedDays > 0)
+            output.add(elapsedDays + " day" + (elapsedDays > 1 ? "s" : ""));
+        if(elapsedHours > 0)
+            output.add(elapsedHours + " hour" + (elapsedHours > 1 ? "s" : ""));
+        if(elapsedMinutes > 0)
+            output.add(elapsedMinutes + " minute" + (elapsedMinutes > 1 ? "s" : ""));
+        if(elapsedSeconds > 0 && useSeconds)
+            output.add(elapsedSeconds + " second" + (elapsedSeconds > 1 ? "s" : ""));
 
         StringBuilder response = new StringBuilder();
         for (String module : output) {
@@ -84,10 +71,7 @@ public class DateTime {
         return response.toString();
     }
 
-    public static String timeAgo(long different, boolean seconds) {
-        useSeconds = seconds;
-        String timeago = timeAgo(different);
-        useSeconds = true;
-        return timeago;
+    public static String timeAgo(long different) {
+        return timeAgo(different, true);
     }
 }
