@@ -34,6 +34,7 @@ import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.chew.api.ChewAPI;
+import pw.chew.chewbotcca.commands.DiscrimCommand;
 import pw.chew.chewbotcca.commands.FeedbackCommand;
 import pw.chew.chewbotcca.commands.LastFMCommand;
 import pw.chew.chewbotcca.commands.RubyGemsCommand;
@@ -171,6 +172,7 @@ public class Main {
                 new ServerSettingsCommand(),
 
                 // Everything Else
+                new DiscrimCommand(waiter),
                 new FeedbackCommand(),
                 new LastFMCommand(),
                 new RubyGemsCommand()
