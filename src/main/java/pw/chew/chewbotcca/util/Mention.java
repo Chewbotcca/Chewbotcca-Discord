@@ -18,9 +18,10 @@ package pw.chew.chewbotcca.util;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.User;
 
 public class Mention {
-    public static Object parseMention(String mention, JDA jda) {
+    public static User parseUserMention(String mention, JDA jda) {
         if(!mention.contains("<") && !mention.contains(">"))
             return null;
 
@@ -28,7 +29,7 @@ public class Mention {
         if(mention.startsWith("@!")) {
             return jda.getUserById(mention.replace("@!", ""));
         }
-        return null;
+        throw new IllegalArgumentException("No valid mention string in message!");
     }
 
     public static Object parseMention(String mention, Guild server, JDA jda) {

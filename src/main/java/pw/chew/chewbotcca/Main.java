@@ -51,6 +51,7 @@ import pw.chew.chewbotcca.commands.github.GHUserCommand;
 import pw.chew.chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.chewbotcca.commands.info.*;
 import pw.chew.chewbotcca.commands.minecraft.*;
+import pw.chew.chewbotcca.commands.moderation.BanCommand;
 import pw.chew.chewbotcca.commands.moderation.RoleCommand;
 import pw.chew.chewbotcca.commands.owner.NewIssueCommand;
 import pw.chew.chewbotcca.commands.owner.ShutdownCommand;
@@ -157,6 +158,7 @@ public class Main {
                 new MCWikiCommand(),
 
                 // Moderation Commands
+                new BanCommand(),
                 new RoleCommand(),
 
                 // Owner Module
