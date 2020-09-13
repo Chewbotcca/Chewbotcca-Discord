@@ -37,48 +37,77 @@ public class RoleCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
+        // Ensure user entered an argument
         String[] args = event.getArgs().split(" ");
-        if(args.length < 1) {
+        if (args.length < 1) {
             event.reply("You appear to be missing an argument. Please specify: `create`, `delete`, `assign` (or `add`), `remove`");
             return;
         }
 
+        // Parse and handle arguments accordingly
         String type = args[0].toLowerCase();
         String arg = event.getArgs().replace(type + " ", "");
-        event.reply(switch (type) {
+        switch (type) {
             case ("create") -> createRole(event, arg);
             case ("delete") -> deleteRole(event, arg);
             case ("add"), ("assign") -> assignRole(event, arg);
             case ("remove") -> removeRole(event, arg);
-            default -> "Invalid type, must be one of `create`, `delete`, `assign` (or `add`), `remove`";
-        });
+            default -> event.reply("Invalid type, must be one of `create`, `delete`, `assign` (or `add`), `remove`");
+        }
     }
 
-    public String createRole(CommandEvent event, String rolename) {
+    /**
+     * Creates a role with given name
+     *
+     * @param event    the command event
+     * @param rolename the name of the role to be created
+     */
+    public void createRole(CommandEvent event, String rolename) {
+        // Get the server and create the role
         Guild server = event.getGuild();
-        server.createRole().setName(rolename).complete();
-        return "I have successfully created the role `" + rolename + "`!";
+        server.createRole().setName(rolename).queue(role -> event.reply("I have successfully created the role `" + rolename + "`!"));
     }
 
-    public String deleteRole(CommandEvent event, String rolename) {
+    /**
+     * Deletes a role with a given name
+     *
+     * @param event    the command event
+     * @param rolename the name of the role to be deleted
+     */
+    public void deleteRole(CommandEvent event, String rolename) {
+        // Get the server
         Guild server = event.getGuild();
+        // Get the user's highest role, for hierarchy checking later
         Role highest = event.getMember().getRoles().get(0);
+        // Attempt to find provided role
         List<Role> roles = server.getRolesByName(rolename, true);
-        if(roles.size() < 1) {
-            return "Unable to find specified role!";
+        if (roles.size() < 1) {
+            event.reply("Unable to find specified role!");
+            return;
         }
+        // Get the user's highest role and check to make sure hierarchy is maintained
         Role target = roles.get(0);
-        if(target.getPosition() >= highest.getPosition()) {
-            return "I can't delete this role because it is higher or equal to your highest role!";
+        Role bot = event.getSelfMember().getRoles().get(0);
+        if (target.getPosition() >= highest.getPosition() || target.getPosition() >= bot.getPosition()) {
+            event.reply("I can't delete this role because it is higher or equal to your (or my) highest role!");
+            return;
         }
-        target.delete().queue();
-        return "I have successfully deleted the role `" + rolename + "`!";
+        // Delete the specified role
+        target.delete().queue(r -> event.reply("I have successfully deleted the role `" + rolename + "`!"));
     }
 
-    public String assignRole(CommandEvent event, String input) {
+    /**
+     * Assign a role to a provided member
+     *
+     * @param event the event
+     * @param input the input, which contains a user and a role
+     */
+    public void assignRole(CommandEvent event, String input) {
+        // Grab input and parse for user and role
         String[] args = input.split(" ");
-        if(args.length < 2) {
-            return "Missing one or more arguments for this command. You need: user mention and role name.";
+        if (args.length < 2) {
+            event.reply("Missing one or more arguments for this command. You need: user mention and role name.");
+            return;
         }
 
         String mention = args[0];
@@ -87,28 +116,45 @@ public class RoleCommand extends Command {
         String id = mention.replace("<@!", "").replace(">", "");
         Member member = event.getGuild().getMemberById(id);
 
-        if(member == null) {
-            return "Unable to find specified member!";
+        if (member == null) {
+            event.reply("Unable to find specified member!");
+            return;
         }
 
-        Role highest = event.getMember().getRoles().get(0);
+        // Attempt to find role
         List<Role> roles = event.getGuild().getRolesByName(rolename, true);
-        if(roles.size() < 1) {
-            return "Unable to find specified role!";
+        if (roles.size() < 1) {
+            event.reply("Unable to find specified role!");
+            return;
         }
+        // Get author's highest role for hierarchy checking
+        Role highest = event.getMember().getRoles().get(0);
+        Role bot = event.getSelfMember().getRoles().get(0);
         Role target = roles.get(0);
-        if(target.getPosition() >= highest.getPosition()) {
-            return "I can't assign this role because it is higher or equal to your highest role!";
+        if (target.getPosition() >= highest.getPosition() || target.getPosition() >= bot.getPosition()) {
+            event.reply("I can't assign this role because it is higher or equal to your (or my) highest role!");
+            return;
         }
 
-        event.getGuild().addRoleToMember(member, target).queue();
-        return "I have successfully given " + member.getEffectiveName() + " the role `" + rolename + "`!";
+        // Add role to member and call it a day
+        event.getGuild().addRoleToMember(member, target).queue(
+            e -> event.reply("I have successfully given " + member.getEffectiveName() + " the role `" + rolename + "`!"),
+            f -> event.replyError("I was unable to give that user the role!")
+        );
     }
 
-    public String removeRole(CommandEvent event, String input) {
+    /**
+     * Remove a role from a specific member
+     *
+     * @param event the command event
+     * @param input the user and role to remove
+     */
+    public void removeRole(CommandEvent event, String input) {
+        // Grab input and parse for user and role
         String[] args = input.split(" ");
-        if(args.length < 2) {
-            return "Missing one or more arguments for this command. You need: user mention and role name.";
+        if (args.length < 2) {
+            event.reply("Missing one or more arguments for this command. You need: user mention and role name.");
+            return;
         }
 
         String mention = args[0];
@@ -117,21 +163,30 @@ public class RoleCommand extends Command {
         String id = mention.replace("<@!", "").replace(">", "");
         Member member = event.getGuild().getMemberById(id);
 
-        if(member == null) {
-            return "Unable to find specified member!";
+        if (member == null) {
+            event.reply("Unable to find specified member!");
+            return;
         }
 
-        Role highest = event.getMember().getRoles().get(0);
+        // Attempt to find role
         List<Role> roles = event.getGuild().getRolesByName(rolename, true);
-        if(roles.size() < 1) {
-            return "Unable to find specified role!";
+        if (roles.size() < 1) {
+            event.reply("Unable to find specified role!");
+            return;
         }
+        // Get author's highest role for hierarchy checking
+        Role highest = event.getMember().getRoles().get(0);
+        Role bot = event.getSelfMember().getRoles().get(0);
         Role target = roles.get(0);
-        if(target.getPosition() >= highest.getPosition()) {
-            return "I can't assign this role because it is higher or equal to your highest role!";
+        if (target.getPosition() >= highest.getPosition() || target.getPosition() >= bot.getPosition()) {
+            event.reply("I can't assign this role because it is higher or equal to your (or my) highest role!");
+            return;
         }
 
-        event.getGuild().removeRoleFromMember(member, target).queue();
-        return "I have successfully removed `" + rolename + "` from " + member.getEffectiveName() + "!";
+        // Remove role from member and call it a day
+        event.getGuild().removeRoleFromMember(member, target).queue(
+            e -> event.reply("I have successfully removed `" + rolename + "` from " + member.getEffectiveName() + "!"),
+            f -> event.replyError("I was unable to take that role from the user. Is my role high enough?")
+        );
     }
 }
