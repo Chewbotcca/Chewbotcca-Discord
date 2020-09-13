@@ -136,6 +136,7 @@ public class Main {
                 new QRCodeCommand(),
                 new RedditCommand(),
                 new RollCommand(),
+                new RoryCommand(),
                 new SpigotDramaCommand(chew),
 
                 // Google Module
