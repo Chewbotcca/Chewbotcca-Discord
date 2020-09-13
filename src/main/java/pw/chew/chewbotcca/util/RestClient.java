@@ -79,6 +79,23 @@ public class RestClient {
     }
 
     /**
+     * Make an Authenticated DELETE Request
+     * @param url the url
+     * @param key the auth key
+     * @return a response
+     */
+    public static String delete(String url, String key) {
+        Request request = new Request.Builder()
+            .url(url)
+            .delete()
+            .addHeader("Authorization", key)
+            .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+            .build();
+
+        return performRequest(request);
+    }
+
+    /**
      * Actually perform the request
      * @param request a request
      * @return a response

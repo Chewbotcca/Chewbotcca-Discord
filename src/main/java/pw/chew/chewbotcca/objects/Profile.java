@@ -90,4 +90,11 @@ public class Profile {
             return null;
         return data.getString("lastfm");
     }
+
+    public void delete() {
+        RestClient.delete(
+            "https://chew.pw/chewbotcca/discord/profile/" + getId() + "/api/delete",
+            PropertiesManager.getChewKey()
+        );
+    }
 }

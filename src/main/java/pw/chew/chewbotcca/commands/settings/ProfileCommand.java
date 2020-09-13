@@ -37,6 +37,11 @@ public class ProfileCommand extends Command {
         commandEvent.getChannel().sendTyping().queue();
         // Get Bot Profile details and send
         Profile profile = Profile.retrieveProfile(commandEvent.getAuthor().getId());
+        if(commandEvent.getArgs().equals("delete")) {
+            profile.delete();
+            commandEvent.reply("Your profile has been deleted from the database!");
+            return;
+        }
         if(!commandEvent.getArgs().contains("set")) {
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Your Chewbotcca Profile")
