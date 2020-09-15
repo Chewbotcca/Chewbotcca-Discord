@@ -46,9 +46,8 @@ public class ChannelInfoCommand extends Command {
         // Set the mode to pins if requested
         if(args.contains("pins")) {
             mode = "pins";
-            args = args.replace("pins", "");
+            args = args.replace("--pins", "").trim();
         }
-        args = args.replace(" ", "");
 
         // Find the channel based on input if possible
         GuildChannel channel;

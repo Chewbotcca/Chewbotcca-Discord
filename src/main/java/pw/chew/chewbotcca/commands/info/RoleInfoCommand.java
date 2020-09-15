@@ -59,9 +59,7 @@ public class RoleInfoCommand extends Command {
         // Set the mode if necessary
         if(arg.contains("members")) {
             mode = "members";
-            arg = arg.replace(" members", "");
-            arg = arg.replace("members ", "");
-            arg = arg.replace("members", "");
+            arg = arg.replace("--members", "").trim();
         }
 
         boolean mention = false;
