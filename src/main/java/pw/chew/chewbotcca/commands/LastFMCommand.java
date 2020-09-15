@@ -53,6 +53,9 @@ public class LastFMCommand extends Command {
             Profile profile = Profile.getProfile(event.getAuthor().getId());
             if (profile.getLastFm() != null) {
                 args = profile.getLastFm();
+            } else {
+                event.reply("You don't have a last.fm username set on your profile. Please specify a user with `%^lastfm user` or set your username with `%^profile set lastfm yourname`!");
+                return;
             }
         }
         JSONObject parse = new JSONObject(RestClient.get("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&limit=1&user=" + args + "&api_key=" + key + "&format=json"));
