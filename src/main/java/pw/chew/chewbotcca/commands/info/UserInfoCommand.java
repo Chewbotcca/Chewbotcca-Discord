@@ -60,10 +60,9 @@ public class UserInfoCommand extends Command {
         String mode = "";
 
         // If they want member info
-        if(args.contains("member")) {
+        if(args.contains("--member")) {
             mode = "member";
-            args = args.replace("member", "");
-            args = args.replace(" ", "");
+            args = args.replace("--member", "").trim();
         }
 
         // Get server members (in sync) for join position
@@ -203,7 +202,7 @@ public class UserInfoCommand extends Command {
         }
 
         if(onServer)
-            e.addField("More Information", "Add `member` to see more about this Member.", true);
+            e.addField("More Information", "Add `--member` to see more about this Member.", true);
 
         return e;
     }
