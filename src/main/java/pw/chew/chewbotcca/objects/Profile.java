@@ -96,5 +96,6 @@ public class Profile {
             "https://chew.pw/chewbotcca/discord/profile/" + getId() + "/api/delete",
             PropertiesManager.getChewKey()
         );
+        cache.remove(getId());
     }
 }
