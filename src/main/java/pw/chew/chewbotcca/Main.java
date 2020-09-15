@@ -61,6 +61,7 @@ import pw.chew.chewbotcca.commands.quotes.TRBMBCommand;
 import pw.chew.chewbotcca.commands.settings.ProfileCommand;
 import pw.chew.chewbotcca.commands.settings.ServerSettingsCommand;
 import pw.chew.chewbotcca.listeners.MagReactListener;
+import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
@@ -208,6 +209,7 @@ public class Main {
         // Register listeners
         jda.addEventListener(
                 new MagReactListener(),
+                new MessageHandler(),
                 new ServerJoinLeaveListener()
         );
     }
