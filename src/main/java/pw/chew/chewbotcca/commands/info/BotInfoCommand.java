@@ -66,7 +66,8 @@ public class BotInfoCommand extends Command {
         switch (list) {
             case "dbl", "top.gg", "topgg" -> commandEvent.reply(gatherTopggInfo(botId, commandEvent).build());
             case "dbots" -> commandEvent.reply(gatherDBotsInfo(botId, commandEvent).build());
-            default -> commandEvent.reply("Invalid Bot List! Possible: ```dbots, topgg```");
+            case "del" -> commandEvent.reply(gatherDELInfo(botId, commandEvent).build());
+            default -> commandEvent.reply("Invalid Bot List! Possible: ```dbots, topgg, del```");
         }
     }
 
@@ -220,6 +221,95 @@ public class BotInfoCommand extends Command {
 
         e.setFooter("Bot added");
         e.setTimestamp(dateParser(bot.getString("addedDate")));
+
+        e.setColor(Color.decode("#43B581"));
+
+        return e;
+    }
+
+    /**
+     * Gathers bot info from DiscordExtremeList
+     * @param id bot ID
+     * @param event the command event
+     * @return an embed
+     */
+    public EmbedBuilder gatherDELInfo(String id, CommandEvent event) {
+        // Gather info from the site
+        JSONObject response = new JSONObject(RestClient.get("https://api.discordextremelist.xyz/v2/bot/" + id, PropertiesManager.getDELToken()));
+
+        // If there's an error let them know
+        if(response.getBoolean("error")) {
+            return new EmbedBuilder().setTitle("Error!").setDescription("An error occurred getting that bot, does it exist");
+        }
+
+        JSONObject bot = response.getJSONObject("bot");
+
+        // Start generating the embed
+        EmbedBuilder e = new EmbedBuilder();
+        e.setTitle("Bot Information");
+
+        // Set the author to the bot name
+        e.setAuthor(bot.getString("name"), "https://discordextremelist.xyz/en-US/bots/" + id, bot.getJSONObject("avatar").getString("url"));
+
+        // Set the thumbnail to the bot avatar
+        e.setThumbnail(bot.getJSONObject("avatar").getString("url"));
+
+        // Set the description to the short description
+        e.setDescription(bot.getString("shortDesc"));
+
+        e.addField("Bot ID", bot.getString("id"), true);
+
+        // Set server count if there is one
+        if(bot.getInt("serverCount") > 0)
+            e.addField("Server Count", String.valueOf(bot.getInt("serverCount")), true);
+        else
+            e.addField("Server Count", "Unknown", true);
+
+        // Set other details
+        e.addField("Prefix", "`" + bot.getString("prefix") + "`", true);
+        e.addField("Library", bot.getString("library"), true);
+
+        // Find and set tags
+        List<String> tags = new ArrayList<>();
+        for(Object tag : bot.getJSONArray("tags")) {
+            tags.add((String) tag);
+        }
+
+        if(tags.isEmpty()) {
+            e.addField("Tags", "None", true);
+        } else {
+            e.addField("Tags", String.join(", ", tags), true);
+        }
+
+        // Find and set owners
+        List<String> owners = new ArrayList<>();
+        owners.add(bot.getJSONObject("owner").getString("id"));
+        for(Object owner : bot.getJSONArray("editors")) {
+            User user = event.getJDA().getUserById((String) owner);
+            if(user == null)
+                owners.add((String) owner);
+            else
+                owners.add(user.getAsTag());
+        }
+
+        e.addField("Owners", String.join(", ", owners), true);
+
+        // Find and set links
+        List<CharSequence> links = new ArrayList<>();
+        links.add("[Bot Page](https://discordextremelist.xyz/en-US/bots/" + id + ")");
+        JSONObject urls = bot.getJSONObject("links");
+        if(!bot.getString("invite").equals(""))
+            links.add("[Invite](" + urls.getString("invite") + ")");
+        if(!bot.getString("support").equals(""))
+            links.add("[Support Server](https://discord.gg/" + bot.getString("support") + ")");
+        if(!bot.getString("website").equals(""))
+            links.add("[Website](" + bot.getString("website") + ")");
+        if(!bot.getString("donation").equals(""))
+            links.add("[Donate](" + bot.getString("donation") + ")");
+        if(!bot.getString("repo").equals(""))
+            links.add("[Source](" + bot.getString("repo") + ")");
+
+        e.addField("Links", String.join("\n", links), true);
 
         e.setColor(Color.decode("#43B581"));
 

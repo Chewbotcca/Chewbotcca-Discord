@@ -115,4 +115,11 @@ public class PropertiesManager {
     public static String getChewKey() {
         return properties.getProperty("chewkey");
     }
+
+    /**
+     * @return a DiscordExtremeList api token
+     */
+    public static String getDELToken() {
+        return properties.getProperty("del");
+    }
 }
