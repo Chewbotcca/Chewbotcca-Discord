@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
@@ -66,7 +67,8 @@ public class YouTubeCommand extends Command {
             event.reply("No results found.");
             return;
         }
-        event.reply(response(url, id).build());
+
+        event.reply(response(url, id, event.getTextChannel()).build());
     }
 
     /**
@@ -75,7 +77,21 @@ public class YouTubeCommand extends Command {
      * @param id the video id
      * @return an embedbuilder ready to be built
      */
-    public EmbedBuilder response(JSONObject url, String id) {
+    public EmbedBuilder response(JSONObject url, String id, TextChannel channel) {
+        boolean restricted = url
+            .getJSONArray("items")
+            .getJSONObject(0)
+            .getJSONObject("contentDetails")
+            .getJSONObject("contentRating")
+            .has("ytRating");
+
+        // Don't respond if not nsfw channel
+        if(restricted && !channel.isNSFW()) {
+            return new EmbedBuilder()
+                .setTitle("Uh oh! Too naughty!")
+                .setDescription("The returned video is marked as age restricted by YouTube, and may only be shown in NSFW channels or DMs. Sorry!");
+        }
+
         // Gather stats and info objects
         JSONObject stats = url.getJSONArray("items").getJSONObject(0).getJSONObject("statistics");
         JSONObject info = url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet");

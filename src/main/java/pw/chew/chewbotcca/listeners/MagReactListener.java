@@ -96,7 +96,7 @@ public class MagReactListener extends ListenerAdapter {
         // Get the video
         JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + video + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics"));
         // make a YouTube video embed response
-        event.getChannel().sendMessage(new YouTubeCommand().response(url, video).build()).queue();
+        event.getChannel().sendMessage(new YouTubeCommand().response(url, video, event.getChannel()).build()).queue();
     }
 
     /**
