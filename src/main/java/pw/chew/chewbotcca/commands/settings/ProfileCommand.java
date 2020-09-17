@@ -59,10 +59,11 @@ public class ProfileCommand extends Command {
         }
         String[] args = commandEvent.getArgs().split(" ");
         if(args.length < 3) {
-            commandEvent.reply("You are missing arguments! Must have `set`, `key`, `value`. Possible keys:\n" +
-                    "```\n" +
-                    "lastfm - Your last.fm username for %^lastfm\n" +
-                    "```");
+            commandEvent.reply("""
+                You are missing arguments! Must have `set`, `key`, `value`. Possible keys:
+                ```
+                lastfm - Your last.fm username for %^lastfm
+                ```""");
             return;
         }
         profile.saveData(args[1].toLowerCase(), args[2]);
