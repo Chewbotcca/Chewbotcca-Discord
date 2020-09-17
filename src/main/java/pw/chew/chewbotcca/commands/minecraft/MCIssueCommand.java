@@ -92,7 +92,7 @@ public class MCIssueCommand extends Command {
 
         embed.setAuthor("Information for " + issue, apiUrl.replace("rest/api/latest/issue", "browse") + issue);
         embed.setTitle(data.getString("summary"));
-        embed.setDescription(data.getString("description"));
+        embed.setDescription(data.getString("description").substring(0, 500));
         embed.addField("Type", data.getJSONObject("issuetype").getString("name"), true);
         try {
             embed.addField("Resolution", data.getJSONObject("resolution").getString("name"), true);
