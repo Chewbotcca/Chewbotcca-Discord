@@ -100,15 +100,15 @@ public class GHIssueCommand extends Command {
             e.setAuthor("Information for Issue #" + issue.getNumber() + " in " + issue.getRepository().getFullName(), String.valueOf(issue.getHtmlUrl()));
         }
         // Set status and color based on issue/pull request status
-        if(!open) {
+        if(merged) {
+            e.setColor(Color.decode("#6f42c1"));
+            e.addField("Status", "Merged", true);
+        } else if(!open) {
             e.setColor(Color.decode("#cb2431"));
             e.addField("Status", "Closed", true);
         } else if(draft) {
             e.setColor(Color.decode("#ffffff"));
             e.addField("Status", "Draft", true);
-        } else if(merged) {
-            e.setColor(Color.decode("#6f42c1"));
-            e.addField("Status", "Merged", true);
         } else {
             e.setColor(Color.decode("#2cbe4e"));
             e.addField("Status", "Open", true);
