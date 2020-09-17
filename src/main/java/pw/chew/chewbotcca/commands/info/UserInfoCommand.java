@@ -79,6 +79,9 @@ public class UserInfoCommand extends Command {
             } else {
                 try {
                     user = commandEvent.getJDA().getUserById(args);
+                    if (user == null) {
+                        user = commandEvent.getJDA().retrieveUserById(args).complete();
+                    }
                 } catch (NullPointerException | NumberFormatException e) {
                     List<Member> users = commandEvent.getGuild().getMembersByName(args, true);
                     List<Member> byNick = commandEvent.getGuild().getMembersByEffectiveName(args, true);
