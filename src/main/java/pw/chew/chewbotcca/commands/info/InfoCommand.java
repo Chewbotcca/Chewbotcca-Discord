@@ -68,6 +68,11 @@ public class InfoCommand extends Command {
         } else {
             e.addField("Arguments", "No arguments", true);
         }
+        if(!data.isNull("flags")) {
+            e.addField("Flags", data.getString("flags"), true);
+        } else {
+            e.addField("Flags", "No flags", true);
+        }
         if(!data.isNull("aliases")) {
             e.addField("Aliases", data.getString("aliases"), true);
         } else {
