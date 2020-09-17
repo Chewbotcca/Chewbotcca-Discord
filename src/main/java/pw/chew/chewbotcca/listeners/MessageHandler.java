@@ -26,5 +26,11 @@ public class MessageHandler extends ListenerAdapter {
         if (event.getTextChannel().getId().equals("752063016425619487")) {
             RoryCommand.getRoryImages();
         }
+        if (event.getTextChannel().getId().equals("745164378659225651") && event.getAuthor().getDiscriminator().equals("0000") && event.getMessage().getEmbeds().size() > 0) {
+            String title = event.getMessage().getEmbeds().get(0).getTitle();
+            if (title != null && title.contains("[Discord] Compile success on main")) {
+                event.getChannel().sendMessage("Updating...").queue(message -> System.exit(0));
+            }
+        }
     }
 }
