@@ -45,7 +45,7 @@ public class DiscrimCommand extends Command {
             discrim = event.getArgs();
         } else if (event.getArgs().contains("--rank")) {
             Map<String, Integer> ranking = getDiscrimRanking(event.getJDA().getUserCache());
-            LinkedHashMap<String, Integer> ranked = sortHashMapByValues(ranking);
+            Map<String, Integer> ranked = sortByValue(ranking);
             Paginator.Builder pbuilder = JDAUtilUtil.makePaginator(waiter);
             pbuilder.setText("Users discriminator ranking"
                 + "\nCached users: " + event.getJDA().getUserCache().size());
@@ -80,30 +80,15 @@ public class DiscrimCommand extends Command {
         return mapping;
     }
 
-    public LinkedHashMap<String, Integer> sortHashMapByValues(Map<String, Integer> passedMap) {
-        List<String> mapKeys = new ArrayList<>(passedMap.keySet());
-        List<Integer> mapValues = new ArrayList<>(passedMap.values());
-        Collections.sort(mapValues);
-        Collections.sort(mapKeys);
-        Collections.reverse(mapKeys);
-        Collections.reverse(mapValues);
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+        List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
+        list.sort(Map.Entry.comparingByValue());
 
-        LinkedHashMap<String, Integer> sortedMap = new LinkedHashMap<>();
-
-        for (Integer val : mapValues) {
-            Iterator<String> keyIt = mapKeys.iterator();
-
-            while (keyIt.hasNext()) {
-                String key = keyIt.next();
-                Integer comp1 = passedMap.get(key);
-
-                if (comp1.equals(val)) {
-                    keyIt.remove();
-                    sortedMap.put(key, val);
-                    break;
-                }
-            }
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
         }
-        return sortedMap;
+
+        return result;
     }
 }
