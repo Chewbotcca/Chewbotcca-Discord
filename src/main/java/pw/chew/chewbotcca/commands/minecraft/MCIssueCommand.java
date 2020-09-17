@@ -90,9 +90,12 @@ public class MCIssueCommand extends Command {
 
         data = data.getJSONObject("fields");
 
-        embed.setAuthor("Information for " + issue, apiUrl.replace("rest/api/latest/issue", "browse") + issue);
+        embed.setAuthor("Information for " + issue.toUpperCase(), apiUrl.replace("rest/api/latest/issue", "browse") + issue);
         embed.setTitle(data.getString("summary"));
-        embed.setDescription(data.getString("description").substring(0, 500));
+        if (data.getString("description").length() > 500)
+            embed.setDescription(data.getString("description").substring(0, 500));
+        else
+            embed.setDescription(data.getString("description"));
         embed.addField("Type", data.getJSONObject("issuetype").getString("name"), true);
         try {
             embed.addField("Resolution", data.getJSONObject("resolution").getString("name"), true);
@@ -116,9 +119,10 @@ public class MCIssueCommand extends Command {
     }
 
     public static String getApiUrl(String target) {
+        String project = target.toUpperCase();
         for(String key : projects.keySet()) {
             List<String> list = projects.get(key);
-            if(list.contains(target))
+            if(list.contains(project))
                 return key;
         }
         return null;
