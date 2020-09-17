@@ -16,7 +16,11 @@
  */
 package pw.chew.chewbotcca.util;
 
-import okhttp3.*;
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.Main;
 

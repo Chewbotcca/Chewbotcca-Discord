@@ -25,7 +25,11 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 // %^discrim command
 public class DiscrimCommand extends Command {
