@@ -4,7 +4,7 @@ on: push
 
 jobs:
   build:
-    name: Patch
+    name: Compile
 
     runs-on: ubuntu-latest
     
