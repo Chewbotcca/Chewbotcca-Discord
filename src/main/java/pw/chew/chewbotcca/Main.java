@@ -16,6 +16,7 @@
  */
 package pw.chew.chewbotcca;
 
+import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.mcprohosting.MCProHostingAPI;
@@ -34,52 +35,6 @@ import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.chew.api.ChewAPI;
-import pw.chew.chewbotcca.commands.DiscrimCommand;
-import pw.chew.chewbotcca.commands.FeedbackCommand;
-import pw.chew.chewbotcca.commands.LastFMCommand;
-import pw.chew.chewbotcca.commands.RubyGemsCommand;
-import pw.chew.chewbotcca.commands.about.HelpCommand;
-import pw.chew.chewbotcca.commands.about.InviteCommand;
-import pw.chew.chewbotcca.commands.about.PingCommand;
-import pw.chew.chewbotcca.commands.about.StatsCommand;
-import pw.chew.chewbotcca.commands.english.DefineCommand;
-import pw.chew.chewbotcca.commands.english.UrbanDictionaryCommand;
-import pw.chew.chewbotcca.commands.fun.CatCommand;
-import pw.chew.chewbotcca.commands.fun.CatFactCommand;
-import pw.chew.chewbotcca.commands.fun.DogCommand;
-import pw.chew.chewbotcca.commands.fun.EightBallCommand;
-import pw.chew.chewbotcca.commands.fun.NumberFactCommand;
-import pw.chew.chewbotcca.commands.fun.QRCodeCommand;
-import pw.chew.chewbotcca.commands.fun.RedditCommand;
-import pw.chew.chewbotcca.commands.fun.RollCommand;
-import pw.chew.chewbotcca.commands.fun.RoryCommand;
-import pw.chew.chewbotcca.commands.fun.SpigotDramaCommand;
-import pw.chew.chewbotcca.commands.github.GHIssueCommand;
-import pw.chew.chewbotcca.commands.github.GHRepoCommand;
-import pw.chew.chewbotcca.commands.github.GHUserCommand;
-import pw.chew.chewbotcca.commands.google.YouTubeCommand;
-import pw.chew.chewbotcca.commands.info.BotInfoCommand;
-import pw.chew.chewbotcca.commands.info.ChannelInfoCommand;
-import pw.chew.chewbotcca.commands.info.InfoCommand;
-import pw.chew.chewbotcca.commands.info.RoleInfoCommand;
-import pw.chew.chewbotcca.commands.info.ServerInfoCommand;
-import pw.chew.chewbotcca.commands.info.UserInfoCommand;
-import pw.chew.chewbotcca.commands.minecraft.HangarCommand;
-import pw.chew.chewbotcca.commands.minecraft.MCIssueCommand;
-import pw.chew.chewbotcca.commands.minecraft.MCPHNodesCommand;
-import pw.chew.chewbotcca.commands.minecraft.MCServerCommand;
-import pw.chew.chewbotcca.commands.minecraft.MCStatusCommand;
-import pw.chew.chewbotcca.commands.minecraft.MCUserCommand;
-import pw.chew.chewbotcca.commands.minecraft.MCWikiCommand;
-import pw.chew.chewbotcca.commands.moderation.BanCommand;
-import pw.chew.chewbotcca.commands.moderation.RoleCommand;
-import pw.chew.chewbotcca.commands.owner.NewIssueCommand;
-import pw.chew.chewbotcca.commands.owner.ShutdownCommand;
-import pw.chew.chewbotcca.commands.quotes.AcronymCommand;
-import pw.chew.chewbotcca.commands.quotes.QuoteCommand;
-import pw.chew.chewbotcca.commands.quotes.TRBMBCommand;
-import pw.chew.chewbotcca.commands.settings.ProfileCommand;
-import pw.chew.chewbotcca.commands.settings.ServerSettingsCommand;
 import pw.chew.chewbotcca.listeners.MagReactListener;
 import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
@@ -87,9 +42,11 @@ import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import javax.security.auth.login.LoginException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 // The Main Bot class. Where all the magic happens!
@@ -97,7 +54,7 @@ public class Main {
     // Instance variables
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) throws LoginException, IOException {
+    public static void main(String[] args) throws LoginException, IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         // Load properties into the PropertiesManager
         Properties prop = new Properties();
         prop.load(new FileInputStream("bot.properties"));
@@ -136,83 +93,7 @@ public class Main {
         ChewAPI chew = new ChewAPI();
         MCProHostingAPI mcpro = new MCProHostingAPI();
 
-        // Register commands
-        client.addCommands(
-                // About Module
-                new HelpCommand(),
-                new InviteCommand(),
-                new PingCommand(),
-                new StatsCommand(),
-
-                // English Module
-                new DefineCommand(),
-                new UrbanDictionaryCommand(),
-
-                // Fun Module
-                new CatCommand(),
-                new CatFactCommand(),
-                new DogCommand(),
-                new EightBallCommand(),
-                new NumberFactCommand(),
-                new QRCodeCommand(),
-                new RedditCommand(),
-                new RollCommand(),
-                new RoryCommand(),
-                new SpigotDramaCommand(),
-
-                // Google Module
-                new YouTubeCommand(),
-
-                // Info Module
-                new BotInfoCommand(),
-                new ChannelInfoCommand(),
-                new InfoCommand(),
-                new RoleInfoCommand(),
-                new ServerInfoCommand(),
-                new UserInfoCommand(),
-
-                // Minecraft Module
-                new MCIssueCommand(),
-                new MCPHNodesCommand(),
-                new MCServerCommand(),
-                new MCStatusCommand(),
-                new MCUserCommand(),
-                new MCWikiCommand(),
-
-                // Moderation Commands
-                new BanCommand(),
-                new RoleCommand(),
-
-                // Owner Module
-                new ShutdownCommand(),
-
-                // Quotes Module
-                new AcronymCommand(),
-                new QuoteCommand(),
-                new TRBMBCommand(),
-
-                // Settings Module
-                new ProfileCommand(),
-                new ServerSettingsCommand(),
-
-                // Everything Else
-                new DiscrimCommand(waiter),
-                new FeedbackCommand(),
-                new LastFMCommand(),
-                new RubyGemsCommand()
-        );
-
-        // Add GitHub commands only if it properly initiated
-        if(github != null) {
-            client.addCommands(
-                    // From Owner Module
-                    new NewIssueCommand(),
-
-                    new GHIssueCommand(),
-                    new GHRepoCommand(),
-                    new GHUserCommand()
-            );
-        }
+        client.addCommands(getCommands());
 
         // Register JDA
         JDA jda = JDABuilder.createDefault(PropertiesManager.getToken())
@@ -234,5 +115,39 @@ public class Main {
         );
 
         new Memory(waiter, jda, chew, mcpro, github, topgg);
+    }
+
+    /**
+     * Loads all commands from "commands" folder.
+     * @return an array of commands
+     */
+    private static Command[] getCommands() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        File directory = new File("./src/main/java/pw/chew/chewbotcca/commands");
+        String packageName = "pw.chew.chewbotcca.commands.";
+        List<Command> commands = new ArrayList<>();
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+
+        for (String content : directory.list()) {
+            if (content.startsWith(".") || content.contains(".rb"))
+                continue;
+            if (content.endsWith(".java")) {
+                LoggerFactory.getLogger(Main.class).debug("Loading command: " + content);
+                commands.add((Command) classLoader.loadClass(packageName + content.replace(".java", "")).newInstance());
+                LoggerFactory.getLogger(Main.class).debug("Loaded command: " + content);
+            } else {
+                LoggerFactory.getLogger(Main.class).debug("Searching directory: " + content);
+                File subdirectory = new File("./src/main/java/pw/chew/chewbotcca/commands/" + content);
+                String subpackageName = "pw.chew.chewbotcca.commands." + content + ".";
+                for (String subcontent : subdirectory.list()) {
+                    LoggerFactory.getLogger(Main.class).debug("Loading command: " + subcontent);
+                    if (subcontent.startsWith(".") || subcontent.contains(".rb"))
+                        continue;
+                    commands.add((Command) classLoader.loadClass(subpackageName + subcontent.replace(".java", "")).newInstance());
+                    LoggerFactory.getLogger(Main.class).debug("Loaded command: " + subcontent);
+                }
+            }
+        }
+
+        return commands.toArray(new Command[0]);
     }
 }
