@@ -120,7 +120,7 @@ public class Main {
     }
 
     /**
-     * Gatheres all commands from "commands" package.
+     * Gathers all commands from "commands" package.
      * @return an array of commands
      */
     private static Command[] getCommands() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
