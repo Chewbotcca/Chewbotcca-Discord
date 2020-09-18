@@ -26,7 +26,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
-import org.awaitility.core.ConditionTimeoutException;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 
@@ -80,8 +79,6 @@ public class ServerInfoCommand extends Command {
         } else {
             event.reply(gatherMainInfo(event, server).build());
         }
-
-        event.getGuild().pruneMemberCache();
     }
 
     /**
@@ -99,16 +96,8 @@ public class ServerInfoCommand extends Command {
 
         e.setThumbnail(server.getIconUrl() + "?size=2048");
 
-        // Retrieve the owner in sync
-        server.retrieveOwner(true).queue();
-        try {
-            await().atMost(3, TimeUnit.SECONDS).until(() -> server.getOwner() != null);
-            assert server.getOwner() != null;
-            e.addField("Server Owner", server.getOwner().getAsMention(), true);
-        } catch (ConditionTimeoutException error) {
-            e.addField("Server Owner", "Timed out retrieving owner...", true);
-        }
-
+        // Retrieve server info
+        e.addField("Server Owner", server.retrieveOwner(true).complete().getAsMention(), true);
         e.addField("Server ID", server.getId(), true);
         e.addField("Voice Region", server.getRegion().getEmoji() + " " + server.getRegion().getName(), true);
         e.addField("Locale", server.getLocale().getDisplayName(), true);
@@ -178,7 +167,11 @@ public class ServerInfoCommand extends Command {
         if(perks.length() > 0)
             e.addField("Features", perks, true);
 
-        e.addField("View More Info", "Roles - `%^sinfo roles`\nBoosts - `%^sinfo boosts`\nBots - `%^sinfo bots`", false);
+        e.addField("View More Info", """
+            Roles - `%^sinfo roles`
+            Boosts - `%^sinfo boosts`
+            Bots - `%^sinfo bots`
+            """, false);
 
         e.setFooter("Server Created on");
         e.setTimestamp(server.getTimeCreated());
@@ -208,7 +201,7 @@ public class ServerInfoCommand extends Command {
                 boostString.add(booster.getAsMention() + " for " + DateTime.timeAgo(now.toEpochMilli() - timeBoosted.toInstant().toEpochMilli()));
         }
         embed.setDescription(String.join("\n", boostString));
-        if(boostString.size() == 0) {
+        if(boostString.isEmpty()) {
             embed.setDescription("No one is boosting! Will you be the first?");
         }
         return embed;
@@ -235,8 +228,10 @@ public class ServerInfoCommand extends Command {
             int members = membersWithRole.size();
             // Skip if it's a bot role
             boolean skip = false;
+            // Skip if managed, has 1 member, and that member is a bot
             if (role.isManaged() && members == 1 && membersWithRole.get(0).getUser().isBot())
                 skip = true;
+            // Skip @everyone role
             if (role.isPublicRole())
                 skip = true;
 
