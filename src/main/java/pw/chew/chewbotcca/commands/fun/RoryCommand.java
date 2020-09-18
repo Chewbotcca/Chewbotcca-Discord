@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.slf4j.LoggerFactory;
-import pw.chew.chewbotcca.Main;
+import pw.chew.chewbotcca.objects.Memory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class RoryCommand extends Command {
     public static void getRoryImages() {
         LoggerFactory.getLogger(RoryCommand.class).debug("Gathering Rory Images...");
         roryImages = new ArrayList<>();
-        Guild roryServer = Main.getJDA().getGuildById("134445052805120001");
+        Guild roryServer = Memory.getJda().getGuildById("134445052805120001");
         if (roryServer == null)
             return;
         TextChannel roryChannel = roryServer.getTextChannelById("752063016425619487");
