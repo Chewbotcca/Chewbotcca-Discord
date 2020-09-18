@@ -32,6 +32,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.discordbots.api.client.DiscordBotListAPI;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.chew.api.ChewAPI;
@@ -42,19 +43,20 @@ import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import javax.security.auth.login.LoginException;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 // The Main Bot class. Where all the magic happens!
 public class Main {
     // Instance variables
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) throws LoginException, IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public static void main(String[] args) throws LoginException, IOException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Load properties into the PropertiesManager
         Properties prop = new Properties();
         prop.load(new FileInputStream("bot.properties"));
@@ -118,34 +120,17 @@ public class Main {
     }
 
     /**
-     * Loads all commands from "commands" folder.
+     * Gatheres all commands from "commands" package.
      * @return an array of commands
      */
-    private static Command[] getCommands() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        File directory = new File("./src/main/java/pw/chew/chewbotcca/commands");
-        String packageName = "pw.chew.chewbotcca.commands.";
+    private static Command[] getCommands() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        Reflections reflections =  new Reflections("pw.chew.chewbotcca.commands");
+        Set<Class<? extends Command>> subTypes = reflections.getSubTypesOf(Command.class);
         List<Command> commands = new ArrayList<>();
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
-        for (String content : directory.list()) {
-            if (content.startsWith(".") || content.contains(".rb"))
-                continue;
-            if (content.endsWith(".java")) {
-                LoggerFactory.getLogger(Main.class).debug("Loading command: " + content);
-                commands.add((Command) classLoader.loadClass(packageName + content.replace(".java", "")).newInstance());
-                LoggerFactory.getLogger(Main.class).debug("Loaded command: " + content);
-            } else {
-                LoggerFactory.getLogger(Main.class).debug("Searching directory: " + content);
-                File subdirectory = new File("./src/main/java/pw/chew/chewbotcca/commands/" + content);
-                String subpackageName = "pw.chew.chewbotcca.commands." + content + ".";
-                for (String subcontent : subdirectory.list()) {
-                    LoggerFactory.getLogger(Main.class).debug("Loading command: " + subcontent);
-                    if (subcontent.startsWith(".") || subcontent.contains(".rb"))
-                        continue;
-                    commands.add((Command) classLoader.loadClass(subpackageName + subcontent.replace(".java", "")).newInstance());
-                    LoggerFactory.getLogger(Main.class).debug("Loaded command: " + subcontent);
-                }
-            }
+        for (Class<? extends Command> theClass : subTypes) {
+            commands.add(theClass.getDeclaredConstructor().newInstance());
+            logger.debug("Loaded " + theClass.getSimpleName());
         }
 
         return commands.toArray(new Command[0]);
