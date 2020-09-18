@@ -21,21 +21,19 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
+import pw.chew.chewbotcca.objects.Memory;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 
 // %^ghrepo command
 public class GHRepoCommand extends Command {
-    final GitHub github;
 
-    public GHRepoCommand(GitHub github) {
+    public GHRepoCommand() {
         this.name = "ghrepo";
         this.aliases = new String[]{"githubrepo", "ghrepository"};
         this.guildOnly = false;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.github = github;
     }
 
     @Override
@@ -50,7 +48,7 @@ public class GHRepoCommand extends Command {
         // Find the repo
         GHRepository repo;
         try {
-            repo = github.getRepository(repoName);
+            repo = Memory.getGithub().getRepository(repoName);
         } catch (IOException e) {
             commandEvent.reply("Invalid repository name. Please make sure this repository exists!");
             return;

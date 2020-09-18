@@ -21,19 +21,17 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueBuilder;
 import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
+import pw.chew.chewbotcca.objects.Memory;
 
 import java.io.IOException;
 
 // %^newissue command
 public class NewIssueCommand extends Command {
-    final GitHub github;
 
-    public NewIssueCommand(GitHub github) {
+    public NewIssueCommand() {
         this.name = "issue";
         this.guildOnly = false;
         this.ownerCommand = true;
-        this.github = github;
     }
 
     @Override
@@ -41,7 +39,7 @@ public class NewIssueCommand extends Command {
         GHRepository repo;
         commandEvent.getChannel().sendTyping().queue();
         try {
-            repo = github.getRepository("Chewbotcca/Discord");
+            repo = Memory.getGithub().getRepository("Chewbotcca/Discord");
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error occurred getting repo!");
@@ -68,7 +66,7 @@ public class NewIssueCommand extends Command {
         }
 
         try {
-            GHIssueBuilder issueBuilder = repo.createIssue(title).assignee(github.getMyself());
+            GHIssueBuilder issueBuilder = repo.createIssue(title).assignee(Memory.getGithub().getMyself());
             if(hasDescription)
                 issueBuilder.body(description);
             if(hasLabel)

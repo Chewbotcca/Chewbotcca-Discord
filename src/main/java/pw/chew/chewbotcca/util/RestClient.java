@@ -22,7 +22,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.slf4j.LoggerFactory;
-import pw.chew.chewbotcca.Main;
+import pw.chew.chewbotcca.objects.Memory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -105,7 +105,7 @@ public class RestClient {
      * @return a response
      */
     public static String performRequest(Request request) {
-        try (Response response = Main.getJDA().getHttpClient().newCall(request).execute()) {
+        try (Response response = Memory.getJda().getHttpClient().newCall(request).execute()) {
             String body;
             ResponseBody responseBody = response.body();
             if(responseBody == null) {

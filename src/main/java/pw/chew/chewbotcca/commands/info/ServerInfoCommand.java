@@ -18,7 +18,6 @@ package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -41,14 +40,12 @@ import static org.awaitility.Awaitility.await;
 
 // %^sinfo command
 public class ServerInfoCommand extends Command {
-    private final EventWaiter waiter;
 
-    public ServerInfoCommand(EventWaiter waiter) {
+    public ServerInfoCommand() {
         this.name = "serverinfo";
         this.aliases = new String[]{"sinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = true;
-        this.waiter = waiter;
     }
 
     @Override
@@ -213,7 +210,7 @@ public class ServerInfoCommand extends Command {
      * @param server the server
      */
     public void gatherRoles(CommandEvent event, Guild server) {
-        Paginator.Builder pbuilder = JDAUtilUtil.makePaginator(waiter).clearItems();
+        Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
 
         List<CharSequence> roleNames = new ArrayList<>();
 
@@ -252,7 +249,7 @@ public class ServerInfoCommand extends Command {
      * @param renderMention whether or not to render a mention
      */
     public void gatherBots(CommandEvent event, Guild server, boolean renderMention) {
-        Paginator.Builder pbuilder = JDAUtilUtil.makePaginator(waiter).clearItems();
+        Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
 
         pbuilder.setText("Bots on " + server.getName() + "\n" + "Newest bots on the bottom");
         // Get all members as an array an sort it by join time

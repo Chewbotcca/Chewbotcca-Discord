@@ -18,23 +18,21 @@ package pw.chew.chewbotcca.commands.quotes;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import pro.chew.api.ChewAPI;
+import pw.chew.chewbotcca.objects.Memory;
 
 // %^acronym command
 public class AcronymCommand extends Command {
-    final ChewAPI chew;
 
-    public AcronymCommand(ChewAPI chewAPI) {
+    public AcronymCommand() {
         this.name = "acronym";
         this.guildOnly = false;
-        this.chew = chewAPI;
     }
 
     @Override
     protected void execute(CommandEvent event) {
         // Get acronym and send if the acronym is valid
         try {
-            String phrase = chew.generateAcronym(event.getArgs());
+            String phrase = Memory.getChewAPI().generateAcronym(event.getArgs());
             event.reply("Acronym for " + event.getArgs() + " is " + phrase);
         } catch (IllegalArgumentException e) {
             event.reply("Args must only contain letters!");

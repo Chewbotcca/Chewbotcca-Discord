@@ -20,24 +20,21 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import pro.chew.api.ChewAPI;
 import pro.chew.api.objects.SpigotDrama;
+import pw.chew.chewbotcca.objects.Memory;
 
 // %^spigotdrama command
 public class SpigotDramaCommand extends Command {
-    final ChewAPI chew;
-
-    public SpigotDramaCommand(ChewAPI chew) {
+    public SpigotDramaCommand() {
         this.name = "spigotdrama";
         this.guildOnly = false;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.chew = chew;
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
         // Get a SpigotDrama response
-        SpigotDrama response = chew.generateSpigotDrama();
+        SpigotDrama response = Memory.getChewAPI().generateSpigotDrama();
         // Make an embed and send it off
         EmbedBuilder embed = new EmbedBuilder();
         embed.setAuthor("md678685", "https://github.com/md678685/spigot-drama-generator", "https://avatars0.githubusercontent.com/u/1917406");

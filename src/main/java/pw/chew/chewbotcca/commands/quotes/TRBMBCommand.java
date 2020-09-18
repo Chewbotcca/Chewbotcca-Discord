@@ -18,21 +18,19 @@ package pw.chew.chewbotcca.commands.quotes;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import pro.chew.api.ChewAPI;
+import pw.chew.chewbotcca.objects.Memory;
 
 // %^trbmb command
 public class TRBMBCommand extends Command {
-    final ChewAPI chew;
 
-    public TRBMBCommand(ChewAPI chewAPI) {
+    public TRBMBCommand() {
         this.name = "trbmb";
         this.guildOnly = false;
-        this.chew = chewAPI;
     }
 
     @Override
     protected void execute(CommandEvent event) {
         // Get and send TRBMB Phrase
-        event.reply(chew.getTRBMBPhrase());
+        event.reply(Memory.getChewAPI().getTRBMBPhrase());
     }
 }

@@ -24,7 +24,7 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.LoggerFactory;
-import pw.chew.chewbotcca.Main;
+import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import javax.annotation.Nonnull;
@@ -48,7 +48,7 @@ public class ServerJoinLeaveListener extends ListenerAdapter {
         long servers = jda.getGuildCache().size();
         // Set server count unless in dev
         if(!PropertiesManager.getSentryEnv().equals("development"))
-            Main.getTopgg().setStats((int) servers);
+            Memory.getTopgg().setStats((int) servers);
         EmbedBuilder e = new EmbedBuilder();
         // Say join or leave
         if(joined) {

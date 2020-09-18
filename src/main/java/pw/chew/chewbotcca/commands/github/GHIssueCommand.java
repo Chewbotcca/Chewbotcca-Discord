@@ -26,7 +26,7 @@ import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHUser;
-import org.kohsuke.github.GitHub;
+import pw.chew.chewbotcca.objects.Memory;
 
 import java.awt.*;
 import java.io.IOException;
@@ -35,15 +35,13 @@ import java.util.List;
 
 // %^ghissue command
 public class GHIssueCommand extends Command {
-    final GitHub github;
     final static ArrayList<String> describedIds = new ArrayList<>();
 
-    public GHIssueCommand(GitHub github) {
+    public GHIssueCommand() {
         this.name = "ghissue";
         this.aliases = new String[]{"ghpull"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
-        this.github = github;
     }
 
     @Override
@@ -166,7 +164,7 @@ public class GHIssueCommand extends Command {
         // Find the GitHub issue
         GHIssue issue;
         try {
-            issue = github.getRepository(repo).getIssue(issueNum);
+            issue = Memory.getGithub().getRepository(repo).getIssue(issueNum);
         } catch (IOException e) {
             commandEvent.reply("Invalid issue number or an invalid repository was provided. Please ensure the issue exists and the repository is public.");
             return null;

@@ -50,7 +50,7 @@ public class DiscrimCommand extends Command {
         } else if (event.getArgs().contains("--rank")) {
             Map<String, Integer> ranking = getDiscrimRanking(event.getJDA().getUserCache());
             Map<String, Integer> ranked = sortByValue(ranking);
-            Paginator.Builder pbuilder = JDAUtilUtil.makePaginator(waiter);
+            Paginator.Builder pbuilder = JDAUtilUtil.makePaginator();
             pbuilder.setText("Users discriminator ranking"
                 + "\nCached users: " + event.getJDA().getUserCache().size());
             for (String discriminator : ranked.keySet()) {
@@ -64,7 +64,7 @@ public class DiscrimCommand extends Command {
     }
 
     public Paginator buildDiscrimPaginator(String discrim, JDA jda) {
-        Paginator.Builder pbuilder = JDAUtilUtil.makePaginator(waiter);
+        Paginator.Builder pbuilder = JDAUtilUtil.makePaginator();
         pbuilder.setText("Users with discriminator #" + discrim
             + "\nCached users: " + jda.getUserCache().size());
         for (User user : jda.getUserCache()) {

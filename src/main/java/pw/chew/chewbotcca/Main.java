@@ -64,6 +64,7 @@ import pw.chew.chewbotcca.commands.info.InfoCommand;
 import pw.chew.chewbotcca.commands.info.RoleInfoCommand;
 import pw.chew.chewbotcca.commands.info.ServerInfoCommand;
 import pw.chew.chewbotcca.commands.info.UserInfoCommand;
+import pw.chew.chewbotcca.commands.minecraft.HangarCommand;
 import pw.chew.chewbotcca.commands.minecraft.MCIssueCommand;
 import pw.chew.chewbotcca.commands.minecraft.MCPHNodesCommand;
 import pw.chew.chewbotcca.commands.minecraft.MCServerCommand;
@@ -82,19 +83,19 @@ import pw.chew.chewbotcca.commands.settings.ServerSettingsCommand;
 import pw.chew.chewbotcca.listeners.MagReactListener;
 import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
+import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
 // The Main Bot class. Where all the magic happens!
 public class Main {
     // Instance variables
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    private static JDA jda;
-    private static DiscordBotListAPI topgg;
 
     public static void main(String[] args) throws LoginException, IOException {
         // Load properties into the PropertiesManager
@@ -106,10 +107,10 @@ public class Main {
         Sentry.init(PropertiesManager.getSentryDsn()).setEnvironment(PropertiesManager.getSentryEnv());
 
         // Initialize Top.gg for stats posting
-        topgg = new DiscordBotListAPI.Builder()
-                .token(PropertiesManager.getTopggToken())
-                .botId(PropertiesManager.getClientId())
-                .build();
+        DiscordBotListAPI topgg = new DiscordBotListAPI.Builder()
+            .token(PropertiesManager.getTopggToken())
+            .botId(PropertiesManager.getClientId())
+            .build();
 
         // Initialize the waiter and client
         EventWaiter waiter = new EventWaiter();
@@ -157,7 +158,7 @@ public class Main {
                 new RedditCommand(),
                 new RollCommand(),
                 new RoryCommand(),
-                new SpigotDramaCommand(chew),
+                new SpigotDramaCommand(),
 
                 // Google Module
                 new YouTubeCommand(),
@@ -166,13 +167,13 @@ public class Main {
                 new BotInfoCommand(),
                 new ChannelInfoCommand(),
                 new InfoCommand(),
-                new RoleInfoCommand(waiter),
-                new ServerInfoCommand(waiter),
+                new RoleInfoCommand(),
+                new ServerInfoCommand(),
                 new UserInfoCommand(),
 
                 // Minecraft Module
                 new MCIssueCommand(),
-                new MCPHNodesCommand(mcpro),
+                new MCPHNodesCommand(),
                 new MCServerCommand(),
                 new MCStatusCommand(),
                 new MCUserCommand(),
@@ -186,9 +187,9 @@ public class Main {
                 new ShutdownCommand(),
 
                 // Quotes Module
-                new AcronymCommand(chew),
+                new AcronymCommand(),
                 new QuoteCommand(),
-                new TRBMBCommand(chew),
+                new TRBMBCommand(),
 
                 // Settings Module
                 new ProfileCommand(),
@@ -205,25 +206,25 @@ public class Main {
         if(github != null) {
             client.addCommands(
                     // From Owner Module
-                    new NewIssueCommand(github),
+                    new NewIssueCommand(),
 
-                    new GHIssueCommand(github),
-                    new GHRepoCommand(github),
-                    new GHUserCommand(github)
+                    new GHIssueCommand(),
+                    new GHRepoCommand(),
+                    new GHUserCommand()
             );
         }
 
         // Register JDA
-        jda = JDABuilder.createDefault(PropertiesManager.getToken())
-                .setChunkingFilter(ChunkingFilter.ALL)
-                .setMemberCachePolicy(MemberCachePolicy.ALL)
-                .enableIntents(GatewayIntent.GUILD_MEMBERS)
-                .enableIntents(GatewayIntent.GUILD_PRESENCES)
-                .enableCache(CacheFlag.ACTIVITY)
-                .setStatus(OnlineStatus.ONLINE)
-                .setActivity(Activity.playing("Booting..."))
-                .addEventListeners(waiter, client.build())
-                .build();
+        JDA jda = JDABuilder.createDefault(PropertiesManager.getToken())
+            .setChunkingFilter(ChunkingFilter.ALL)
+            .setMemberCachePolicy(MemberCachePolicy.ALL)
+            .enableIntents(GatewayIntent.GUILD_MEMBERS)
+            .enableIntents(GatewayIntent.GUILD_PRESENCES)
+            .enableCache(CacheFlag.ACTIVITY)
+            .setStatus(OnlineStatus.ONLINE)
+            .setActivity(Activity.playing("Booting..."))
+            .addEventListeners(waiter, client.build())
+            .build();
 
         // Register listeners
         jda.addEventListener(
@@ -231,15 +232,7 @@ public class Main {
                 new MessageHandler(),
                 new ServerJoinLeaveListener()
         );
-    }
 
-    // Get the JDA if needed
-    public static JDA getJDA() {
-        return jda;
-    }
-
-    // Get the Topgg API when needed
-    public static DiscordBotListAPI getTopgg() {
-        return topgg;
+        new Memory(waiter, jda, chew, mcpro, github, topgg);
     }
 }

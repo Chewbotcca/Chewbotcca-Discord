@@ -22,20 +22,18 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHUser;
-import org.kohsuke.github.GitHub;
+import pw.chew.chewbotcca.objects.Memory;
 
 import java.io.IOException;
 
 // %^ghuser command
 public class GHUserCommand extends Command {
-    final GitHub github;
 
-    public GHUserCommand(GitHub github) {
+    public GHUserCommand() {
         this.name = "ghuser";
         this.aliases = new String[]{"ghorg"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
-        this.github = github;
     }
 
     @Override
@@ -46,7 +44,7 @@ public class GHUserCommand extends Command {
         // Find the GitHub user and notify if errored
         GHUser user;
         try {
-            user = github.getUser(username);
+            user = Memory.getGithub().getUser(username);
         } catch (IOException e) {
             commandEvent.reply("Invalid username. Please make sure this user exists!");
             return;
@@ -73,7 +71,7 @@ public class GHUserCommand extends Command {
                     e.addField("Twitter", "[@" + user.getTwitterUsername() + "](https://twitter.com/" + user.getTwitterUsername() + ")", true);
             } else {
                 // If it is an org, list other stuff instead
-                GHOrganization org = github.getOrganization(user.getLogin());
+                GHOrganization org = Memory.getGithub().getOrganization(user.getLogin());
                 e.setTitle("GitHub profile for Organization " + user.getLogin(), "https://github.com/" + user.getLogin());
                 e.addField("Public Members", String.valueOf(org.listMembers().toArray().length), true);
             }

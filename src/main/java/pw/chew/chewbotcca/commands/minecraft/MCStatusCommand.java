@@ -24,7 +24,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.Main;
+import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.io.IOException;
@@ -100,7 +100,7 @@ public class MCStatusCommand extends Command {
                 .get()
                 .build();
 
-        try (Response response = Main.getJDA().getHttpClient().newCall(request).execute()) {
+        try (Response response = Memory.getJda().getHttpClient().newCall(request).execute()) {
             return response.code() == 200;
         } catch (IOException e) {
             e.printStackTrace();

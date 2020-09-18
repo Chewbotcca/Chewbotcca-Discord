@@ -18,7 +18,6 @@ package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -39,14 +38,12 @@ import static org.awaitility.Awaitility.await;
 
 // %^rinfo command
 public class RoleInfoCommand extends Command {
-    private final EventWaiter waiter;
 
-    public RoleInfoCommand(EventWaiter waiter) {
+    public RoleInfoCommand() {
         this.name = "roleinfo";
         this.aliases = new String[]{"rinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = true;
-        this.waiter = waiter;
     }
 
     @Override
@@ -63,9 +60,9 @@ public class RoleInfoCommand extends Command {
         }
 
         boolean mention = false;
-        if(arg.contains(" --mention")) {
+        if(arg.contains("--mention")) {
             mention = true;
-            arg = arg.replace(" --mention", "");
+            arg = arg.replace("--mention", "").trim();
         }
 
         // Parse and find the role
@@ -161,7 +158,7 @@ public class RoleInfoCommand extends Command {
             event.reply("Finding all members is unsupported.");
             return;
         }
-        Paginator.Builder paginator = JDAUtilUtil.makePaginator(waiter).clearItems();
+        Paginator.Builder paginator = JDAUtilUtil.makePaginator().clearItems();
         paginator.setText("Members in role " + role.getName());
         // Get members
         new Thread(() -> event.getGuild().loadMembers().get());
