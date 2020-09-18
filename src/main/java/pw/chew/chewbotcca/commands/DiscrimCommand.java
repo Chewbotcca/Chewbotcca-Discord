@@ -18,7 +18,6 @@ package pw.chew.chewbotcca.commands;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
@@ -33,12 +32,10 @@ import java.util.Map;
 
 // %^discrim command
 public class DiscrimCommand extends Command {
-    private final EventWaiter waiter;
 
-    public DiscrimCommand(EventWaiter waiter) {
+    public DiscrimCommand() {
         this.name = "discrim";
         this.guildOnly = false;
-        this.waiter = waiter;
     }
 
     @Override
