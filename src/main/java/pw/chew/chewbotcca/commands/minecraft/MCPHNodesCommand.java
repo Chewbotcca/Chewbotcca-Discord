@@ -57,7 +57,7 @@ public class MCPHNodesCommand extends Command {
      */
     public EmbedBuilder allNodes() {
         // Gather info
-        List<Node> downNodes = Memory.getMcproAPI().getNodeStatuses().stream().filter(Node::isOnline).collect(Collectors.toList());
+        List<Node> downNodes = Memory.getMcproAPI().getNodeStatuses().stream().filter(node -> !node.isOnline()).collect(Collectors.toList());
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("MCProHosting Node Statuses", "https://panel.mcprohosting.com/status");
         embed.setDescription("Only showing status for locations with at least 1 down node.");
@@ -80,7 +80,7 @@ public class MCPHNodesCommand extends Command {
             for (Node downNode : down) {
                 nodeList.add(String.valueOf(downNode.getId()));
             }
-            embed.addField(name, "Outages: " + String.join(", ", nodeList), true);
+            embed.addField(location, "Outages: " + String.join(", ", nodeList), true);
         }
         return embed;
     }
