@@ -48,7 +48,7 @@ public class RedditCommand extends Command {
         } else {
             // Otherwise, a subreddit was probably specified, so use that
             String[] args = commandEvent.getArgs().split(" ");
-            url = String.format(baseUrl, args[0]);
+            url = String.format(baseUrl, args[0].replace("r/", ""));
             if(args.length > 1) {
                 num = Integer.parseInt(args[1]);
             }
@@ -57,6 +57,11 @@ public class RedditCommand extends Command {
         // Get data from reddit
         JSONObject reddit = new JSONObject(RestClient.get(url));
         JSONArray data = reddit.getJSONObject("data").getJSONArray("children");
+
+        if (data.length() == 0) {
+            commandEvent.reply("This sub-reddit does not have any posts!");
+            return;
+        }
 
         JSONObject post;
 
@@ -85,13 +90,15 @@ public class RedditCommand extends Command {
     // Code to generate a post embed based off of a post json object
     public EmbedBuilder generatePostEmbed(JSONObject post) {
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle(post.getString("title"), post.getString("url"));
-        embed.setAuthor(post.getString("author"), "https://reddit.com/u/" + post.getString("author"));
+        embed.setTitle(post.getString("title"), "https://reddit.com/" + post.getString("permalink"));
+        embed.setAuthor("u/" + post.getString("author"), "https://reddit.com/u/" + post.getString("author"));
         embed.setTimestamp(Instant.ofEpochSecond(post.getLong("created_utc")));
         embed.addField("Upvotes", String.valueOf(post.getInt("score")), true);
         embed.addField("Comments", String.valueOf(post.getInt("num_comments")), true);
         if(post.has("description"))
             embed.setDescription(post.getString("description"));
+        if (post.has("preview"))
+            embed.setImage(post.getString("url"));
         return embed;
     }
 
