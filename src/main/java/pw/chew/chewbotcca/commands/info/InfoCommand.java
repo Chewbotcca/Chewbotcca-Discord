@@ -78,6 +78,16 @@ public class InfoCommand extends Command {
         } else {
             e.addField("Aliases", "No aliases", true);
         }
+        if(!data.isNull("bot_permissions")) {
+            e.addField("Bot Permissions", data.getString("bot_permissions"), true);
+        } else {
+            e.addField("Bot Permissions", "No special permissions needed.", true);
+        }
+        if(!data.isNull("user_permissions")) {
+            e.addField("User Permissions", data.getString("user_permissions"), true);
+        } else {
+            e.addField("User Permissions", "No special permissions needed.", true);
+        }
 
         event.reply(e.build());
     }
