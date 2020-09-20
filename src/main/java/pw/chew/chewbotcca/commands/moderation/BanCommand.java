@@ -78,7 +78,7 @@ public class BanCommand extends Command {
                     "You just banned some DUDE (aka " + finalUser.getAsTag() + ").\n" +
                     "How much history got deleted? " + finalDays + " days...");
 
-                embed.setAuthor("Beaner boi: " + event.getAuthor().getAsTag());
+                embed.setAuthor("The banner (you): " + event.getAuthor().getAsTag());
 
                 event.reply(embed.build());
             });
