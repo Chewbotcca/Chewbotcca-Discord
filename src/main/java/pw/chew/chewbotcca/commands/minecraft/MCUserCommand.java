@@ -55,7 +55,7 @@ public class MCUserCommand extends Command {
                 commandEvent.reply("Not a valid input! Please enter a valid UUID!");
                 return;
             }
-        } else if (name.length() >= 3 && name.length() <= 16) {
+        } else if (name.length() >= 1 && name.length() <= 16) {
             // If it's a username
             try {
                 JSONObject profile = new JSONObject(RestClient.get("https://api.mojang.com/users/profiles/minecraft/" + name));
