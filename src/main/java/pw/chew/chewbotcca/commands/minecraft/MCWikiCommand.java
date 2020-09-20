@@ -81,11 +81,11 @@ public class MCWikiCommand extends Command {
         }
 
         if(!noSlash.isEmpty())
-            articleName = noSlash.get(0).replace(' ', '_');
+            articleName = noSlash.get(0).replaceAll(" ", "_");
         else
-            articleName = j.getString(0).replace(' ', '_');
+            articleName = j.getString(0).replaceAll(" ", "_");
 
-        String url = mcUrl + articleName.replace(" ", "_");
+        String url = mcUrl + articleName.replaceAll(" ", "_");
 
         // Actually get the page
         String page = RestClient.get(url);
