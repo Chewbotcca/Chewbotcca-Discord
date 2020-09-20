@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
@@ -35,6 +36,7 @@ public class DiscrimCommand extends Command {
 
     public DiscrimCommand() {
         this.name = "discrim";
+        this.botPermissions = new Permission[]{Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
     }
 

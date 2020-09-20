@@ -44,7 +44,7 @@ public class ServerInfoCommand extends Command {
     public ServerInfoCommand() {
         this.name = "serverinfo";
         this.aliases = new String[]{"sinfo"};
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION};
         this.guildOnly = true;
     }
 

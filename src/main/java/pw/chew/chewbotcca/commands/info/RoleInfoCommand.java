@@ -42,7 +42,7 @@ public class RoleInfoCommand extends Command {
     public RoleInfoCommand() {
         this.name = "roleinfo";
         this.aliases = new String[]{"rinfo"};
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION};
         this.guildOnly = true;
     }
 
