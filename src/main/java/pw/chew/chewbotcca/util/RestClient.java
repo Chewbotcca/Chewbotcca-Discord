@@ -17,10 +17,12 @@
 package pw.chew.chewbotcca.util;
 
 import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.objects.Memory;
 
@@ -30,6 +32,8 @@ import java.util.Map;
 
 // Off brand RestClient based on the ruby gem of the same name
 public class RestClient {
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
     /**
      * Make a GET request
      * @param url the url to get
@@ -78,6 +82,24 @@ public class RestClient {
                 .addHeader("Authorization", key)
                 .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
                 .build();
+
+        return performRequest(request);
+    }
+
+    /**
+     * Make an Unauthenticated POST Request with JSON Body
+     * @param url the url
+     * @param json the json body to send
+     * @return a response
+     */
+    public static String post(String url, JSONObject json) {
+        RequestBody body = RequestBody.create(JSON, json.toString());
+
+        Request request = new Request.Builder()
+            .url(url)
+            .post(body)
+            .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+            .build();
 
         return performRequest(request);
     }
