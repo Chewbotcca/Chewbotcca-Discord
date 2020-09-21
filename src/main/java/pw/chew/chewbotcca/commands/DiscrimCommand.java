@@ -26,6 +26,7 @@ import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -86,6 +87,7 @@ public class DiscrimCommand extends Command {
     public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
         List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
         list.sort(Map.Entry.comparingByValue());
+        Collections.reverse(list);
 
         Map<K, V> result = new LinkedHashMap<>();
         for (Map.Entry<K, V> entry : list) {
