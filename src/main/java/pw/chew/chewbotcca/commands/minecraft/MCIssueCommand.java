@@ -26,13 +26,11 @@ import pw.chew.chewbotcca.util.RestClient;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class MCIssueCommand extends Command {
-    final static ArrayList<String> describedIds = new ArrayList<>();
     private static final HashMap<String, List<String>> projects = new HashMap<>();
 
     public MCIssueCommand() {
@@ -126,17 +124,5 @@ public class MCIssueCommand extends Command {
                 return key;
         }
         return null;
-    }
-
-    /*
-    Methods for MagReact
-     */
-
-    public static boolean didDescribe(String id) {
-        return describedIds.contains(id);
-    }
-
-    public static void described(String id) {
-        describedIds.add(id);
     }
 }

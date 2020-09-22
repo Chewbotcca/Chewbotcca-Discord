@@ -22,20 +22,24 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.json.JSONObject;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.commands.github.GHIssueCommand;
 import pw.chew.chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.chewbotcca.commands.minecraft.MCIssueCommand;
+import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 // Listen to 🔍 reactions
 public class MagReactListener extends ListenerAdapter {
+    private static final List<String> describedIds = new ArrayList<>();
+
     // Listen for all reactions
     @Override
     public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
@@ -45,6 +49,12 @@ public class MagReactListener extends ListenerAdapter {
         }
         // Get the message id
         String id = event.getMessageId();
+        // Ignore if already described to avoid spam
+        if (didDescribe(id)) {
+            LoggerFactory.getLogger(MagReactListener.class).debug("Already described this message!");
+            return;
+        }
+
         // Retrieve the message
         event.getChannel().retrieveMessageById(id).queue((msg) -> {
             String content = msg.getContentStripped().replace(">", "");
@@ -59,7 +69,6 @@ public class MagReactListener extends ListenerAdapter {
                 handleMcIssue(content, event, msg);
             }
         });
-
     }
 
     /**
@@ -86,13 +95,8 @@ public class MagReactListener extends ListenerAdapter {
             LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
             return;
         }
-        // Ignore if already described to avoid spam
-        if(YouTubeCommand.didDescribe(msg.getId())) {
-            LoggerFactory.getLogger(MagReactListener.class).debug("Already described this message!");
-            return;
-        }
         // Mark it as described
-        YouTubeCommand.described(msg.getId());
+        described(msg.getId());
         // Get the video
         JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + video + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics"));
         // make a YouTube video embed response
@@ -117,21 +121,10 @@ public class MagReactListener extends ListenerAdapter {
             LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
             return;
         }
-        // Ignore if already described to avoid spam
-        if(GHIssueCommand.didDescribe(msg.getId())) {
-            LoggerFactory.getLogger(MagReactListener.class).debug("Already described this message!");
-            return;
-        }
         // Ignore if described
-        GHIssueCommand.described(msg.getId());
+        described(msg.getId());
         // Initialize GitHub and the response
-        GitHub github;
-        try {
-            github = new GitHubBuilder().withOAuthToken(PropertiesManager.getGithubToken()).build();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        GitHub github = Memory.getGithub();
         GHIssue ghIssue;
         try {
             ghIssue = github.getRepository(repo).getIssue(issue);
@@ -156,13 +149,8 @@ public class MagReactListener extends ListenerAdapter {
             LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
             return;
         }
-        // Ignore if already described to avoid spam
-        if(MCIssueCommand.didDescribe(msg.getId())) {
-            LoggerFactory.getLogger(MagReactListener.class).debug("Already described this message!");
-            return;
-        }
         // Ignore if described
-        MCIssueCommand.described(msg.getId());
+        described(msg.getId());
         // Ensure we actually track this
         String apiUrl = MCIssueCommand.getApiUrl(issue.split("-")[0]);
         if(apiUrl == null)
@@ -171,5 +159,22 @@ public class MagReactListener extends ListenerAdapter {
         JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
         // Initialize GitHub and the response
         event.getChannel().sendMessage(MCIssueCommand.generateEmbed(data, issue, apiUrl).build()).queue();
+    }
+
+    /**
+     * Queries whether a specific message ID has been described
+     * @param id the message id
+     * @return if it was described
+     */
+    public static boolean didDescribe(String id) {
+        return describedIds.contains(id);
+    }
+
+    /**
+     * Mark a message ID as "described"
+     * @param id the message ID
+     */
+    public static void described(String id) {
+        describedIds.add(id);
     }
 }

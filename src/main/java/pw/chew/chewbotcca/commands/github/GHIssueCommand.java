@@ -35,7 +35,6 @@ import java.util.List;
 
 // %^ghissue command
 public class GHIssueCommand extends Command {
-    final static ArrayList<String> describedIds = new ArrayList<>();
 
     public GHIssueCommand() {
         this.name = "ghissue";
@@ -170,15 +169,5 @@ public class GHIssueCommand extends Command {
             return null;
         }
         return issue;
-    }
-
-    // Method used in MagReact to deduce if it's been handled already
-    public static boolean didDescribe(String id) {
-        return describedIds.contains(id);
-    }
-
-    // Mark a message as handled for MagReact
-    public static void described(String id) {
-        describedIds.add(id);
     }
 }

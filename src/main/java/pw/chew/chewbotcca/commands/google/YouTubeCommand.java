@@ -33,12 +33,10 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Locale;
 
 // %^youtube command
 public class YouTubeCommand extends Command {
-    final static ArrayList<String> describedIds = new ArrayList<>();
 
     public YouTubeCommand() {
         this.name = "youtube";
@@ -163,17 +161,5 @@ public class YouTubeCommand extends Command {
         OffsetDateTime odtInstanceAtOffset = OffsetDateTime.parse(date, inputFormat);
         DateTimeFormatter outputFormat = DateTimeFormatter.ofPattern("MM/dd/uuuu'\n'HH:mm' UTC'");
         return odtInstanceAtOffset.format(outputFormat);
-    }
-
-    /*
-    Methods for MagReact
-     */
-
-    public static boolean didDescribe(String id) {
-        return describedIds.contains(id);
-    }
-
-    public static void described(String id) {
-        describedIds.add(id);
     }
 }
