@@ -118,11 +118,20 @@ public class ChannelInfoCommand extends Command {
         e.addField("Type", channel.getType().toString(), true);
 
         // If it's a text channel and we can access the webhooks, add the count.
-        if(channel.getType() == ChannelType.TEXT && commandEvent.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
-            AtomicReference<List<Webhook>> hooks = new AtomicReference<>();
-            ((TextChannel) channel).retrieveWebhooks().queue((hooks::set));
-            await().atMost(5, TimeUnit.SECONDS).until(() -> hooks.get() != null);
-            e.addField("Webhooks", String.valueOf(hooks.get().size()), true);
+        if(channel.getType() == ChannelType.TEXT) {
+            TextChannel textChannel = ((TextChannel) channel);
+            if (commandEvent.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
+                List<Webhook> hooks = textChannel.retrieveWebhooks().complete();
+                e.addField("Webhooks", String.valueOf(hooks.size()), true);
+            }
+            e.addField("Pins", textChannel.retrievePinnedMessages().complete().size() + " / 50", true);
+            List<String> info = new ArrayList<>();
+            if (textChannel.isNews())
+                info.add("<:news:725504846937063595> News");
+            if (textChannel.isNSFW())
+                info.add("<:channel_nsfw:585783907660857354> NSFW");
+            if (!info.isEmpty())
+                e.addField("Information", String.join("\n", info), true);
         }
 
         e.setFooter("Channel Created");
@@ -140,11 +149,7 @@ public class ChannelInfoCommand extends Command {
     public EmbedBuilder getPinsInfo(TextChannel channel, CommandEvent commandEvent) {
         EmbedBuilder e = new EmbedBuilder();
         // Retrieve the channel pins
-        AtomicReference<List<Message>> pinAR = new AtomicReference<>();
-        channel.retrievePinnedMessages().queue((pinAR::set));
-        // I absolutely hate async, and I'm not used to it, this puts it back in sync
-        await().atMost(5, TimeUnit.SECONDS).until(() -> pinAR.get() != null);
-        List<Message> pins = pinAR.get();
+        List<Message> pins = channel.retrievePinnedMessages().complete();
         // Find the top pins users and sort it
         HashMap<String, Integer> topPins = new HashMap<>();
         for(Message message : pins) {
