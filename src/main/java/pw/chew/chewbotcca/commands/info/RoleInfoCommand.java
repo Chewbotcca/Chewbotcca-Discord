@@ -50,6 +50,10 @@ public class RoleInfoCommand extends Command {
     protected void execute(CommandEvent event) {
         // Get the args
         String arg = event.getArgs();
+        if (arg.isEmpty()) {
+            event.reply("Please specify a role name to look up!");
+            return;
+        }
 
         String mode = "";
 
@@ -120,23 +124,11 @@ public class RoleInfoCommand extends Command {
         embed.addField("Members", NumberFormat.getNumberInstance(Locale.US).format(members) + " / " + NumberFormat.getNumberInstance(Locale.US).format(total) + " (" + percent + "%)", true);
         embed.addField("Mention / ID", role.getAsMention() + "\n" + role.getId(), true);
         // Find and provide info
-        String info;
-        if(role.isHoisted()) {
-            info = "\uD83D\uDFE2 Hoisted\n";
-        } else {
-            info = "\uD83D\uDD34 Hoisted\n";
-        }
-        if(role.isMentionable()) {
-            info += "\uD83D\uDFE2 Mentionable\n";
-        } else {
-            info += "\uD83D\uDD34 Mentionable\n";
-        }
-        if(role.isManaged()) {
-            info += "\uD83D\uDFE2 Managed";
-        } else {
-            info += "\uD83D\uDD34 Managed";
-        }
-        embed.addField("Information", info, true);
+        List<String> info = new ArrayList<>();
+        info.add(getInfoFormat(role.isHoisted(), "Hoisted"));
+        info.add(getInfoFormat(role.isMentionable(), "Mentionable"));
+        info.add(getInfoFormat(role.isMentionable(), "Managed"));
+        embed.addField("Information", String.join("\n", info), true);
         embed.setColor(role.getColor());
         embed.setFooter("Created");
         // If the user has permission to manage roles, show the permissions
@@ -192,10 +184,27 @@ public class RoleInfoCommand extends Command {
     public String generatePermissionList(EnumSet<Permission> permissions) {
         ArrayList<CharSequence> perms = new ArrayList<>();
         Permission[] permList = permissions.toArray(new Permission[0]);
+        if (permissions.isEmpty()) {
+            return "*No perms selected*";
+        }
         for(int i = 0; i < permissions.size(); i++) {
             perms.add(permList[i].getName());
         }
         return String.join(", ", perms);
+    }
+
+    /**
+     * Helper method for %^rinfo info formatting
+     * @param yes if it's green or not
+     * @param string the string to append
+     * @return a formatted string
+     */
+    private String getInfoFormat(boolean yes, String string) {
+        if (yes) {
+            return "\uD83D\uDFE2 " + string;
+        } else {
+            return "\uD83D\uDD34 " + string;
+        }
     }
 }
 
