@@ -17,11 +17,13 @@ public class RoryCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
-        String showcat = new JSONObject(RestClient.get("https://rory.cat/purr")).getString("url");
+        JSONObject rory = new JSONObject(RestClient.get("https://rory.cat/purr"));
+        String permalink = "https://rory.cat/id/" + rory.getInt("id");
 
         event.reply(new EmbedBuilder()
-            .setTitle("Rory :3", showcat)
-            .setImage(showcat)
+            .setTitle("Rory :3", permalink)
+            .setImage(rory.getString("url"))
+            .setFooter("ID: " + rory.getInt("id"))
             .build()
         );
     }
