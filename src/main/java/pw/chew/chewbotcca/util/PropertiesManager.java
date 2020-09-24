@@ -122,4 +122,11 @@ public class PropertiesManager {
     public static String getDELToken() {
         return properties.getProperty("del");
     }
+
+    /**
+     * @return the key for paste.ee
+     */
+    public static String getPasteEEKey() {
+        return properties.getProperty("pasteee");
+    }
 }
