@@ -22,6 +22,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.util.ArrayList;
@@ -38,20 +39,20 @@ public class InfoCommand extends Command {
     protected void execute(CommandEvent event) {
         // Make sure there's an arg
         String command = event.getArgs();
-        if(command.length() == 0) {
+        if (command.isEmpty()) {
             event.reply("Please specify a command to find info for!");
             return;
         }
         // Get the command from the chew api
         JSONObject data = new JSONObject(RestClient.get("https://chew.pw/chewbotcca/discord/api/command/" + command));
         // If there's an error
-        if(data.has("error")) {
+        if (data.has("error")) {
             JSONArray didYouMean = data.getJSONArray("didYouMean");
             ArrayList<String> predictions = new ArrayList<>();
-            for(int i = 0; i < didYouMean.length(); i++) {
+            for (int i = 0; i < didYouMean.length(); i++) {
                 predictions.add(didYouMean.getString(i));
             }
-            if(predictions.size() > 0) {
+            if (predictions.size() > 0) {
                 event.reply("Invalid command! See <https://chew.pw/chewbotcca/discord/commands> for a list of commands. Did you mean? " + String.join(", ", predictions));
             } else {
                 event.reply("Invalid command! See <https://chew.pw/chewbotcca/discord/commands> for a list of commands.");
@@ -61,33 +62,14 @@ public class InfoCommand extends Command {
 
         // Gather the data and make an embed with it
         EmbedBuilder e = new EmbedBuilder()
-                .setTitle("**Info For**: `%^" + data.getString("command") + "`")
-                .setDescription(data.getString("description"));
-        if(!data.isNull("args")) {
-            e.addField("Arguments", data.getString("args"), true);
-        } else {
-            e.addField("Arguments", "No arguments", true);
-        }
-        if(!data.isNull("flags")) {
-            e.addField("Flags", data.getString("flags"), true);
-        } else {
-            e.addField("Flags", "No flags", true);
-        }
-        if(!data.isNull("aliases")) {
-            e.addField("Aliases", data.getString("aliases"), true);
-        } else {
-            e.addField("Aliases", "No aliases", true);
-        }
-        if(!data.isNull("bot_permissions")) {
-            e.addField("Bot Permissions", data.getString("bot_permissions"), true);
-        } else {
-            e.addField("Bot Permissions", "No special permissions needed.", true);
-        }
-        if(!data.isNull("user_permissions")) {
-            e.addField("User Permissions", data.getString("user_permissions"), true);
-        } else {
-            e.addField("User Permissions", "No special permissions needed.", true);
-        }
+            .setTitle("**Info For**: `" + PropertiesManager.getPrefix() + data.getString("command") + "`")
+            .setDescription(data.getString("description"));
+
+        e.addField("Arguments", data.isNull("args") ? "No Arguments" : data.getString("args"), true);
+        e.addField("Flags", data.isNull("flags") ? "No Flags" : data.getString("flags"), true);
+        e.addField("Aliases", data.isNull("aliases") ? "No Aliases" : data.getString("aliases"), true);
+        e.addField("Bot Permissions", data.isNull("bot_permissions") ? "*No special perms needed*" : data.getString("bot_permissions"), true);
+        e.addField("User Permissions", data.isNull("user_permissions") ? "*No special perms needed*" : data.getString("user_permissions"), true);
 
         event.reply(e.build());
     }
