@@ -23,7 +23,7 @@ import net.dv8tion.jda.api.Permission;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
-import java.awt.*;
+import java.awt.Color;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 

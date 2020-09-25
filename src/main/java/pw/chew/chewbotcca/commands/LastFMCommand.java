@@ -26,7 +26,7 @@ import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
-import java.awt.*;
+import java.awt.Color;
 
 // %^lastfm command
 public class LastFMCommand extends Command {

@@ -25,7 +25,7 @@ import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
-import java.awt.*;
+import java.awt.Color;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
