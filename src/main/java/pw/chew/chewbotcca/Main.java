@@ -36,8 +36,8 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.chew.api.ChewAPI;
-import pw.chew.chewbotcca.listeners.MagReactListener;
 import pw.chew.chewbotcca.listeners.MessageHandler;
+import pw.chew.chewbotcca.listeners.ReactListener;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
 import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.util.PropertiesManager;
@@ -111,7 +111,7 @@ public class Main {
 
         // Register listeners
         jda.addEventListener(
-                new MagReactListener(),
+                new ReactListener(),
                 new MessageHandler(),
                 new ServerJoinLeaveListener()
         );

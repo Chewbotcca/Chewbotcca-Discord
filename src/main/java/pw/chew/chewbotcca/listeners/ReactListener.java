@@ -36,22 +36,25 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// Listen to 🔍 reactions
-public class MagReactListener extends ListenerAdapter {
+// Listen to reactions
+public class ReactListener extends ListenerAdapter {
     private static final List<String> describedIds = new ArrayList<>();
 
     // Listen for all reactions
     @Override
     public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
-        // Ignore if it's not a mag
-        if(!event.getReactionEmote().getName().equals("\uD83D\uDD0D") && !event.getReactionEmote().getName().equals("\uD83D\uDD0E")) {
-            return;
+        // Handle if it's a 🔍 reaction
+        if(event.getReactionEmote().getName().equals("\uD83D\uDD0D") || event.getReactionEmote().getName().equals("\uD83D\uDD0E")) {
+            handleMagReaction(event);
         }
+    }
+
+    public void handleMagReaction(@Nonnull GuildMessageReactionAddEvent event) {
         // Get the message id
         String id = event.getMessageId();
         // Ignore if already described to avoid spam
         if (didDescribe(id)) {
-            LoggerFactory.getLogger(MagReactListener.class).debug("Already described this message!");
+            LoggerFactory.getLogger(ReactListener.class).debug("Already described this message!");
             return;
         }
 
@@ -92,7 +95,7 @@ public class MagReactListener extends ListenerAdapter {
             return;
         // Ignore if message >= 15 minutes
         if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
-            LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
+            LoggerFactory.getLogger(ReactListener.class).debug("Message older than 15 minutes, not describing!");
             return;
         }
         // Mark it as described
@@ -118,7 +121,7 @@ public class MagReactListener extends ListenerAdapter {
         int issue = Integer.parseInt(url[6]);
         // Ignore if message >= 15 minutes old
         if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
-            LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
+            LoggerFactory.getLogger(ReactListener.class).debug("Message older than 15 minutes, not describing!");
             return;
         }
         // Ignore if described
@@ -146,7 +149,7 @@ public class MagReactListener extends ListenerAdapter {
         String issue = url[url.length - 1];
         // Ignore if message >= 15 minutes old
         if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
-            LoggerFactory.getLogger(MagReactListener.class).debug("Message older than 15 minutes, not describing!");
+            LoggerFactory.getLogger(ReactListener.class).debug("Message older than 15 minutes, not describing!");
             return;
         }
         // Ignore if described
