@@ -31,6 +31,7 @@ public class FeedbackCommand extends Command {
         this.name = "feedback";
         this.cooldown = 30;
         this.cooldownScope = CooldownScope.USER;
+        this.guildOnly = false;
     }
 
     @Override

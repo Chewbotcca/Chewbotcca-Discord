@@ -35,6 +35,7 @@ public class OCRCommand extends Command {
         this.cooldown = 60;
         this.cooldownScope = CooldownScope.USER;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.guildOnly = false;
     }
 
     @Override

@@ -24,6 +24,7 @@ public class ShutdownCommand extends Command {
     public ShutdownCommand() {
         this.name = "shutdown";
         this.ownerCommand = true;
+        this.guildOnly = false;
     }
 
     @Override

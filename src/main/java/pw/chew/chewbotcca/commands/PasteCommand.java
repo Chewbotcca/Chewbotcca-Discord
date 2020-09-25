@@ -17,6 +17,7 @@ public class PasteCommand extends Command {
         this.name = "paste";
         this.cooldown = 15;
         this.cooldownScope = CooldownScope.USER;
+        this.guildOnly = false;
     }
 
     @Override
