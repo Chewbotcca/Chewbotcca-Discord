@@ -35,6 +35,7 @@ public class InviteCommand extends Command {
                 .setTitle("Invite me!")
                 .setDescription("""
                     [Click me to invite me to your server (with all the perms I need)](https://discord.com/oauth2/authorize?client_id=604362556668248095&scope=bot&permissions=939805764)!
+                    [Click me to invite me to your server (with all perms)](https://discord.com/oauth2/authorize?client_id=604362556668248095&scope=bot&permissions=8)!
                     [Click me to invite me to your server (with no special perms)](https://discord.com/oauth2/authorize?client_id=604362556668248095&scope=bot&permissions=0)!
                     [Need help? Click me to join my help server](https://discord.gg/UjxQ3Bh)!
                     
