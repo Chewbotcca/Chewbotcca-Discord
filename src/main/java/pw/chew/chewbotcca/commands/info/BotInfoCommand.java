@@ -298,16 +298,16 @@ public class BotInfoCommand extends Command {
         List<CharSequence> links = new ArrayList<>();
         links.add("[Bot Page](https://discordextremelist.xyz/en-US/bots/" + id + ")");
         JSONObject urls = bot.getJSONObject("links");
-        if(!bot.getString("invite").equals(""))
+        if(!urls.getString("invite").equals(""))
             links.add("[Invite](" + urls.getString("invite") + ")");
-        if(!bot.getString("support").equals(""))
-            links.add("[Support Server](https://discord.gg/" + bot.getString("support") + ")");
-        if(!bot.getString("website").equals(""))
-            links.add("[Website](" + bot.getString("website") + ")");
-        if(!bot.getString("donation").equals(""))
-            links.add("[Donate](" + bot.getString("donation") + ")");
-        if(!bot.getString("repo").equals(""))
-            links.add("[Source](" + bot.getString("repo") + ")");
+        if(!urls.getString("support").equals(""))
+            links.add("[Support Server](" + urls.getString("support") + ")");
+        if(!urls.getString("website").equals(""))
+            links.add("[Website](" + urls.getString("website") + ")");
+        if(!urls.getString("donation").equals(""))
+            links.add("[Donate](" + urls.getString("donation") + ")");
+        if(!urls.getString("repo").equals(""))
+            links.add("[Source](" + urls.getString("repo") + ")");
 
         e.addField("Links", String.join("\n", links), true);
 
