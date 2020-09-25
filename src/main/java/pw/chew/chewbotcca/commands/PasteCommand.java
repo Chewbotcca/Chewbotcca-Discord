@@ -9,9 +9,12 @@ import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PasteCommand extends Command {
+    Map<String, String> pasted = new HashMap<>();
 
     public PasteCommand() {
         this.name = "paste";
@@ -36,6 +39,10 @@ public class PasteCommand extends Command {
             event.reply("Only cdn.discordapp.com urls are supported at this time!");
             return;
         }
+        if (pasted.containsKey(file)) {
+            event.reply("Already pasted this! Link: " + pasted.get(file));
+            return;
+        }
 
         String contents = RestClient.get(file);
 
@@ -51,6 +58,7 @@ public class PasteCommand extends Command {
 
         if (response.has("link")) {
             event.reply("Your paste is available at: " + response.getString("link"));
+            pasted.put(file, response.getString("link"));
         }
     }
 
