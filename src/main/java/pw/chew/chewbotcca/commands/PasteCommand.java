@@ -2,6 +2,7 @@ package pw.chew.chewbotcca.commands;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.json.JSONArray;
@@ -26,7 +27,7 @@ public class PasteCommand extends Command {
     @Override
     protected void execute(CommandEvent event) {
         String file;
-        if (event.getArgs().isBlank()) {
+        if (event.getArgs().isBlank() && event.getChannelType() == ChannelType.TEXT) {
             file = getRecentUpload(event.getTextChannel());
         } else {
             file = event.getArgs();
@@ -44,12 +45,15 @@ public class PasteCommand extends Command {
             return;
         }
 
+        event.getChannel().sendTyping().queue();
+
         String contents = RestClient.get(file);
+        String name = file.split("/")[file.split("/").length - 1];
 
         JSONObject payload = new JSONObject()
             .put("description", "Uploaded file from Chewbotcca Discord Bot")
             .put("sections", new JSONArray().put(new JSONObject()
-                .put("name", file.split("/")[file.split("/").length - 1])
+                .put("name", name)
                 .put("syntax", "autodetect")
                 .put("contents", contents)
             ));
@@ -57,7 +61,7 @@ public class PasteCommand extends Command {
         JSONObject response = new JSONObject(RestClient.post("https://api.paste.ee/v1/pastes?key=" + PropertiesManager.getPasteEEKey(), payload));
 
         if (response.has("link")) {
-            event.reply("Your paste is available at: " + response.getString("link"));
+            event.reply("Your paste for" + name + " is available at: " + response.getString("link"));
             pasted.put(file, response.getString("link"));
         }
     }
