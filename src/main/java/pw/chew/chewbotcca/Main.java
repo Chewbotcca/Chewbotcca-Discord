@@ -29,7 +29,6 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import org.discordbots.api.client.DiscordBotListAPI;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.reflections.Reflections;
@@ -64,12 +63,6 @@ public class Main {
 
         // Initialize Sentry to catch errors
         Sentry.init(PropertiesManager.getSentryDsn()).setEnvironment(PropertiesManager.getSentryEnv());
-
-        // Initialize Top.gg for stats posting
-        DiscordBotListAPI topgg = new DiscordBotListAPI.Builder()
-            .token(PropertiesManager.getTopggToken())
-            .botId(PropertiesManager.getClientId())
-            .build();
 
         // Initialize the waiter and client
         EventWaiter waiter = new EventWaiter();
@@ -116,7 +109,7 @@ public class Main {
                 new ServerJoinLeaveListener()
         );
 
-        new Memory(waiter, jda, chew, mcpro, github, topgg);
+        new Memory(waiter, jda, chew, mcpro, github);
     }
 
     /**

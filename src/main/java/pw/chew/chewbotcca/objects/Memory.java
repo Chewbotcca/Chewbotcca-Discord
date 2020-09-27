@@ -19,7 +19,6 @@ package pw.chew.chewbotcca.objects;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.mcprohosting.MCProHostingAPI;
 import net.dv8tion.jda.api.JDA;
-import org.discordbots.api.client.DiscordBotListAPI;
 import org.kohsuke.github.GitHub;
 import pro.chew.api.ChewAPI;
 
@@ -32,15 +31,13 @@ public class Memory {
     private static ChewAPI chewAPI;
     private static MCProHostingAPI mcproAPI;
     private static GitHub github;
-    private static DiscordBotListAPI topgg;
 
-    public Memory(EventWaiter waiter, JDA jda, ChewAPI chewAPI, MCProHostingAPI mcproAPI, GitHub github, DiscordBotListAPI topgg) {
+    public Memory(EventWaiter waiter, JDA jda, ChewAPI chewAPI, MCProHostingAPI mcproAPI, GitHub github) {
         Memory.waiter = waiter;
         Memory.jda = jda;
         Memory.chewAPI = chewAPI;
         Memory.mcproAPI = mcproAPI;
         Memory.github = github;
-        Memory.topgg = topgg;
     }
 
     public static JDA getJda() {
@@ -81,13 +78,5 @@ public class Memory {
 
     public void setWaiter(EventWaiter waiter) {
         Memory.waiter = waiter;
-    }
-
-    public static DiscordBotListAPI getTopgg() {
-        return topgg;
-    }
-
-    public static void setTopgg(DiscordBotListAPI topgg) {
-        Memory.topgg = topgg;
     }
 }

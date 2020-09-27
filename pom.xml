@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>4.8.0</version>
+            <version>4.9.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -93,14 +93,8 @@
         <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
-            <version>1.115</version>
+            <version>1.116</version>
             <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.discordbots</groupId>
-            <artifactId>DBL-Java-Library</artifactId>
-            <version>2.0.1</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/net.sourceforge.htmlcleaner/htmlcleaner -->
@@ -113,7 +107,7 @@
         <dependency>
             <groupId>pro.chew.api</groupId>
             <artifactId>ChewAPI</artifactId>
-            <version>1.0-b3</version>
+            <version>1.0-b5</version>
         </dependency>
 
         <dependency>

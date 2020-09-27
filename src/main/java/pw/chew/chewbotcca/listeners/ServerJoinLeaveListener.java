@@ -23,12 +23,13 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
-import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.util.RestClient;
 
 import javax.annotation.Nonnull;
-import java.awt.*;
+import java.awt.Color;
 
 // Listen to server joins
 public class ServerJoinLeaveListener extends ListenerAdapter {
@@ -46,17 +47,14 @@ public class ServerJoinLeaveListener extends ListenerAdapter {
         // If it's a join event
         boolean joined = event instanceof GuildJoinEvent;
         long servers = jda.getGuildCache().size();
-        // Set server count unless in dev
-        if(!PropertiesManager.getSentryEnv().equals("development"))
-            Memory.getTopgg().setStats((int) servers);
         EmbedBuilder e = new EmbedBuilder();
         // Say join or leave
         if(joined) {
             e.setTitle("I joined a server!");
-            e.setColor(Color.decode("#00ff00"));
+            e.setColor(Color.GREEN);
         } else {
             e.setTitle("I left a server!");
-            e.setColor(Color.decode("#ff0000"));
+            e.setColor(Color.RED);
         }
         e.addField("Name", guild.getName(), true);
         e.addField("ID", guild.getId(), true);
@@ -67,5 +65,21 @@ public class ServerJoinLeaveListener extends ListenerAdapter {
             LoggerFactory.getLogger(this.getClass()).error("Join Channel not found, this is not good.");
         else
             joinChannel.sendMessage(e.build()).queue();
+
+        if(!PropertiesManager.getSentryEnv().equals("development")) {
+            syncStats(1, servers);
+        }
+    }
+
+    public static void syncStats(int shards, long servers) {
+        // Put all stats here, this varies depending on list so we just throw it all there who cares
+        JSONObject stats = new JSONObject()
+            .put("shardCount", 1)
+            .put("shard_count", 1)
+            .put("guildCount", servers)
+            .put("server_count", servers);
+        RestClient.post("https://discord.bots.gg/api/v1/bots/" + PropertiesManager.getClientId() + "/stats", PropertiesManager.getDbotsToken(), stats);
+        RestClient.post("https://top.gg/api/bots/" + PropertiesManager.getClientId() + "/stats", PropertiesManager.getTopggToken(), stats);
+        RestClient.post("https://api.discordextremelist.xyz/v2/bot/" + PropertiesManager.getClientId() + "/stats", PropertiesManager.getDELToken(), stats);
     }
 }
