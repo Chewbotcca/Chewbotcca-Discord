@@ -36,33 +36,38 @@ public class PasteCommand extends Command {
             event.reply("Please link to the file you want to embed!");
             return;
         }
+
+        String name = file.split("/")[file.split("/").length - 1];
+
         if (!file.contains("cdn.discordapp.com")) {
             event.reply("Only cdn.discordapp.com urls are supported at this time!");
             return;
         }
         if (pasted.containsKey(file)) {
-            event.reply("Already pasted this! Link: " + pasted.get(file));
+            event.reply("Already pasted " + name + "! Link: https://paste.gg/chewbotcca/" + pasted.get(file));
             return;
         }
 
         event.getChannel().sendTyping().queue();
 
         String contents = RestClient.get(file);
-        String name = file.split("/")[file.split("/").length - 1];
 
         JSONObject payload = new JSONObject()
-            .put("description", "Uploaded file from Chewbotcca Discord Bot")
-            .put("sections", new JSONArray().put(new JSONObject()
+            .put("name", "Uploaded file from Chewbotcca Discord Bot")
+            .put("files", new JSONArray().put(new JSONObject()
                 .put("name", name)
-                .put("syntax", "autodetect")
-                .put("contents", contents)
+                .put("content", new JSONObject()
+                    .put("format", "text")
+                    .put("highlight_language", "null")
+                    .put("value", contents)
+                )
             ));
 
-        JSONObject response = new JSONObject(RestClient.post("https://api.paste.ee/v1/pastes?key=" + PropertiesManager.getPasteEEKey(), payload));
+        JSONObject response = new JSONObject(RestClient.post("https://api.paste.gg/v1/pastes", "Key " + PropertiesManager.getPasteGgKey(), payload));
 
-        if (response.has("link")) {
-            event.reply("Your paste for" + name + " is available at: " + response.getString("link"));
-            pasted.put(file, response.getString("link"));
+        if (response.getString("status").equals("success")) {
+            event.reply("Your paste for " + name + " is available at: https://paste.gg/chewbotcca/" + response.getJSONObject("result").getString("id"));
+            pasted.put(file, response.getJSONObject("result").getString("id"));
         }
     }
 
@@ -74,8 +79,6 @@ public class PasteCommand extends Command {
 
             Message.Attachment attachment = message.getAttachments().get(0);
             if (attachment.isImage() || attachment.isVideo())
-                continue;
-            if (attachment.getSize() > 12000000)
                 continue;
 
             return attachment.getUrl();

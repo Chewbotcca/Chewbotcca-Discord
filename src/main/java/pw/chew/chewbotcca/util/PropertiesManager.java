@@ -124,9 +124,9 @@ public class PropertiesManager {
     }
 
     /**
-     * @return the key for paste.ee
+     * @return the key for paste.gg
      */
-    public static String getPasteEEKey() {
-        return properties.getProperty("pasteee");
+    public static String getPasteGgKey() {
+        return properties.getProperty("pastegg");
     }
 }
