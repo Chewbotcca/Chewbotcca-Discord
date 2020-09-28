@@ -67,7 +67,8 @@ public class RubyGemsCommand extends Command {
         e.addField("Downloads", "For Version: " + NumberFormat.getNumberInstance(Locale.US).format(data.getInt("version_downloads")) + "\n" +
                 "Total: " + NumberFormat.getNumberInstance(Locale.US).format(data.getInt("downloads")), true);
 
-        e.addField("License", data.getJSONArray("licenses").getString(0), true);
+        if (!data.isNull("licenses"))
+            e.addField("License", data.getJSONArray("licenses").getString(0), true);
         if(rank > -1)
             e.addField("Rank", "#" + NumberFormat.getNumberInstance(Locale.US).format(rank), true);
         else
