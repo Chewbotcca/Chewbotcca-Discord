@@ -40,43 +40,38 @@ public class Memory {
         Memory.github = github;
     }
 
+    /**
+     * @return the JDA instance used to run the bot
+     */
     public static JDA getJda() {
         return jda;
     }
 
-    public static void setJda(JDA jda) {
-        Memory.jda = jda;
-    }
-
+    /**
+     * @return the ChewAPI used for Chew API stuff
+     */
     public static ChewAPI getChewAPI() {
         return chewAPI;
     }
 
-    public void setChewAPI(ChewAPI chewAPI) {
-        Memory.chewAPI = chewAPI;
-    }
-
+    /**
+     * @return the MCPro API used for MCPro API stuff
+     */
     public static MCProHostingAPI getMcproAPI() {
         return mcproAPI;
     }
 
-    public void setMcproAPI(MCProHostingAPI mcproAPI) {
-        Memory.mcproAPI = mcproAPI;
-    }
-
+    /**
+     * @return the GitHub API used for GitHub API stuff
+     */
     public static GitHub getGithub() {
         return github;
     }
 
-    public void setGithub(GitHub github) {
-        Memory.github = github;
-    }
-
+    /**
+     * @return the event waiter used by JDA Utilities
+     */
     public static EventWaiter getWaiter() {
         return waiter;
-    }
-
-    public void setWaiter(EventWaiter waiter) {
-        Memory.waiter = waiter;
     }
 }
