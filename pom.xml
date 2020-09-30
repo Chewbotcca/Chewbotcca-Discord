@@ -44,11 +44,11 @@
 
         <!-- The sdcf4j core module -->
         <dependency>
-            <groupId>com.jagrosh</groupId>
-            <artifactId>jda-utilities</artifactId>
-            <version>3.0.3</version>
-            <scope>compile</scope>
-            <type>pom</type>
+            <groupId>pw.chew</groupId>
+            <artifactId>jda-chewtils</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/jda-chewtils-1.0.0-all.jar</systemPath>
         </dependency>
 
         <!-- Logback classic as out logging framework -->

@@ -158,17 +158,15 @@ public class RoleInfoCommand extends Command {
         await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
         // Get the member list and find how members actually with the role
         List<Member> memberList = event.getGuild().getMemberCache().asList();
-        int total = 0;
         for(Member member : memberList) {
             if(member.getRoles().contains(role)) {
                 if (mention)
                     paginator.addItems(member.getAsMention());
                 else
                     paginator.addItems(member.getUser().getAsTag());
-                total++;
             }
         }
-        if (total == 0)
+        if (paginator.getItems().isEmpty())
             paginator.addItems("No one has this role!");
 
         Paginator p = paginator.setUsers(event.getAuthor()).build();
