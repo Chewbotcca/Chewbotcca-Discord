@@ -47,8 +47,7 @@
             <groupId>pw.chew</groupId>
             <artifactId>jda-chewtils</artifactId>
             <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/jda-chewtils-1.0.0-all.jar</systemPath>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Logback classic as out logging framework -->
