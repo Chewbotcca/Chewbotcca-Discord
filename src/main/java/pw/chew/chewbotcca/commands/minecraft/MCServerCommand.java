@@ -20,6 +20,8 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
@@ -58,13 +60,14 @@ public class MCServerCommand extends Command {
         String online;
         if (data.getBoolean("online")) {
             online = "Online";
-            e.setColor(Color.decode("#00ff00"));
+            e.setColor(Color.GREEN);
         } else {
             online = "Offline";
-            e.setColor(Color.decode("#FF0000"));
+            e.setColor(Color.RED);
         }
 
         // Show other stats too
+        e.setDescription(generateDescription(data).replaceAll("§([a-f]|[k-o]|r|[0-9])", ""));
         e.addField("Status", online, true);
         e.addField("Players", data.getJSONObject("players").getInt("online") + "/" + data.getJSONObject("players").getInt("max"), true);
         e.addField("Version", data.getJSONObject("version").getString("name"), true);
@@ -77,5 +80,34 @@ public class MCServerCommand extends Command {
         e.setTimestamp(odtInstanceAtOffset);
 
         commandEvent.reply(e.build());
+    }
+
+    public String generateDescription(JSONObject data) {
+        if (!data.has("description") || data.isNull("description")) {
+            return "";
+        }
+        Object description = data.get("description");
+        try {
+            return data.getString("description");
+        } catch (JSONException e) {
+            JSONArray stuff = data.getJSONObject("description").getJSONArray("extra");
+            StringBuilder string = new StringBuilder();
+            for (int i = 0; i < stuff.length(); i++) {
+                JSONObject object = stuff.getJSONObject(i);
+                String text = object.getString("text");
+                if (object.has("strikethrough"))
+                    text = "~~" + text + "~~";
+                if (object.has("underline"))
+                    text = "__" + text + "__";
+                if (object.has("italic"))
+                    text = "_" + text + "_";
+                if (object.has("bold"))
+                    text = "**" + text + "**";
+                string.append(text);
+            }
+            String response = string.toString();
+            response = response.replace("****", "").replace("~~~~", "");
+            return response;
+        }
     }
 }
