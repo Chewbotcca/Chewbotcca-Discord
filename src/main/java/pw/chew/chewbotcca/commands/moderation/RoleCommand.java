@@ -22,6 +22,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import pw.chew.chewbotcca.util.Mention;
 
 import java.util.List;
 
@@ -77,17 +78,16 @@ public class RoleCommand extends Command {
     public void deleteRole(CommandEvent event, String rolename) {
         // Get the server
         Guild server = event.getGuild();
-        // Get the user's highest role, for hierarchy checking later
-        Role highest = event.getMember().getRoles().get(0);
         // Attempt to find provided role
         List<Role> roles = server.getRolesByName(rolename, true);
-        if (roles.size() < 1) {
+        if (roles.isEmpty()) {
             event.reply("Unable to find specified role!");
             return;
         }
         // Get the user's highest role and check to make sure hierarchy is maintained
+        Role highest = getHighestRole(event.getMember());
+        Role bot = getHighestRole(event.getSelfMember());
         Role target = roles.get(0);
-        Role bot = event.getSelfMember().getRoles().get(0);
         if (target.getPosition() >= highest.getPosition() || target.getPosition() >= bot.getPosition()) {
             event.reply("I can't delete this role because it is higher or equal to your (or my) highest role!");
             return;
@@ -113,23 +113,24 @@ public class RoleCommand extends Command {
         String mention = args[0];
         String rolename = input.replace(args[0] + " ", "");
 
-        String id = mention.replace("<@!", "").replace(">", "");
-        Member member = event.getGuild().getMemberById(id);
+        Object parse = Mention.parseMention(mention, event.getGuild(), event.getJDA());
 
-        if (member == null) {
+        if (!(parse instanceof Member)) {
             event.reply("Unable to find specified member!");
             return;
         }
 
+        Member member = (Member)parse;
+
         // Attempt to find role
         List<Role> roles = event.getGuild().getRolesByName(rolename, true);
-        if (roles.size() < 1) {
+        if (roles.isEmpty()) {
             event.reply("Unable to find specified role!");
             return;
         }
         // Get author's highest role for hierarchy checking
-        Role highest = event.getMember().getRoles().get(0);
-        Role bot = event.getSelfMember().getRoles().get(0);
+        Role highest = getHighestRole(event.getMember());
+        Role bot = getHighestRole(event.getSelfMember());
         Role target = roles.get(0);
         if (target.getPosition() >= highest.getPosition() || target.getPosition() >= bot.getPosition()) {
             event.reply("I can't assign this role because it is higher or equal to your (or my) highest role!");
@@ -160,23 +161,24 @@ public class RoleCommand extends Command {
         String mention = args[0];
         String rolename = input.replace(args[0] + " ", "");
 
-        String id = mention.replace("<@!", "").replace(">", "");
-        Member member = event.getGuild().getMemberById(id);
+        Object parse = Mention.parseMention(mention, event.getGuild(), event.getJDA());
 
-        if (member == null) {
+        if (!(parse instanceof Member)) {
             event.reply("Unable to find specified member!");
             return;
         }
 
+        Member member = (Member)parse;
+
         // Attempt to find role
         List<Role> roles = event.getGuild().getRolesByName(rolename, true);
-        if (roles.size() < 1) {
+        if (roles.isEmpty()) {
             event.reply("Unable to find specified role!");
             return;
         }
         // Get author's highest role for hierarchy checking
-        Role highest = event.getMember().getRoles().get(0);
-        Role bot = event.getSelfMember().getRoles().get(0);
+        Role highest = getHighestRole(event.getMember());
+        Role bot = getHighestRole(event.getSelfMember());
         Role target = roles.get(0);
         if (target.getPosition() >= highest.getPosition() || target.getPosition() >= bot.getPosition()) {
             event.reply("I can't assign this role because it is higher or equal to your (or my) highest role!");
@@ -188,5 +190,18 @@ public class RoleCommand extends Command {
             e -> event.reply("I have successfully removed `" + rolename + "` from " + member.getEffectiveName() + "!"),
             f -> event.replyError("I was unable to take that role from the user. Is my role high enough?")
         );
+    }
+
+    /**
+     * Gets the highest role for a member
+     * @param member the member
+     * @return the highest role this user has
+     */
+    public Role getHighestRole(Member member) {
+        Role role = member.getGuild().getPublicRole();
+        if (!member.getRoles().isEmpty()) {
+            role = member.getRoles().get(0);
+        }
+        return role;
     }
 }
