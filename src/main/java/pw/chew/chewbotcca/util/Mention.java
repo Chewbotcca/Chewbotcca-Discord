@@ -18,6 +18,7 @@ package pw.chew.chewbotcca.util;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 
 public class Mention {
@@ -38,7 +39,13 @@ public class Mention {
 
         mention = mention.replace("<", "").replace(">", "");
         if(mention.startsWith("@!")) {
-            return jda.getUserById(mention.replace("@!", ""));
+            String id = mention.replace("@!", "");
+            Member member = server.getMemberById(id);
+            if (member == null) {
+                return jda.retrieveUserById(id).complete();
+            } else {
+                return member;
+            }
         }
         if(mention.startsWith("#")) {
             return server.getGuildChannelById(mention.replace("#", ""));
