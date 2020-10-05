@@ -90,6 +90,9 @@ public class MCServerCommand extends Command {
         try {
             return data.getString("description");
         } catch (JSONException e) {
+            if (data.getJSONObject("description").has("text")) {
+                return data.getJSONObject("description").getString("text");
+            }
             JSONArray stuff = data.getJSONObject("description").getJSONArray("extra");
             StringBuilder string = new StringBuilder();
             for (int i = 0; i < stuff.length(); i++) {
