@@ -33,7 +33,12 @@ public class RoryCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
-        JSONObject rory = new JSONObject(RestClient.get("https://rory.cat/purr"));
+        event.getChannel().sendTyping().queue();
+        JSONObject rory = new JSONObject(RestClient.get("https://rory.cat/purr/" + event.getArgs()));
+        if (rory.has("error")) {
+            event.reply(rory.getString("error"));
+            return;
+        }
         String permalink = "https://rory.cat/id/" + rory.getInt("id");
 
         event.reply(new EmbedBuilder()
