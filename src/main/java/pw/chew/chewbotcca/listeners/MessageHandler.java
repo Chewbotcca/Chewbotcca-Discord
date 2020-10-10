@@ -16,13 +16,13 @@
  */
 package pw.chew.chewbotcca.listeners;
 
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class MessageHandler extends ListenerAdapter {
     @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
-        if (event.getTextChannel().getId().equals("745164378659225651") && event.getAuthor().getDiscriminator().equals("0000") && event.getMessage().getEmbeds().size() > 0) {
+    public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+        if (event.getChannel().getId().equals("745164378659225651") && event.getAuthor().getDiscriminator().equals("0000") && event.getMessage().getEmbeds().size() > 0) {
             String title = event.getMessage().getEmbeds().get(0).getTitle();
             if (title != null && title.contains("[Discord] Compile success on main")) {
                 event.getChannel().sendMessage("Updating...").queue(message -> System.exit(0));
