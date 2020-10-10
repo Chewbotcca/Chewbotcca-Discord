@@ -37,7 +37,7 @@ You can view commands [here](https://chew.pw/chewbotcca/discord/commands).
 
 You can add the bot [with this link](https://discord.com/oauth2/authorize?client_id=604362556668248095&scope=bot&permissions=0)
 
-You can join the Discord server with [this link](https://discord.gg/r583nHA).
+You can join the Discord server with [this link](https://discord.gg/UjxQ3Bh).
 
 You can view the GitHub repository @ [Chewbotcca/Discord](https://github.com/Chewbotcca/Discord)
 
