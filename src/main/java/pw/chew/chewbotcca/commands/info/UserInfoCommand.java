@@ -28,7 +28,7 @@ import net.dv8tion.jda.api.entities.User;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.Mention;
 
-import java.awt.*;
+import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -75,7 +75,11 @@ public class UserInfoCommand extends Command {
         } else {
             Object mention = Mention.parseMention(args, commandEvent.getGuild(), commandEvent.getJDA());
             if(mention != null) {
-                user = (User)mention;
+                if (mention instanceof Member) {
+                    user = ((Member)mention).getUser();
+                } else {
+                    user = (User)mention;
+                }
             } else {
                 try {
                     user = commandEvent.getJDA().getUserById(args);
