@@ -83,6 +83,7 @@ public class RestClient {
                 .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
                 .build();
 
+        LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
         return performRequest(request);
     }
 
@@ -101,6 +102,7 @@ public class RestClient {
             .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
             .build();
 
+        LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
         return performRequest(request);
     }
 
@@ -121,6 +123,7 @@ public class RestClient {
             .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
             .build();
 
+        LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
         return performRequest(request);
     }
 
@@ -138,6 +141,7 @@ public class RestClient {
             .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
             .build();
 
+        LoggerFactory.getLogger(RestClient.class).debug("Making call to DELETE " + url);
         return performRequest(request);
     }
 
