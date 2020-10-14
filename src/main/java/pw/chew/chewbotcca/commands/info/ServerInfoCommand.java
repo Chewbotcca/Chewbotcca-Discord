@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 
@@ -73,6 +74,8 @@ public class ServerInfoCommand extends Command {
             gatherBots(event, server, renderMention);
         } else if(args.contains("member")) {
             event.reply(gatherMemberByJoin(server, args.split(" ")[1]).build());
+        } else if(args.contains("channel")) {
+            event.reply(gatherChannelInfo(server).build());
         } else {
             event.reply(gatherMainInfo(event, server).build());
         }
@@ -134,21 +137,15 @@ public class ServerInfoCommand extends Command {
             }
         }
 
-        String textpercent = df.format((float)textchans / (float)totalchans * 100);
-        String voicepercent = df.format((float)voicechans / (float)totalchans * 100);
-        String catepercent = df.format((float)categories / (float)totalchans * 100);
-        String storepercent = df.format((float)storechans / (float)totalchans * 100);
-        String newspercent = df.format((float)newschans / (float)totalchans * 100);
-
         List<CharSequence> counts = new ArrayList<>();
         counts.add("Total: " + totalchans);
-        counts.add("Text: " + textchans + " (" + textpercent + "%)");
-        counts.add("Voice: " + voicechans + " (" + voicepercent + "%)");
-        counts.add("Categories: " + categories + " (" + catepercent + "%)");
+        counts.add("Text: " + textchans);
+        counts.add("Voice: " + voicechans);
+        counts.add("Categories: " + categories);
         if(server.getFeatures().contains("COMMERCE"))
-            counts.add("Store Pages: " + storechans + " (" + storepercent + "%)");
+            counts.add("Store Pages: " + storechans);
         if(server.getFeatures().contains("NEWS"))
-            counts.add("News: " + newschans + " (" + newspercent + "%)");
+            counts.add("News: " + newschans);
 
         e.addField("Channel Count", String.join("\n", counts), true);
 
@@ -168,6 +165,7 @@ public class ServerInfoCommand extends Command {
             Roles - `%^sinfo roles`
             Boosts - `%^sinfo boosts`
             Bots - `%^sinfo bots`
+            Channels - `%^sinfo channels`
             """, false);
 
         e.setFooter("Server Created on");
@@ -306,6 +304,88 @@ public class ServerInfoCommand extends Command {
                 return -1;
         });
         return new UserInfoCommand().gatherMemberInfo(server, bruh[position - 1]);
+    }
+
+    /**
+     * Get channel info, like count and other info
+     * @param server the server
+     * @return an embed
+     */
+    public EmbedBuilder gatherChannelInfo(Guild server) {
+        DecimalFormat df = new DecimalFormat("#.##");
+
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Channel Info and Stats for " + server.getName());
+        embed.setDescription("Total Channels: " + server.getChannels().size());
+
+        // Channel counts
+        int totalChannels = server.getChannels().size();
+        int textChannels = server.getTextChannels().size();
+        int voiceChannels = server.getVoiceChannels().size();
+        int categories = server.getCategories().size();
+        int storeChannels = server.getStoreChannels().size();
+        int newsChannels = 0;
+        int nsfw = 0;
+        int inVoice = 0;
+
+        for(TextChannel channel : server.getTextChannels()) {
+            if(channel.isNews()) {
+                newsChannels++;
+                textChannels--;
+            }
+            if (channel.isNSFW()) {
+                nsfw++;
+            }
+        }
+
+        for (VoiceChannel vc : server.getVoiceChannels()) {
+            inVoice += vc.getMembers().size();
+        }
+
+        String percentText = df.format((float) textChannels / (float) totalChannels * 100);
+        String percentVoice = df.format((float) voiceChannels / (float) totalChannels * 100);
+        String percentCategory = df.format((float)categories / (float) totalChannels * 100);
+        String percentStore = df.format((float) storeChannels / (float) totalChannels * 100);
+        String percentNews = df.format((float) newsChannels / (float) totalChannels * 100);
+        String percentNSFW = df.format((float) nsfw / (float) textChannels * 100);
+
+        embed.addField(
+            "Text Channels",
+            "Total: " + textChannels + " (" + percentText + "%)" + "\n" +
+            "NSFW: " + nsfw,
+            true
+        );
+
+        embed.addField(
+            "Voice Channels",
+            "Total: " + voiceChannels + " (" + percentVoice + "%)" + "\n" +
+                "Members in Voice: " + inVoice,
+            true
+        );
+
+        embed.addField(
+            "Categories",
+            "Total: " + categories + " (" + percentCategory + "%)",
+            true
+        );
+
+        if(server.getFeatures().contains("COMMERCE")) {
+            embed.addField(
+                "Store",
+                "Total: " + storeChannels + " (" + percentStore + "%)",
+                true
+            );
+        }
+
+        if(server.getFeatures().contains("NEWS")) {
+            embed.addField(
+                "Announcement Channels",
+                "Total: " + newsChannels + " (" + percentNews + "%)",
+                true
+            );
+        }
+
+        return embed;
     }
 
     /**
