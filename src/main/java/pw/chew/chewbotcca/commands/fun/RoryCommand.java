@@ -57,7 +57,7 @@ public class RoryCommand extends Command {
             .setTitle("Rory :3", permalink)
             .setImage(rory.getString("url"))
             .setFooter("ID: " + rory.getInt("id"));
-        if (event.getMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
+        if (event.getMember().hasPermission(Permission.MANAGE_WEBHOOKS) && event.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
             embed.setDescription("Stay up to date with new Rory images by running `%^rory follow`!");
         }
 
