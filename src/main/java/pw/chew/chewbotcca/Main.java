@@ -122,6 +122,9 @@ public class Main {
         List<Command> commands = new ArrayList<>();
 
         for (Class<? extends Command> theClass : subTypes) {
+            // Don't load SubCommands
+            if (theClass.getName().contains("SubCommand"))
+                continue;
             commands.add(theClass.getDeclaredConstructor().newInstance());
             logger.debug("Loaded " + theClass.getSimpleName());
         }
