@@ -21,18 +21,12 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-import org.json.JSONArray;
+import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.WebhookType;
 import org.json.JSONObject;
-import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.util.RestClient;
 
-import java.io.IOException;
+import java.util.List;
 
 public class RoryCommand extends Command {
 
@@ -70,7 +64,7 @@ public class RoryCommand extends Command {
             this.botPermissions = new Permission[]{Permission.MANAGE_WEBHOOKS};
             this.userPermissions = new Permission[]{Permission.MANAGE_WEBHOOKS};
             this.guildOnly = true;
-            this.cooldown = 1000;
+            this.cooldown = 30;
             this.cooldownScope = CooldownScope.CHANNEL;
         }
 
@@ -100,38 +94,22 @@ public class RoryCommand extends Command {
                 event.reply("This channel already has a Rory Images feed! (If not, an error occurred, oopsie)");
                 return;
             }
-            MediaType JSON = MediaType.parse("application/json");
-            OkHttpClient client = event.getJDA().getHttpClient();
-            RequestBody body = RequestBody.create("{\"webhook_channel_id\": \"" + destination.getId() + "\"}", JSON);
-            Request request = new Request.Builder()
-                .url("https://discord.com/api/v6/channels/752063016425619487/followers")
-                .addHeader("Authorization", event.getJDA().getToken())
-                .post(body)
-                .build();
-            try (Response response = client.newCall(request).execute()) {
-                ResponseBody responseBody = response.body();
-                if (!response.isSuccessful()) {
-                    // ... handle failed request
-                    event.reply("Error occurred! Bug me with `%^feedback you done messed up with that %^rory follow command of yours`");
-                    LoggerFactory.getLogger(this.getClass()).error(response.code() + " " + responseBody.string());
-                    return;
-                }
-            } catch (IOException e) {
-                // ... handle IO exception
-                e.printStackTrace();
+            TextChannel rory = event.getJDA().getTextChannelById("752063016425619487");
+            if (rory == null) {
+                event.reply("Rory channel not found! :(");
+                return;
             }
-            event.reply("Followed the rory images channel successfully, enjoy the Rory :3");
+            rory.follow(destination).queue(yay -> event.reply("Followed the rory images channel successfully, enjoy the Rory :3"));
         }
 
         public boolean alreadyFollowing(TextChannel channel, CommandEvent event) {
-            JSONArray response = new JSONArray(RestClient.get("https://discord.com/api/v6/channels/" + channel.getId() + "/webhooks", event.getJDA().getToken()));
-            for (int i = 0; i < response.length(); i++) {
-                JSONObject index = response.getJSONObject(i);
-                if (index.getInt("type") == 1) {
+            List<Webhook> webhooks = channel.retrieveWebhooks().complete();
+            for (Webhook webhook : webhooks) {
+                if (webhook.getType() != WebhookType.FOLLOWER) {
                     continue;
                 }
-                JSONObject source = index.getJSONObject("source_channel");
-                if (source.getString("id").equals("752063016425619487")) {
+                Webhook.ChannelReference refChannel = webhook.getSourceChannel();
+                if (refChannel != null && refChannel.getId().equals("752063016425619487")) {
                     return true;
                 }
             }
