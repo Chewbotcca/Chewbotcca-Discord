@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 public class HangarCommand extends Command {
-    private static final String baseUrl = "https://hangar.minidigger.me/api/v2/";
+    private static final String baseUrl = "https://hangar.minidigger.me/api/v1/";
     private static String key = null;
     private static Instant lastUpdate = Instant.now();
 
