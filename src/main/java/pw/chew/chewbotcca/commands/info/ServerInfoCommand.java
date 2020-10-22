@@ -157,9 +157,15 @@ public class ServerInfoCommand extends Command {
                             "\nBoosters: " + server.getBoosters().size(), true);
 
         // Gather perk info
-        String perks = perkParser(server);
-        if(perks.length() > 0)
-            e.addField("Features", perks, true);
+        List<String> perks = new ArrayList<>();
+        String[] features = server.getFeatures().toArray(new String[0]);
+        Arrays.sort(features);
+        for (String perk : features) {
+            perks.add(perkParser(perk, server));
+        }
+        if(perks.size() > 0) {
+            e.addField("Features", String.join("\n", perks), true);
+        }
 
         e.addField("View More Info", """
             Roles - `%^sinfo roles`
@@ -390,27 +396,29 @@ public class ServerInfoCommand extends Command {
 
     /**
      * Parse the perk list and make it fancy if necessary
+     * @param feature the feature
      * @param server the server
      * @return the perks as nice list
      */
-    public String perkParser(Guild server) {
-        List<CharSequence> perks = new ArrayList<>();
-        String[] features = server.getFeatures().toArray(new String[0]);
-        Arrays.sort(features);
-        for(String feature : features) {
-            switch (feature) {
-                default -> perks.add(capitalize(feature));
-                case "BANNER" -> perks.add("[Banner](" + server.getBannerUrl() + "?size=2048)");
-                case "COMMERCE" -> perks.add("<:store_tag:725504846924611584> Store Channels");
-                case "NEWS" -> perks.add("<:news:725504846937063595> News Channels");
-                case "INVITE_SPLASH" -> perks.add("[Invite Splash](" + server.getSplashUrl() + "?size=2048)");
-                case "PARTNERED" -> perks.add("<:partner:753433398005071872> Partnered Server");
-                case "VANITY_URL" -> perks.add("Vanity URL: " + "[" + server.getVanityCode() + "](https://discord.gg/" + server.getVanityCode() + ")");
-                case "VERIFIED" -> perks.add("<:verifiedserver:753433397933899826> Verified");
-            }
-        }
+    public String perkParser(String feature, Guild server) {
+        return switch (feature) {
+            default -> capitalize(feature);
+            case "BANNER" -> "[Banner](" + server.getBannerUrl() + "?size=2048)";
+            case "COMMERCE" -> "<:store_tag:725504846924611584> Store Channels";
+            case "NEWS" -> "<:news:725504846937063595> News Channels";
+            case "INVITE_SPLASH" -> "[Invite Splash](" + server.getSplashUrl() + "?size=2048)";
+            case "PARTNERED" -> "<:partner:753433398005071872> Partnered Server";
+            case "VANITY_URL" -> parseVanityUrl(server.getVanityCode());
+            case "VERIFIED" -> "<:verifiedserver:753433397933899826> Verified";
+        };
+    }
 
-        return String.join("\n", perks);
+    private String parseVanityUrl(String vanity) {
+        if (vanity == null) {
+            return "Vanity URL: None Set!";
+        } else {
+            return "Vanity URL: " + "[" + vanity + "](https://discord.gg/" + vanity + ")";
+        }
     }
 
     /*
