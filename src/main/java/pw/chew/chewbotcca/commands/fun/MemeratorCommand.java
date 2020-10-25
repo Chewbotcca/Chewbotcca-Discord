@@ -30,7 +30,12 @@ public class MemeratorCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        commandEvent.reply("Please specify meme/user to search for.");
+        commandEvent.reply("""
+            Please specify meme/user to search for. Examples:
+            `%^memerator meme aaaaaaa` => Get meme `aaaaaaa`
+            `%^memerator meme bruh moment` => Search for memes containing "bruh moment"
+            `%^memerator user Chewbotcca` => Find a user by username
+            """);
     }
 
     private static class MemeratorMemeSubCommand extends Command {
