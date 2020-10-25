@@ -126,6 +126,12 @@
             <artifactId>reflections</artifactId>
             <version>0.9.12</version>
         </dependency>
+
+        <dependency>
+            <groupId>me.memerator.api</groupId>
+            <artifactId>MemeratorAPI</artifactId>
+            <version>1.1.0_69</version>
+        </dependency>
     </dependencies>
 
     <build>

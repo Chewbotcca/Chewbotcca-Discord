@@ -129,4 +129,11 @@ public class PropertiesManager {
     public static String getPasteGgKey() {
         return properties.getProperty("pastegg");
     }
+
+    /**
+     * @return the Memerator API key
+     */
+    public static String getMemeratorKey() {
+        return properties.getProperty("memerator");
+    }
 }
