@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.TextChannel;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -57,7 +58,7 @@ public class RoryCommand extends Command {
             .setTitle("Rory :3", permalink)
             .setImage(rory.getString("url"))
             .setFooter("ID: " + rory.getInt("id"));
-        if (event.getMember().hasPermission(Permission.MANAGE_WEBHOOKS) && event.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
+        if (event.getChannelType() == ChannelType.TEXT && event.getMember().hasPermission(Permission.MANAGE_WEBHOOKS) && event.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
             embed.setDescription("Stay up to date with new Rory images by running `%^rory follow`!");
         }
 
