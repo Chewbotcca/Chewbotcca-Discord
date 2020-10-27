@@ -97,7 +97,7 @@ public class MemeratorCommand extends Command {
                 return;
             }
             String authorString = "[" + meme.getAuthor().getUsername() + "](" + meme.getAuthor().getProfileUrl() + ")";
-            if (meme.getAuthor().getUserPerks().contains(UserPerk.FOUNDER)) {
+            if (meme.getAuthor().getUserPerks().contains(UserPerk.VERIFIED)) {
                 authorString = authorString + " <:verified:595298760502935573>";
             }
 
