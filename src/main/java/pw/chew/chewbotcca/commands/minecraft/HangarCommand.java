@@ -29,7 +29,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 public class HangarCommand extends Command {
-    private static final String baseUrl = "https://hangar.minidigger.me/api/v1/";
+    private static final String baseUrl = "https://hangar.minidigger.me/";
+    private static final String apiUrl = "https://hangar.minidigger.me/api/v1/";
     private static String key = null;
     private static Instant lastUpdate = Instant.now();
 
@@ -47,10 +48,10 @@ public class HangarCommand extends Command {
             regenerateKey();
         }
         String args = URLEncoder.encode(event.getArgs(), StandardCharsets.UTF_8);
-        JSONObject response = new JSONObject(RestClient.get(baseUrl + "projects?q=" + args + "&limit=1", "HangarApi session=\"" + key + "\""));
+        JSONObject response = new JSONObject(RestClient.get(apiUrl + "projects?q=" + args + "&limit=1", "HangarApi session=\"" + key + "\""));
         LoggerFactory.getLogger(HangarCommand.class).debug(response.toString());
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setAuthor("Hangar Plugin Repository Search Results", baseUrl.replace("api/v2/", ""));
+        embed.setAuthor("Hangar Plugin Repository Search Results", baseUrl);
         if (response.getJSONObject("pagination").getInt("count") == 0) {
             embed.setDescription("No results found!");
             event.reply(embed.build());
@@ -59,7 +60,7 @@ public class HangarCommand extends Command {
 
         JSONObject plugin = response.getJSONArray("result").getJSONObject(0);
         JSONObject namespace = plugin.getJSONObject("namespace");
-        String projectURL = baseUrl.replace("api/v2/", "") + namespace.getString("owner") + "/" + namespace.getString("slug");
+        String projectURL = baseUrl + namespace.getString("owner") + "/" + namespace.getString("slug");
 
         embed.setTitle(plugin.getString("name"), projectURL);
         embed.setDescription(plugin.getString("description"));
@@ -78,7 +79,7 @@ public class HangarCommand extends Command {
     }
 
     private void regenerateKey() {
-        JSONObject response = new JSONObject(RestClient.post(baseUrl + "authenticate", new JSONObject()));
+        JSONObject response = new JSONObject(RestClient.post(apiUrl + "authenticate", new JSONObject()));
         key = response.getString("session");
         lastUpdate = Instant.now();
     }
