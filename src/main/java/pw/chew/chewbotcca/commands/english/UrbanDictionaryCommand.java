@@ -68,7 +68,7 @@ public class UrbanDictionaryCommand extends Command {
         // Build embed and send it off!
         event.reply(new EmbedBuilder()
                 .setTitle("Urban Dictionary definition for **" + word + "**")
-                .addField("Definition", definition, false)
+                .setDescription(definition)
                 .addField("Author", author, true)
                 .addField("Rating", "**" + up + "** 👍 - **" + down + "** 👎 (**" + ratio + "%**)", true)
                 .addField("Example", example, false)
