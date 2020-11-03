@@ -20,13 +20,15 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
-import java.awt.*;
+import java.awt.Color;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
@@ -50,14 +52,21 @@ public class YouTubeCommand extends Command {
     protected void execute(CommandEvent event) {
         // Get the input and find results
         String search = event.getArgs();
+        String id = null;
+        if (search.contains("youtube.com")) {
+            id = search.split("=")[1];
+        } else if (search.contains("youtu.be")) {
+            id = search.split("/")[search.split("/").length - 1];
+        }
         String findidurl = "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=" + URLEncoder.encode(search, StandardCharsets.UTF_8) + "&key=" + PropertiesManager.getGoogleKey();
         // Find a video if there is one
-        String id;
-        try {
-            id = new JSONObject(RestClient.get(findidurl)).getJSONArray("items").getJSONObject(0).getJSONObject("id").getString("videoId");
-        } catch (JSONException e) {
-            event.reply("No videos found!");
-            return;
+        if (id == null) {
+            try {
+                id = new JSONObject(RestClient.get(findidurl)).getJSONArray("items").getJSONObject(0).getJSONObject("id").getString("videoId");
+            } catch (JSONException e) {
+                event.reply("No videos found!");
+                return;
+            }
         }
         // Get the video
         JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + id + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics"));
@@ -66,7 +75,7 @@ public class YouTubeCommand extends Command {
             return;
         }
 
-        event.reply(response(url, id, event.getTextChannel()).build());
+        event.reply(response(url, id, event.getChannel()).build());
     }
 
     /**
@@ -75,7 +84,7 @@ public class YouTubeCommand extends Command {
      * @param id the video id
      * @return an embedbuilder ready to be built
      */
-    public EmbedBuilder response(JSONObject url, String id, TextChannel channel) {
+    public EmbedBuilder response(JSONObject url, String id, MessageChannel channel) {
         boolean restricted = url
             .getJSONArray("items")
             .getJSONObject(0)
@@ -84,7 +93,7 @@ public class YouTubeCommand extends Command {
             .has("ytRating");
 
         // Don't respond if not nsfw channel
-        if(restricted && !channel.isNSFW()) {
+        if(restricted && channel.getType() == ChannelType.TEXT && !((TextChannel)channel).isNSFW()) {
             return new EmbedBuilder()
                 .setTitle("Uh oh! Too naughty!")
                 .setDescription("The returned video is marked as age restricted by YouTube, and may only be shown in NSFW channels or DMs. Sorry!");
@@ -99,14 +108,19 @@ public class YouTubeCommand extends Command {
         // The view count is apparently optional, as proven with Apple's WWDC 2020 livestream
         if(stats.has("viewCount"))
             views = Long.parseLong(stats.getString("viewCount"));
-        int likes = Integer.parseInt(stats.getString("likeCount"));
-        int dislike = Integer.parseInt(stats.getString("dislikeCount"));
+        int likes = -1, dislike = -1;
+        float totalLikes;
+        String percent = "", disPercent = "";
+        DecimalFormat df = new DecimalFormat("#.##");
+        if(stats.has("likeCount")) {
+            likes = Integer.parseInt(stats.getString("likeCount"));
+            dislike = Integer.parseInt(stats.getString("dislikeCount"));
+            totalLikes = likes + dislike;
+            percent = df.format(likes / totalLikes * 100);
+            disPercent = df.format(dislike / totalLikes * 100);
+        }
         // Parse upload
         String upload = info.getString("publishedAt");
-        DecimalFormat df = new DecimalFormat("#.##");
-        float totallikes = likes + dislike;
-        String percent = df.format(likes / totallikes * 100);
-        String dispercent = df.format(dislike / totallikes * 100);
 
         String urlpls = "http://youtu.be/" + id;
 
@@ -122,8 +136,9 @@ public class YouTubeCommand extends Command {
         else
             embed.addField("Views", "Unknown", true);
         // Add and format rating
-        embed.addField("Rating", "<:ytup:717600455580188683> **" + NumberFormat.getNumberInstance(Locale.US).format(likes) + "** *(" + percent + "%)*\n" +
-                        "<:ytdown:717600455353696317> **" + NumberFormat.getNumberInstance(Locale.US).format(dislike) + "** *(" + dispercent + "%)*", true);
+        if (likes > -1)
+            embed.addField("Rating", "<:ytup:717600455580188683> **" + NumberFormat.getNumberInstance(Locale.US).format(likes) + "** *(" + percent + "%)*\n" +
+                "<:ytdown:717600455353696317> **" + NumberFormat.getNumberInstance(Locale.US).format(dislike) + "** *(" + disPercent + "%)*", true);
         embed.addField("Uploaded", dateParser(upload), true);
         embed.setThumbnail(url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet").getJSONObject("thumbnails").getJSONObject("maxres").getString("url"));
         embed.setColor(Color.decode("#FF0001"));
