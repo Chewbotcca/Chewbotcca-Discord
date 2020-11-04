@@ -22,6 +22,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import pw.chew.chewbotcca.objects.Profile;
 
+import java.util.Arrays;
+import java.util.List;
+
 // %^profile command
 public class ProfileCommand extends Command {
 
@@ -48,11 +51,8 @@ public class ProfileCommand extends Command {
                     .setDescription("The profile system is a work in progress! More details will appear soon!")
                     .setFooter("ID: " + profile.getId());
 
-            if(profile.getLastFm() == null) {
-                embed.addField("Lastfm Username", "Set with `%^profile set lastfm [name]`", true);
-            } else {
-                embed.addField("Lastfm Username", profile.getLastFm(), true);
-            }
+            embed.addField("Lastfm Username", profile.getLastFm() == null ? "Set with `%^profile set lastfm [name]`" : profile.getLastFm(), true);
+            embed.addField("GitHub Username", profile.getGitHub() == null ? "Set with `%^profile set github [name]`" : profile.getGitHub(), true);
 
             commandEvent.reply(embed.build());
             return;
@@ -63,10 +63,14 @@ public class ProfileCommand extends Command {
                 You are missing arguments! Must have `set`, `key`, `value`. Possible keys:
                 ```
                 lastfm - Your last.fm username for %^lastfm
+                github - Your GitHub username for %^ghuser
                 ```""");
             return;
         }
-        profile.saveData(args[1].toLowerCase(), args[2]);
+        List<String> supported = Arrays.asList("github", "lastfm");
+        if(supported.contains(args[1].toLowerCase())) {
+            profile.saveData(args[1].toLowerCase(), args[2]);
+        }
         commandEvent.reply("If you see this message, then it saved successfully... hopefully.");
     }
 }

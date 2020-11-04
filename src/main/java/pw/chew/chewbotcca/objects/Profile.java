@@ -91,6 +91,16 @@ public class Profile {
         return data.getString("lastfm");
     }
 
+    /**
+     * The user's GitHub username, used for %^ghuser
+     * @return their GitHub username
+     */
+    public String getGitHub() {
+        if(data.isNull("github"))
+            return null;
+        return data.getString("github");
+    }
+
     public void delete() {
         RestClient.delete(
             "https://chew.pw/chewbotcca/discord/profile/" + getId() + "/api/delete",
