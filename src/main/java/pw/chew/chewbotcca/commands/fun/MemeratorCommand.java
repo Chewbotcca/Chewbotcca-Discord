@@ -28,7 +28,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.TextChannel;
-import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import java.util.ArrayList;
@@ -54,7 +53,11 @@ public class MemeratorCommand extends Command {
             """);
     }
 
-    private static class MemeratorMemeSubCommand extends Command {
+    public static MemeratorAPI getAPI() {
+        return api;
+    }
+
+    public static class MemeratorMemeSubCommand extends Command {
 
         public MemeratorMemeSubCommand() {
             this.name = "meme";
@@ -69,55 +72,61 @@ public class MemeratorCommand extends Command {
             event.getChannel().sendTyping().queue();
             boolean id = false;
             String args = event.getArgs();
-            Meme meme;
             if (args.toLowerCase().matches("([a-f]|[0-9]){6,7}")) {
                 id = true;
             }
-            LoggerFactory.getLogger(this.getClass()).debug("ID IS " + id);
-            if (id) {
-                try {
-                    meme = api.getMeme(args);
-                } catch (NotFound notFound) {
-                    meme = null;
-                }
-            } else {
-                List<Meme> response = api.searchMemes(args);
-                if (response.isEmpty()) {
-                    meme = null;
-                } else {
-                    meme = response.get(0);
-                }
-            }
+            Meme meme = getMeme(args, id);
             if (meme == null) {
                 event.reply("No memes found for query.");
                 return;
             }
 
-            boolean canShow = true;
             if(event.getChannelType() == ChannelType.TEXT) {
                 TextChannel channel = event.getTextChannel();
                 if(!channel.isNSFW() && meme.getAgeRating() == Age.MATURE) {
-                    canShow = false;
+                    event.reply(new EmbedBuilder()
+                        .setTitle("Meme Information (" + meme.getMemeId() + ")", meme.getMemeUrl())
+                        .setDescription("This meme is marked as Mature and this channel is not a NSFW channel!").build());
+                    return;
                 }
             }
+            EmbedBuilder eb = generateMemeEmbed(meme);
+            if(event.getChannelType() == ChannelType.TEXT) {
+                eb.setColor(event.getSelfMember().getColor());
+            }
+            event.reply(eb.build());
+        }
+
+        public static Meme getMeme(String args, boolean id) {
+            if (id) {
+                try {
+                    return api.getMeme(args);
+                } catch (NotFound notFound) {
+                    return null;
+                }
+            } else {
+                List<Meme> response = api.searchMemes(args);
+                if (response.isEmpty()) {
+                    return null;
+                } else {
+                    return response.get(0);
+                }
+            }
+        }
+
+        public static EmbedBuilder generateMemeEmbed(Meme meme) {
             String captionOrNah;
             if(meme.getCaption() == null || meme.getCaption().equals("")) {
                 captionOrNah = "*Author hasn't set a caption yet!*";
             } else {
                 captionOrNah = meme.getCaption();
             }
-            if(!canShow) {
-                event.reply(new EmbedBuilder()
-                    .setTitle("Meme Information (" + meme.getMemeId() + ")", meme.getMemeUrl())
-                    .setDescription("This meme is marked as Mature and this channel is not a NSFW channel!").build());
-                return;
-            }
             String authorString = "[" + meme.getAuthor().getUsername() + "](" + meme.getAuthor().getProfileUrl() + ")";
             if (meme.getAuthor().getUserPerks().contains(UserPerk.VERIFIED)) {
                 authorString = authorString + " <:verified:595298760502935573>";
             }
 
-            EmbedBuilder eb = new EmbedBuilder()
+            return new EmbedBuilder()
                 .setTitle("Meme Information (" + meme.getMemeId() + ")", meme.getMemeUrl())
                 .addField("Author", authorString, true)
                 .addField("Age Rating", meme.getAgeRating().toString(), true)
@@ -127,14 +136,10 @@ public class MemeratorCommand extends Command {
                 .setFooter("Meme submitted")
                 .setTimestamp(meme.getTimestamp())
                 .setImage(meme.getImageUrl());
-            if(event.getChannelType() == ChannelType.TEXT) {
-                eb.setColor(event.getSelfMember().getColor());
-            }
-            event.reply(eb.build());
         }
     }
 
-    private static class MemeratorUserSubCommand extends Command {
+    public static class MemeratorUserSubCommand extends Command {
 
         public MemeratorUserSubCommand() {
             this.name = "user";
@@ -154,6 +159,10 @@ public class MemeratorCommand extends Command {
                 commandEvent.reply("User not found!");
                 return;
             }
+            commandEvent.reply(generateUserEmbed(user).build());
+        }
+
+        public static EmbedBuilder generateUserEmbed(User user) {
             List<CharSequence> perks = new ArrayList<>();
             List<UserPerk> perkList = user.getUserPerks();
             if(perkList.contains(UserPerk.FOUNDER))
@@ -176,7 +185,7 @@ public class MemeratorCommand extends Command {
                 .setTimestamp(user.getJoinTimestamp());
             if(!perks.isEmpty())
                 embed.addField("Status", String.join("\n", perks), true);
-            commandEvent.getChannel().sendMessage(embed.build()).queue();
+            return embed;
         }
     }
 }

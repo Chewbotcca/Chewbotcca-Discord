@@ -16,6 +16,9 @@
  */
 package pw.chew.chewbotcca.listeners;
 
+import me.memerator.api.errors.NotFound;
+import me.memerator.api.object.Meme;
+import me.memerator.api.object.User;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -23,6 +26,7 @@ import org.json.JSONObject;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GitHub;
 import org.slf4j.LoggerFactory;
+import pw.chew.chewbotcca.commands.fun.MemeratorCommand;
 import pw.chew.chewbotcca.commands.github.GHIssueCommand;
 import pw.chew.chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.chewbotcca.commands.minecraft.MCIssueCommand;
@@ -35,6 +39,9 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static pw.chew.chewbotcca.commands.fun.MemeratorCommand.MemeratorMemeSubCommand.generateMemeEmbed;
+import static pw.chew.chewbotcca.commands.fun.MemeratorCommand.MemeratorUserSubCommand.generateUserEmbed;
 
 // Listen to reactions
 public class ReactListener extends ListenerAdapter {
@@ -60,6 +67,12 @@ public class ReactListener extends ListenerAdapter {
 
         // Retrieve the message
         event.getChannel().retrieveMessageById(id).queue((msg) -> {
+            // Ignore if message >= 15 minutes old
+            if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
+                LoggerFactory.getLogger(ReactListener.class).debug("Message older than 15 minutes, not describing!");
+                return;
+            }
+
             String content = msg.getContentStripped().replace(">", "");
             if(content.contains("youtube.com") || content.contains("youtu.be")) {
                 // If it's a YouTube video
@@ -70,6 +83,12 @@ public class ReactListener extends ListenerAdapter {
             } else if(content.contains("bugs.mojang.com") || content.contains("hub.spigotmc.org/jira")) {
                 // If it's a mojira/spigot jira link
                 handleMcIssue(content, event, msg);
+            } else if(content.contains("memerator.me/m")) {
+                // If it's a Memerator meme
+                handleMemeratorMeme(content, event, msg);
+            } else if(content.contains("memerator.me/p")) {
+                // If it's a Memerator user
+                handleMemeratorUser(content, event, msg);
             }
         });
     }
@@ -93,11 +112,6 @@ public class ReactListener extends ListenerAdapter {
         // If one couldn't be found for whatever reason
         if(video == null)
             return;
-        // Ignore if message >= 15 minutes
-        if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
-            LoggerFactory.getLogger(ReactListener.class).debug("Message older than 15 minutes, not describing!");
-            return;
-        }
         // Mark it as described
         described(msg.getId());
         // Get the video
@@ -119,11 +133,6 @@ public class ReactListener extends ListenerAdapter {
         String repo = url[3] + "/" + url[4];
         // Get the issue num
         int issue = Integer.parseInt(url[6]);
-        // Ignore if message >= 15 minutes old
-        if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
-            LoggerFactory.getLogger(ReactListener.class).debug("Message older than 15 minutes, not describing!");
-            return;
-        }
         // Ignore if described
         described(msg.getId());
         // Initialize GitHub and the response
@@ -147,11 +156,6 @@ public class ReactListener extends ListenerAdapter {
         // Get PROJECT-NUM from URL
         String[] url = content.split("/");
         String issue = url[url.length - 1];
-        // Ignore if message >= 15 minutes old
-        if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
-            LoggerFactory.getLogger(ReactListener.class).debug("Message older than 15 minutes, not describing!");
-            return;
-        }
         // Ignore if described
         described(msg.getId());
         // Ensure we actually track this
@@ -162,6 +166,43 @@ public class ReactListener extends ListenerAdapter {
         JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
         // Initialize GitHub and the response
         event.getChannel().sendMessage(MCIssueCommand.generateEmbed(data, issue, apiUrl).build()).queue();
+    }
+
+    /**
+     * Handles a Memerator Meme Link
+     * @param content the message content
+     * @param event the reaction event
+     * @param msg the message itself
+     */
+    public void handleMemeratorMeme(String content, GuildMessageReactionAddEvent event, Message msg) {
+        String id = content.split("/")[content.split("/").length - 1];
+        if (!id.toLowerCase().matches("([a-f]|[0-9]){6,7}")) {
+            return;
+        }
+        // Ignore if described
+        described(msg.getId());
+        // Get the meme
+        Meme meme = MemeratorCommand.MemeratorMemeSubCommand.getMeme(id, true);
+        if (meme == null) {
+            return;
+        }
+        event.getChannel().sendMessage(generateMemeEmbed(meme).build()).queue();
+        msg.suppressEmbeds(true).queue();
+    }
+
+    public void handleMemeratorUser(String content, GuildMessageReactionAddEvent event, Message msg) {
+        String name = content.split("/")[content.split("/").length - 1];
+        // Ignore if described
+        described(msg.getId());
+        // Get the user
+        User user;
+        try {
+            user = MemeratorCommand.getAPI().getUser(name);
+        } catch (NotFound notFound) {
+            return;
+        }
+        event.getChannel().sendMessage(generateUserEmbed(user).build()).queue();
+        msg.suppressEmbeds(true).queue();
     }
 
     /**
