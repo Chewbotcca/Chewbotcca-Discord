@@ -46,8 +46,9 @@
         <dependency>
             <groupId>pw.chew</groupId>
             <artifactId>jda-chewtils</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.0_13</version>
             <scope>compile</scope>
+            <type>pom</type>
         </dependency>
 
         <!-- Logback classic as out logging framework -->
