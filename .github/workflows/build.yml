@@ -20,7 +20,5 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 15
-    - name: Install JDA-Chewtils
-      run: mvn install:install-file -Dfile=lib/jda-chewtils-1.0.0-all.jar -DgroupId=pw.chew -DartifactId=jda-chewtils -Dversion=1.0.0 -Dpackaging=jar
     - name: Compile
       run: mvn clean package
