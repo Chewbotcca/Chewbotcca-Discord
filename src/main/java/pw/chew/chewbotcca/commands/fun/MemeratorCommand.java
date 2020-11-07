@@ -183,6 +183,9 @@ public class MemeratorCommand extends Command {
                 .addField("Stats", "Memes: " + user.getMemeCount() + "\nFollowers: " + user.getFollowerCount() + "\nFollowing: " + user.getFollowingCount(), true)
                 .setFooter("Joined")
                 .setTimestamp(user.getJoinTimestamp());
+            if (user.isProActive()) {
+                embed.setColor(user.getNameColor());
+            }
             if(!perks.isEmpty())
                 embed.addField("Status", String.join("\n", perks), true);
             return embed;
