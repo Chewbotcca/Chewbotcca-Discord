@@ -26,9 +26,10 @@ import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHUser;
+import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.objects.Memory;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,10 +69,16 @@ public class GHIssueCommand extends Command {
         // Set the title and body to the issue title and body
         e.setTitle(issue.getTitle());
         if(issue.getBody() != null) {
-            if (issue.getBody().length() > 400) {
-                e.setDescription(issue.getBody().substring(0, 399) + "...");
+            String body = issue.getBody();
+            // Remove Comments
+            body = body.replaceAll("<!--(.*?)-->", "");
+            // Remove double new-lines
+            body = body.replaceAll("\\n\\n", "\n");
+            LoggerFactory.getLogger(this.getClass()).debug(body);
+            if (body.length() > 400) {
+                e.setDescription(body.substring(0, 399) + "...");
             } else {
-                e.setDescription(issue.getBody());
+                e.setDescription(body);
             }
         }
         // Find the state
