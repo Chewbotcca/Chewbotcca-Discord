@@ -69,8 +69,15 @@ public class DefineCommand extends Command {
                 .setColor(0xd084)
                 .setDescription(
                     definition.getString("text")
+                        // Get rid of xrefs entirely
                         .replaceAll("<xref (.*?)>(.*?)<\\/xref>", "$2")
+                        .replaceAll("<internalXref (.*?)>(.*?)<\\/internalXref>", "$2")
                         .replaceAll("<xref>(.*?)<\\/xref>", "$1")
+                        // Italics
+                        .replaceAll("<em>(.*?)</em>", "*$1*")
+                        .replaceAll("<i>(.*?)</i>", "*$1*")
+                        // Bold
+                        .replaceAll("<strong>(.*?)</strong>", "**$1**")
                 )
                 .setAuthor("Dictionary", null, "https://icons.iconarchive.com/icons/johanchalibert/mac-osx-yosemite/1024/dictionary-icon.png");
 
