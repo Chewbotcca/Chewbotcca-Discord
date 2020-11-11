@@ -50,11 +50,6 @@ public class DefineCommand extends Command {
             return;
         }
 
-        if(!grabbedword.getJSONObject(0).has("text")) {
-            commandEvent.reply("Word has no definition! Why does it exist then!");
-            return;
-        }
-
         EmbedPaginator.Builder paginator = JDAUtilUtil.makeEmbedPaginator();
         paginator.setUsers(commandEvent.getAuthor());
 
@@ -63,22 +58,29 @@ public class DefineCommand extends Command {
         for(int i = 0; i < definitions; i++) {
             JSONObject definition = grabbedword.getJSONObject(i);
 
+            String defined = "*No definition available, try navigating with the reactions below.*";
+
+            if (definition.has("text")) {
+                defined = definition.getString("text")
+                    // Get rid of xrefs and other unused tags entirely
+                    .replaceAll("<xref (.*?)>(.*?)<\\/xref>", "$2")
+                    .replaceAll("<internalXref (.*?)>(.*?)<\\/internalXref>", "$2")
+                    .replaceAll("<xref>(.*?)<\\/xref>", "$1")
+                    .replaceAll("<altname>(.*?)<\\/altname>", "$1")
+                    .replaceAll("<spn>(.*?)<\\/spn>", "$1")
+                    .replaceAll("<stype>(.*?)<\\/stype>", "$1")
+                    // Italics
+                    .replaceAll("<em>(.*?)</em>", "*$1*")
+                    .replaceAll("<i>(.*?)</i>", "*$1*")
+                    // Bold
+                    .replaceAll("<strong>(.*?)</strong>", "**$1**");
+            }
+
             // Build the definition embed
             EmbedBuilder e = new EmbedBuilder()
                 .setTitle("Definition for " + word, definition.getString("wordnikUrl"))
                 .setColor(0xd084)
-                .setDescription(
-                    definition.getString("text")
-                        // Get rid of xrefs entirely
-                        .replaceAll("<xref (.*?)>(.*?)<\\/xref>", "$2")
-                        .replaceAll("<internalXref (.*?)>(.*?)<\\/internalXref>", "$2")
-                        .replaceAll("<xref>(.*?)<\\/xref>", "$1")
-                        // Italics
-                        .replaceAll("<em>(.*?)</em>", "*$1*")
-                        .replaceAll("<i>(.*?)</i>", "*$1*")
-                        // Bold
-                        .replaceAll("<strong>(.*?)</strong>", "**$1**")
-                )
+                .setDescription(defined)
                 .setAuthor("Dictionary", null, "https://icons.iconarchive.com/icons/johanchalibert/mac-osx-yosemite/1024/dictionary-icon.png");
 
             // Only put part of speech if there is one
