@@ -46,11 +46,15 @@ public class RollCommand extends Command {
         int dice;
         int sides;
         try {
-            dice = Integer.parseInt(types[0]);
+            dice = Integer.parseInt(types[0].trim());
             if (types.length < 2) {
                 sides = 6;
             } else {
-                sides = Integer.parseInt(types[1]);
+                sides = Integer.parseInt(types[1].trim());
+            }
+            // Max_value + 1 overflows
+            if (sides == Integer.MAX_VALUE) {
+                sides--;
             }
         } catch (NumberFormatException e) {
             commandEvent.reply("Your input is too big! Try again, but with lower numbers.");
