@@ -106,8 +106,9 @@ public class YouTubeCommand extends Command {
         String length = url.getJSONArray("items").getJSONObject(0).getJSONObject("contentDetails").getString("duration");
         long views = 0;
         // The view count is apparently optional, as proven with Apple's WWDC 2020 livestream
-        if(stats.has("viewCount"))
+        if(stats.has("viewCount")) {
             views = Long.parseLong(stats.getString("viewCount"));
+        }
         int likes = -1, dislike = -1;
         float totalLikes;
         String percent = "", disPercent = "";
@@ -119,8 +120,6 @@ public class YouTubeCommand extends Command {
             percent = df.format(likes / totalLikes * 100);
             disPercent = df.format(dislike / totalLikes * 100);
         }
-        // Parse upload
-        String upload = info.getString("publishedAt");
 
         String urlpls = "http://youtu.be/" + id;
 
@@ -131,15 +130,18 @@ public class YouTubeCommand extends Command {
         embed.addField("Uploader", "[" + info.getString("channelTitle") + "](https://youtube.com/channel/" + info.getString("channelId") + ")", true);
         embed.addField("Duration", durationParser(length), true);
         // Put view count if there is one
-        if(stats.has("viewCount"))
+        if(stats.has("viewCount")) {
             embed.addField("Views", NumberFormat.getNumberInstance(Locale.US).format(views), true);
-        else
+        } else {
             embed.addField("Views", "Unknown", true);
+        }
         // Add and format rating
-        if (likes > -1)
+        if (likes > -1) {
             embed.addField("Rating", "<:ytup:717600455580188683> **" + NumberFormat.getNumberInstance(Locale.US).format(likes) + "** *(" + percent + "%)*\n" +
                 "<:ytdown:717600455353696317> **" + NumberFormat.getNumberInstance(Locale.US).format(dislike) + "** *(" + disPercent + "%)*", true);
-        embed.addField("Uploaded", dateParser(upload), true);
+        }
+        embed.setFooter("Uploaded");
+        embed.setTimestamp(dateParser(info.getString("publishedAt")));
         embed.setThumbnail(url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet").getJSONObject("thumbnails").getJSONObject("maxres").getString("url"));
         embed.setColor(Color.decode("#FF0001"));
         return embed;
@@ -171,10 +173,8 @@ public class YouTubeCommand extends Command {
      * @param date the date from the api
      * @return the parsed date
      */
-    public String dateParser(String date) {
+    public OffsetDateTime dateParser(String date) {
         DateTimeFormatter inputFormat = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ssX");
-        OffsetDateTime odtInstanceAtOffset = OffsetDateTime.parse(date, inputFormat);
-        DateTimeFormatter outputFormat = DateTimeFormatter.ofPattern("MM/dd/uuuu'\n'HH:mm' UTC'");
-        return odtInstanceAtOffset.format(outputFormat);
+        return OffsetDateTime.parse(date, inputFormat);
     }
 }
