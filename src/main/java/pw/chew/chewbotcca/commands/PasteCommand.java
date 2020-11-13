@@ -28,7 +28,7 @@ public class PasteCommand extends Command {
     protected void execute(CommandEvent event) {
         String file;
         if (event.getArgs().isBlank() && event.getChannelType() == ChannelType.TEXT) {
-            file = getRecentUpload(event.getTextChannel());
+            file = getRecentUpload(event.getTextChannel(), event.getMessage());
         } else {
             file = event.getArgs();
         }
@@ -71,7 +71,13 @@ public class PasteCommand extends Command {
         }
     }
 
-    public String getRecentUpload(TextChannel channel) {
+    public String getRecentUpload(TextChannel channel, Message sentMessage) {
+        if (!sentMessage.getAttachments().isEmpty()) {
+            Message.Attachment attachment = sentMessage.getAttachments().get(0);
+            if (!(attachment.isImage() || attachment.isVideo())) {
+                return attachment.getUrl();
+            }
+        }
         List<Message> messages = channel.getHistory().retrievePast(10).complete();
         for (Message message : messages) {
             if (message.getAttachments().isEmpty())
