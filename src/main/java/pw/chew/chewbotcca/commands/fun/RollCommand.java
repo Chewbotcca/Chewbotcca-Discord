@@ -21,6 +21,8 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
 // %^roll command
@@ -35,7 +37,7 @@ public class RollCommand extends Command {
     protected void execute(CommandEvent commandEvent) {
         // Get the args, if there's no args, just use a default 1d6
         String args = commandEvent.getArgs();
-        if(args.equals("")) {
+        if(args.isBlank()) {
             args = "1d6";
         }
 
@@ -64,7 +66,7 @@ public class RollCommand extends Command {
             return;
         }
         // Do the math to calculate the dice roll
-        int total = 0;
+        long total = 0;
         for(int i = 0; i < dice; i++) {
             total += ThreadLocalRandom.current().nextInt(1, sides + 1);
         }
@@ -72,9 +74,9 @@ public class RollCommand extends Command {
         // Take the data, make an embed, and send it off
         commandEvent.reply(new EmbedBuilder()
                 .setTitle("Dice Roll \uD83C\uDFB2")
-                .addField("Dice", String.valueOf(dice), true)
-                .addField("Sides", String.valueOf(sides), true)
-                .addField("Total", String.valueOf(total), false)
+                .addField("Dice", NumberFormat.getNumberInstance(Locale.US).format(dice), true)
+                .addField("Sides", NumberFormat.getNumberInstance(Locale.US).format(sides), true)
+                .addField("Total", NumberFormat.getNumberInstance(Locale.US).format(total), false)
                 .build()
         );
     }
