@@ -52,10 +52,6 @@ public class RollCommand extends Command {
             } else {
                 sides = Integer.parseInt(types[1].trim());
             }
-            // Max_value + 1 overflows
-            if (sides == Integer.MAX_VALUE) {
-                sides--;
-            }
         } catch (NumberFormatException e) {
             commandEvent.reply("Your input is too big! Try again, but with lower numbers.");
             return;
@@ -70,9 +66,10 @@ public class RollCommand extends Command {
             return;
         }
         // Do the math to calculate the dice roll
+        commandEvent.getChannel().sendTyping().queue();
         long total = 0;
         for(int i = 0; i < dice; i++) {
-            total += ThreadLocalRandom.current().nextInt(1, sides + 1);
+            total += ThreadLocalRandom.current().nextInt(0, sides) + 1;
         }
 
         // Take the data, make an embed, and send it off
