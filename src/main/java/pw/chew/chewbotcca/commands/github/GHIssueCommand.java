@@ -21,14 +21,17 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
+import org.kohsuke.github.GHDirection;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHUser;
+import org.kohsuke.github.PagedIterator;
+import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.objects.Memory;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +50,13 @@ public class GHIssueCommand extends Command {
     protected void execute(CommandEvent commandEvent) {
         commandEvent.getChannel().sendTyping().queue();
 
-        GHIssue issue = parseMessage(commandEvent);
+        GHIssue issue;
+        try {
+            issue = parseMessage(commandEvent);
+        } catch (IOException e) {
+            commandEvent.reply("Invalid issue number or an invalid repository was provided. Please ensure the issue exists and the repository is public.");
+            return;
+        }
         if(issue == null)
             return;
 
@@ -140,33 +149,43 @@ public class GHIssueCommand extends Command {
         return e;
     }
 
-    public GHIssue parseMessage(CommandEvent commandEvent) {
+    public GHIssue parseMessage(CommandEvent commandEvent) throws IOException {
         String[] args = commandEvent.getArgs().split(" ");
         if(commandEvent.getArgs().contains("github.com/")) {
             String[] url = commandEvent.getArgs().split("/");
-            if(url.length >= 7)
-            args = new String[]{url[3] + "/" + url[4], url[6]};
+            if(url.length >= 7) {
+                args = new String[]{url[3] + "/" + url[4], url[6]};
+            }
         }
         if(args.length < 2) {
             commandEvent.reply("Please provide a Repository and an Issue Number!");
             return null;
         }
         String repo = args[0];
+        String term = commandEvent.getArgs().replace(repo + " ", "");
+        LoggerFactory.getLogger(this.getClass()).debug("term: " + term);
+        // Store GHIssue for later
+        GHIssue issue;
         // Make sure the issue number is valid
         int issueNum;
         try {
             issueNum = Integer.parseInt(args[1]);
-        } catch (NumberFormatException e) {
-            commandEvent.reply("Invalid number provided for issue number. Must be a number. Make sure you're doing Repo then Number!");
-            return null;
-        }
-        // Find the GitHub issue
-        GHIssue issue;
-        try {
             issue = Memory.getGithub().getRepository(repo).getIssue(issueNum);
-        } catch (IOException e) {
-            commandEvent.reply("Invalid issue number or an invalid repository was provided. Please ensure the issue exists and the repository is public.");
-            return null;
+        } catch (NumberFormatException e) {
+            PagedIterator<GHIssue> iterator = Memory.getGithub().searchIssues()
+                .q(term + " repo:" + repo)
+                .order(GHDirection.DESC)
+                .list()
+                ._iterator(1);
+            if (iterator.hasNext()) {
+                issue = iterator.next();
+            } else {
+                commandEvent.reply("Could not find specified issue in repo `" + repo + "`!");
+                return null;
+            }
+            int num = issue.getNumber();
+            issue = Memory.getGithub().getRepository(repo).getIssue(num);
+            return issue;
         }
         return issue;
     }
