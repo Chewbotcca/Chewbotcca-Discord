@@ -32,7 +32,12 @@ public class CatFactCommand extends Command {
     @Override
     protected void execute(CommandEvent commandEvent) {
         // Get a fact and respond with it
-        String fact = new JSONObject(RestClient.get("https://catfact.ninja/fact")).getString("fact");
+        JSONObject data = new JSONObject(RestClient.get("https://catfact.ninja/fact"));
+        if (data.has("error")) {
+            commandEvent.reply("Could not get cat fact :cry: Error: " + data.getString("error"));
+            return;
+        }
+        String fact = data.getString("fact");
         commandEvent.reply(fact);
     }
 }
