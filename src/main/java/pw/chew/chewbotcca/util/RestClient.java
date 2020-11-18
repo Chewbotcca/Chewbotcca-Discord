@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.objects.Memory;
 
+import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -161,8 +162,12 @@ public class RestClient {
             }
             LoggerFactory.getLogger(RestClient.class).debug("Response is " + body);
             return body;
+        } catch (SSLHandshakeException e) {
+            LoggerFactory.getLogger(RestClient.class).warn("Call to " + request.url() + " failed with SSLHandshakeException!");
+            return "{error: 'SSLHandshakeException'}";
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(RestClient.class).warn("Call to " + request.url() + " failed with IOException!");
+            return "{error: 'IOException'}";
         }
         return null;
     }
