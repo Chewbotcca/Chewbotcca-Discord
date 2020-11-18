@@ -169,7 +169,6 @@ public class RestClient {
             LoggerFactory.getLogger(RestClient.class).warn("Call to " + request.url() + " failed with IOException!");
             return "{error: 'IOException'}";
         }
-        return null;
     }
 
     public static RequestBody bodyFromHash(HashMap<String, Object> args) {
