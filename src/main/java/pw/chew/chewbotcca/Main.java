@@ -38,6 +38,7 @@ import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ReactListener;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
 import pw.chew.chewbotcca.objects.Memory;
+import pw.chew.chewbotcca.objects.ServerSettings;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import javax.security.auth.login.LoginException;
@@ -71,6 +72,14 @@ public class Main {
         client.useDefaultGame();
         client.setOwnerId(PropertiesManager.getOwnerId());
         client.setPrefix(PropertiesManager.getPrefix());
+        client.setPrefixes(new String[]{"<@!" + PropertiesManager.getClientId() + "> "});
+        client.setPrefixFunction(event -> {
+            if (event.isFromGuild()) {
+                // Get server prefix, as long as it's cached.
+                return ServerSettings.getServerIfCached(event.getGuild().getId()).getPrefix();
+            }
+            return null;
+        });
 
         client.useHelpBuilder(false);
 

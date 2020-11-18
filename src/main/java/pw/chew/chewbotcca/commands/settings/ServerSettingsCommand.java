@@ -23,11 +23,14 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import pw.chew.chewbotcca.objects.ServerSettings;
 
+import java.util.Arrays;
+import java.util.List;
+
 // %^serversettings command
 public class ServerSettingsCommand extends Command {
     public ServerSettingsCommand() {
         this.name = "serversettings";
-        this.aliases = new String[]{"settings"};
+        this.aliases = new String[]{"settings", "ss"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         this.guildOnly = true;
@@ -37,14 +40,33 @@ public class ServerSettingsCommand extends Command {
     protected void execute(CommandEvent commandEvent) {
         // Start typing
         commandEvent.getChannel().sendTyping().queue();
-        // Get guild and its settings and return info
+        // Get server and its settings and return info
         Guild ser = commandEvent.getGuild();
         ServerSettings server = ServerSettings.retrieveServer(ser.getId());
-        commandEvent.reply(new EmbedBuilder()
+        if(!commandEvent.getArgs().contains("set")) {
+            EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("Server Settings for " + ser.getName())
-                .setDescription("The settings system is a work in progress! More details will appear soon!")
-                .setFooter("ID: " + server.getId())
-                .build()
-        );
+                .setDescription("The server settings system is a work in progress! More details will appear soon!")
+                .setFooter("ID: " + server.getId());
+
+            embed.addField("Prefix", server.getPrefix() == null ? "Set with `%^settings set prefix [prefix]`" : server.getPrefix(), true);
+
+            commandEvent.reply(embed.build());
+            return;
+        }
+        String[] args = commandEvent.getArgs().split(" ");
+        if(args.length < 3) {
+            commandEvent.reply("""
+                You are missing arguments! Must have `set`, `key`, `value`. Possible keys:
+                ```
+                prefix - The custom server prefix
+                ```""");
+            return;
+        }
+        List<String> supported = Arrays.asList("prefix");
+        if(supported.contains(args[1].toLowerCase())) {
+            server.saveData(args[1].toLowerCase(), args[2]);
+        }
+        commandEvent.reply("If you see this message, then it saved successfully... hopefully.");
     }
 }
