@@ -51,8 +51,8 @@ public class ProfileCommand extends Command {
                     .setDescription("The profile system is a work in progress! More details will appear soon!")
                     .setFooter("ID: " + profile.getId());
 
-            embed.addField("Lastfm Username", profile.getLastFm() == null ? "Set with `%^profile set lastfm [name]`" : profile.getLastFm(), true);
-            embed.addField("GitHub Username", profile.getGitHub() == null ? "Set with `%^profile set github [name]`" : profile.getGitHub(), true);
+            embed.addField("Lastfm Username", profile.getLastFm() == null ? "Set with `" + commandEvent.getPrefix() + "profile set lastfm [name]`" : profile.getLastFm(), true);
+            embed.addField("GitHub Username", profile.getGitHub() == null ? "Set with `" + commandEvent.getPrefix() + "profile set github [name]`" : profile.getGitHub(), true);
 
             commandEvent.reply(embed.build());
             return;
@@ -64,7 +64,7 @@ public class ProfileCommand extends Command {
                 ```
                 lastfm - Your last.fm username for %^lastfm
                 github - Your GitHub username for %^ghuser
-                ```""");
+                ```""".replaceAll("%\\^", commandEvent.getPrefix()));
             return;
         }
         List<String> supported = Arrays.asList("github", "lastfm");

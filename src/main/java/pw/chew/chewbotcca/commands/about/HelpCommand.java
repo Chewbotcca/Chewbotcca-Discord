@@ -36,7 +36,7 @@ public class HelpCommand extends Command {
         // Reply with embed
         String notice = null;
         if (!commandEvent.getArgs().isEmpty()) {
-            notice = "Psst, to view more info about a command, use `%^info command`!";
+            notice = "Psst, to view more info about a command, use `" + commandEvent.getPrefix() + "info command`!";
         }
         MessageEmbed embed = new EmbedBuilder()
             .setTitle("Welcome to the Chewbotcca Discord Bot")
@@ -48,7 +48,7 @@ public class HelpCommand extends Command {
             .addField("Commands", "You can find all my commands [here](https://chew.pw/chewbotcca/discord/commands)", true)
             .addField("Invite me!", "You can invite me to your server with [this link](https://discord.com/oauth2/authorize?client_id=604362556668248095&scope=bot&permissions=0).", true)
             .addField("Help Server", "Click [me](https://discord.gg/UjxQ3Bh) to join the help server.", true)
-            .addField("More Bot Stats", "Run `%^stats` to see more stats!", true)
+            .addField("More Bot Stats", "Run `" + commandEvent.getPrefix() + "stats` to see more stats!", true)
             .build();
         if (notice == null)
             commandEvent.getChannel().sendMessage(embed).queue();

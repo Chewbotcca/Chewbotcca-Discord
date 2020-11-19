@@ -49,7 +49,7 @@ public class ServerSettingsCommand extends Command {
                 .setDescription("The server settings system is a work in progress! More details will appear soon!")
                 .setFooter("ID: " + server.getId());
 
-            embed.addField("Prefix", server.getPrefix() == null ? "Set with `%^settings set prefix [prefix]`" : server.getPrefix(), true);
+            embed.addField("Prefix", server.getPrefix() == null ? "Set with `" + commandEvent.getPrefix() + "settings set prefix [prefix]`" : server.getPrefix(), true);
 
             commandEvent.reply(embed.build());
             return;

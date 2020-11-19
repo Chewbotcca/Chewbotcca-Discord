@@ -54,7 +54,7 @@ public class LastFMCommand extends Command {
             if (profile.getLastFm() != null) {
                 args = profile.getLastFm();
             } else {
-                event.reply("You don't have a last.fm username set on your profile. Please specify a user with `%^lastfm user` or set your username with `%^profile set lastfm yourname`!");
+                event.reply("You don't have a last.fm username set on your profile. Please specify a user with `" + event.getPrefix() + "lastfm user` or set your username with `" + event.getPrefix() + "profile set lastfm yourname`!");
                 return;
             }
         }

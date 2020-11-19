@@ -59,7 +59,7 @@ public class RoryCommand extends Command {
             .setImage(rory.getString("url"))
             .setFooter("ID: " + rory.getInt("id"));
         if (event.getChannelType() == ChannelType.TEXT && event.getMember().hasPermission(Permission.MANAGE_WEBHOOKS) && event.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
-            embed.setDescription("Stay up to date with new Rory images by running `%^rory follow`!");
+            embed.setDescription("Stay up to date with new Rory images by running `" + event.getPrefix() + "rory follow`!");
         }
 
         event.reply(embed.build());
@@ -113,7 +113,7 @@ public class RoryCommand extends Command {
                 ResponseBody responseBody = response.body();
                 if (!response.isSuccessful()) {
                     // ... handle failed request
-                    event.reply("Error occurred! Bug me with `%^feedback you done messed up with that %^rory follow command of yours`");
+                    event.reply("Error occurred! Bug me with `" + event.getPrefix() + "feedback you done messed up with that " + event.getPrefix() + "rory follow command of yours`");
                     LoggerFactory.getLogger(this.getClass()).error(response.code() + " " + responseBody.string());
                     return;
                 }

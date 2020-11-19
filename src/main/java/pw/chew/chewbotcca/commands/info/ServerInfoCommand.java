@@ -142,7 +142,7 @@ public class ServerInfoCommand extends Command {
             Boosts - `%^sinfo boosts`
             Bots - `%^sinfo bots`
             Channels - `%^sinfo channels`
-            """, false);
+            """.replaceAll("%\\^", event.getPrefix()), false);
 
         e.setFooter("Server Created on");
         e.setTimestamp(server.getTimeCreated());

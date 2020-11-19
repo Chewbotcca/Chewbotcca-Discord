@@ -46,7 +46,8 @@ public class GHUserCommand extends Command {
             if (profile.getGitHub() != null) {
                 username = profile.getGitHub();
             } else {
-                commandEvent.reply("You don't have a GitHub username set on your profile. Please specify a user with `%^ghuser user` or set your username with `%^profile set github yourname`!");
+                commandEvent.reply("You don't have a GitHub username set on your profile. " +
+                    "Please specify a user with `" + commandEvent.getPrefix() + "ghuser user` or set your username with `" + commandEvent.getPrefix() + "profile set github yourname`!");
                 return;
             }
         }
