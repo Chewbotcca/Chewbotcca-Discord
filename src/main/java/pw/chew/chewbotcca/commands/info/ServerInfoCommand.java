@@ -120,11 +120,13 @@ public class ServerInfoCommand extends Command {
         e.addField("Channel Count", String.join("\n", counts), true);
 
         // Server Boosting Stats
-        if(server.getBoostCount() > 0)
+        if(server.getBoostCount() > 0 && server.getBoostRole() != null) {
             e.addField("Server Boosting",
-                    "Level: " + server.getBoostTier().getKey() +
-                            "\nBoosts: " + server.getBoostCount() +
-                            "\nBoosters: " + server.getBoosters().size(), true);
+                "Level: " + server.getBoostTier().getKey() +
+                    "\nBoosts: " + server.getBoostCount() +
+                    "\nBoosters: " + server.getBoosters().size() +
+                    "\nRole: " + server.getBoostRole().getAsMention(), true);
+        }
 
         // Gather perk info
         List<String> perks = new ArrayList<>();
@@ -251,24 +253,21 @@ public class ServerInfoCommand extends Command {
 
             roleNames.add("Role List for " + event.getGuild().getName());
             roleNames.add("Members - Role Mention");
-            roleNames.add("Note: Roles that are integrations are skipped!");
+            roleNames.add("Note: Roles that are bot roles are skipped!");
 
             // Gather roles and iterate over each to find stats
             List<Role> roles = event.getGuild().getRoles();
             for (Role role : roles) {
-                List<Member> membersWithRole = event.getGuild().getMembersWithRoles(role);
-                int members = membersWithRole.size();
-                // Skip if it's a bot role
-                boolean skip = false;
-                // Skip if managed, has 1 member, and that member is a bot
-                if (role.isManaged() && members == 1 && membersWithRole.get(0).getUser().isBot())
-                    skip = true;
+                // Skip if bot role
+                if (role.getTags().isBot())
+                    continue;
                 // Skip @everyone role
                 if (role.isPublicRole())
-                    skip = true;
+                    continue;
 
-                if (!skip)
-                    pbuilder.addItems(membersWithRole.size() + " - " + role.getAsMention());
+                List<Member> membersWithRole = event.getGuild().getMembersWithRoles(role);
+
+                pbuilder.addItems(membersWithRole.size() + " - " + role.getAsMention());
             }
 
             Paginator p = pbuilder.setText(String.join("\n", roleNames))
