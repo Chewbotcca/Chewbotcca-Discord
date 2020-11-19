@@ -38,7 +38,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.2.0_212</version>
+            <version>4.2.0_218</version>
             <scope>compile</scope>
         </dependency>
 
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>pw.chew</groupId>
             <artifactId>jda-chewtils</artifactId>
-            <version>1.0.0_15</version>
+            <version>1.0.0_16</version>
             <scope>compile</scope>
             <type>pom</type>
         </dependency>
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20200518</version>
+            <version>20201115</version>
             <scope>compile</scope>
         </dependency>
 
