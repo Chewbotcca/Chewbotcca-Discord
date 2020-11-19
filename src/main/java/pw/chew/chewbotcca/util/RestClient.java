@@ -156,7 +156,7 @@ public class RestClient {
             String body;
             ResponseBody responseBody = response.body();
             if(responseBody == null) {
-                body = null;
+                body = "{}";
             } else {
                 body = responseBody.string();
             }
@@ -173,6 +173,8 @@ public class RestClient {
 
     public static RequestBody bodyFromHash(HashMap<String, Object> args) {
         FormBody.Builder bodyArgs = new FormBody.Builder();
+        if (args == null)
+            return bodyArgs.build();
         for(Map.Entry<String, Object> entry : args.entrySet()) {
             bodyArgs.add(entry.getKey(), String.valueOf(entry.getValue()));
         }

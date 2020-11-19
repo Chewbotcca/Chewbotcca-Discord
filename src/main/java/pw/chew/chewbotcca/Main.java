@@ -130,7 +130,7 @@ public class Main {
             if (theClass.getName().contains("SubCommand"))
                 continue;
             commands.add(theClass.getDeclaredConstructor().newInstance());
-            logger.debug("Loaded " + theClass.getSimpleName());
+            LoggerFactory.getLogger(theClass).debug("Loaded Successfully!");
         }
 
         return commands.toArray(new Command[0]);
