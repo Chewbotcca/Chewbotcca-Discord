@@ -127,7 +127,9 @@ public class RoleInfoCommand extends Command {
         List<String> info = new ArrayList<>();
         info.add(getInfoFormat(role.isHoisted(), "Hoisted"));
         info.add(getInfoFormat(role.isMentionable(), "Mentionable"));
-        info.add(getInfoFormat(role.isMentionable(), "Managed"));
+        info.add(getInfoFormat(role.getTags().isBot(), "Bot Role"));
+        info.add(getInfoFormat(role.getTags().isBoost(), "Boost Role"));
+        info.add(getInfoFormat(role.getTags().isIntegration(), "Integration Role"));
         embed.addField("Information", String.join("\n", info), true);
         embed.setColor(role.getColor());
         embed.setFooter("Created");
