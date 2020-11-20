@@ -101,6 +101,7 @@ public class Main {
             .enableIntents(GatewayIntent.GUILD_MEMBERS)
             .enableIntents(GatewayIntent.GUILD_PRESENCES)
             .enableCache(CacheFlag.ACTIVITY)
+            .enableCache(CacheFlag.ROLE_TAGS)
             .setStatus(OnlineStatus.ONLINE)
             .setActivity(Activity.playing("Booting..."))
             .addEventListeners(waiter, client.build())
