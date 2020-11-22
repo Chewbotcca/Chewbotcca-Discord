@@ -75,7 +75,12 @@ public class MemeratorCommand extends Command {
             if (args.toLowerCase().matches("([a-f]|[0-9]){6,7}")) {
                 id = true;
             }
-            Meme meme = getMeme(args, id);
+            Meme meme;
+            if (args.equalsIgnoreCase("random")) {
+                meme = api.getRandomMeme();
+            } else {
+                meme = getMeme(args, id);
+            }
             if (meme == null) {
                 event.reply("No memes found for query.");
                 return;
