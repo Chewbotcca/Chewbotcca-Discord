@@ -62,7 +62,10 @@ public class Main {
         PropertiesManager.loadProperties(prop);
 
         // Initialize Sentry to catch errors
-        Sentry.init(PropertiesManager.getSentryDsn()).setEnvironment(PropertiesManager.getSentryEnv());
+        Sentry.init(options -> {
+            options.setDsn(PropertiesManager.getSentryDsn());
+            options.setEnvironment(PropertiesManager.getSentryEnv());
+        });
 
         // Initialize the waiter and client
         EventWaiter waiter = new EventWaiter();
