@@ -78,7 +78,8 @@ public class PasteCommand extends Command {
 
         // Return response
         if (response.getString("status").equals("success")) {
-            message.reply("Your paste for " + name + " is available at: https://paste.gg/chewbotcca/" + response.getJSONObject("result").getString("id")).queue();
+            String url = "https://paste.gg/chewbotcca/" + response.getJSONObject("result").getString("id");
+            message.reply("Your paste for " + name + " is available at: " + url).mentionRepliedUser(false).queue();
             pasted.put(file, response.getJSONObject("result").getString("id"));
         }
     }
