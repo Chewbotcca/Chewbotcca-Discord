@@ -42,6 +42,7 @@ public class YouTubeCommand extends Command {
 
     public YouTubeCommand() {
         this.name = "youtube";
+        this.aliases = new String[]{"yt"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
         this.cooldown = 5;
@@ -142,7 +143,7 @@ public class YouTubeCommand extends Command {
         }
         embed.setFooter("Uploaded");
         embed.setTimestamp(dateParser(info.getString("publishedAt")));
-        embed.setThumbnail(url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet").getJSONObject("thumbnails").getJSONObject("maxres").getString("url"));
+        embed.setThumbnail(getBestThumbnail(url.getJSONArray("items").getJSONObject(0).getJSONObject("snippet").getJSONObject("thumbnails")));
         embed.setColor(Color.decode("#FF0001"));
         return embed;
     }
@@ -160,12 +161,44 @@ public class YouTubeCommand extends Command {
             String chari = chars[i];
             try {
                 Integer.parseInt(chari);
+                if (chari.length() < 2 && output.toString().contains(":")) {
+                    chari = "0" + chari;
+                }
                 output.append(chari);
             } catch (NumberFormatException e) {
                 output.append(":");
             }
         }
-        return output.toString();
+        String response = output.toString();
+        if (!response.contains(":")) {
+            if (response.length() < 2) {
+                response = "0:0" + response;
+            } else {
+                response = "0:" + response;
+            }
+        }
+        return response;
+    }
+
+    /**
+     * Finds the best thumbnail given all the choices
+     * @param thumbnails the thumbnail object
+     * @return the thumbnail
+     */
+    public String getBestThumbnail(JSONObject thumbnails) {
+        // If no best thumbnail, just use YouTube logo
+        String bestThumbnail = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/YouTube_social_red_circle_(2017).svg/1200px-YouTube_social_red_circle_(2017).svg.png";
+        int currentWidth = 0;
+        int currentHeight = 0;
+        for (String value : thumbnails.keySet()) {
+            JSONObject thumbnail = thumbnails.getJSONObject(value);
+            if (thumbnail.getInt("width") > currentWidth && thumbnail.getInt("height") > currentHeight) {
+                bestThumbnail = thumbnail.getString("url");
+                currentWidth = thumbnail.getInt("width");
+                currentHeight = thumbnail.getInt("height");
+            }
+        }
+        return bestThumbnail;
     }
 
     /**
