@@ -46,7 +46,9 @@ public class ServerSettingsCommand extends Command {
         if(!commandEvent.getArgs().contains("set")) {
             EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("Server Settings for " + ser.getName())
-                .setDescription("The server settings system is a work in progress! More details will appear soon!")
+                .setDescription("To set an option, execute `" + commandEvent.getPrefix() + "ss set option value`.\n" +
+                    "To view a list of valid options, simply run `" + commandEvent.getPrefix() + "ss set` " +
+                    "or visit the [wiki](https://wiki.chew.pro/index.php/Commands/serversettings)")
                 .setFooter("ID: " + server.getId());
 
             embed.addField("Prefix", server.getPrefix() == null ? "Set with `" + commandEvent.getPrefix() + "settings set prefix [prefix]`" : server.getPrefix(), true);
