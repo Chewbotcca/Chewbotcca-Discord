@@ -75,7 +75,7 @@ public class GHIssueCommand extends Command {
     public EmbedBuilder issueBuilder(GHIssue issue) {
         EmbedBuilder e = new EmbedBuilder();
         // Set the title and body to the issue title and body
-        e.setTitle(issue.getTitle());
+        e.setTitle(issue.getTitle(), String.valueOf(issue.getHtmlUrl()));
         if(issue.getBody() != null) {
             if (issue.getBody().length() > 400) {
                 e.setDescription(issue.getBody().substring(0, 399) + "...");
@@ -89,7 +89,7 @@ public class GHIssueCommand extends Command {
         boolean draft = false;
         if(issue.isPullRequest()) {
             // If it's a pull request, treat it as such
-            e.setAuthor("Information for Pull Request #" + issue.getNumber() + " in " + issue.getRepository().getFullName(), String.valueOf(issue.getHtmlUrl()));
+            e.setAuthor("Information for Pull Request #" + issue.getNumber() + " in " + issue.getRepository().getFullName());
             try {
                 GHPullRequest pull = issue.getRepository().getPullRequest(issue.getNumber());
                 merged = pull.isMerged();
@@ -103,7 +103,7 @@ public class GHIssueCommand extends Command {
             }
         } else {
             // Otherwise it's just an issue, do nothing special.
-            e.setAuthor("Information for Issue #" + issue.getNumber() + " in " + issue.getRepository().getFullName(), String.valueOf(issue.getHtmlUrl()));
+            e.setAuthor("Information for Issue #" + issue.getNumber() + " in " + issue.getRepository().getFullName());
         }
         // Set status and color based on issue/pull request status
         if(merged) {
