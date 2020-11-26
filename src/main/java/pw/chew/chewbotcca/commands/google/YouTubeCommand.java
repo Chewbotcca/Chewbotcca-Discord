@@ -35,6 +35,9 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 // %^youtube command
@@ -154,30 +157,17 @@ public class YouTubeCommand extends Command {
      * @return a parsed duration
      */
     public String durationParser(String duration) {
-        duration = duration.replace("PT", "");
-        String[] chars = duration.split("");
-        StringBuilder output = new StringBuilder();
-        for(int i = 0; i < duration.length() - 1; i++) {
-            String chari = chars[i];
-            try {
-                Integer.parseInt(chari);
-                if (chari.length() < 2 && output.toString().contains(":")) {
-                    chari = "0" + chari;
-                }
-                output.append(chari);
-            } catch (NumberFormatException e) {
-                output.append(":");
+        List<String> timesTemp = Arrays.asList(duration.replace("PT", "").split("[A-Z]"));
+        List<String> times = new ArrayList<>(timesTemp);
+        if (times.size() == 1) {
+            times.add(0, "0");
+        }
+        for (int i = 1; i < times.size(); i++) {
+            if (times.get(i).length() == 1) {
+                times.set(i, "0" + times.get(i));
             }
         }
-        String response = output.toString();
-        if (!response.contains(":")) {
-            if (response.length() < 2) {
-                response = "0:0" + response;
-            } else {
-                response = "0:" + response;
-            }
-        }
-        return response;
+        return String.join(":", times);
     }
 
     /**
