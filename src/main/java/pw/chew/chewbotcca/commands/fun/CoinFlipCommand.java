@@ -29,6 +29,7 @@ public class CoinFlipCommand extends Command {
         this.name = "coinflip";
         this.aliases = new String[]{"flip"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.guildOnly = false;
     }
 
     @Override

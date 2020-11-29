@@ -46,6 +46,7 @@ public class APODCommand extends Command {
         this.name = "apod";
         this.aliases = new String[]{"dailyspace", "astropix", "apix"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.guildOnly = false;
     }
 
     @Override

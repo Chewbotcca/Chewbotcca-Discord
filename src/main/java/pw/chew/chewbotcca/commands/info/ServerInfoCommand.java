@@ -286,6 +286,7 @@ public class ServerInfoCommand extends Command {
             this.name = "bots";
             this.aliases = new String[]{"bot"};
             this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION};
+            this.guildOnly = true;
         }
 
         @Override

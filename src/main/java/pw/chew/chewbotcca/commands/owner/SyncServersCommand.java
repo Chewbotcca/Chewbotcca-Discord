@@ -25,6 +25,7 @@ public class SyncServersCommand extends Command {
     public SyncServersCommand() {
         this.name = "syncservers";
         this.ownerCommand = true;
+        this.guildOnly = false;
     }
 
     @Override
