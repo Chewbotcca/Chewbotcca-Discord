@@ -79,16 +79,16 @@ public class ReactListener extends ListenerAdapter {
                 handleYouTube(content, event, msg);
             } else if(content.contains("github.com") && (content.contains("/issues") || content.contains("/pull"))) {
                 // If it's a github issue or pr
-                handleGitHub(content, event, msg);
+                handleGitHub(content, msg);
             } else if(content.contains("bugs.mojang.com") || content.contains("hub.spigotmc.org/jira")) {
                 // If it's a mojira/spigot jira link
-                handleMcIssue(content, event, msg);
+                handleMcIssue(content, msg);
             } else if(content.contains("memerator.me/m")) {
                 // If it's a Memerator meme
-                handleMemeratorMeme(content, event, msg);
+                handleMemeratorMeme(content, msg);
             } else if(content.contains("memerator.me/p")) {
                 // If it's a Memerator user
-                handleMemeratorUser(content, event, msg);
+                handleMemeratorUser(content, msg);
             }
         });
     }
@@ -117,16 +117,15 @@ public class ReactListener extends ListenerAdapter {
         // Get the video
         JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + video + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics"));
         // make a YouTube video embed response
-        event.getChannel().sendMessage(new YouTubeCommand().response(url, video, event.getChannel()).build()).queue();
+        msg.reply(new YouTubeCommand().response(url, video, event.getChannel()).build()).mentionRepliedUser(false).queue();
     }
 
     /**
      * Handle a Github.com link
      * @param content the message content
-     * @param event the reaction event
      * @param msg the message itself
      */
-    public void handleGitHub(String content, GuildMessageReactionAddEvent event, Message msg) {
+    public void handleGitHub(String content, Message msg) {
         // Example: https://github.com/Chewbotcca/Discord/issues/1
         // => "https:" "" "github.com" "Chewbotcca" "Discord" "issues" "1"
         String[] url = content.split("/");
@@ -143,16 +142,15 @@ public class ReactListener extends ListenerAdapter {
         } catch (IOException e) {
             return;
         }
-        event.getChannel().sendMessage(new GHIssueCommand().issueBuilder(ghIssue).build()).queue();
+        msg.reply(new GHIssueCommand().issueBuilder(ghIssue).build()).mentionRepliedUser(false).queue();
     }
 
     /**
      * Handle a Mojira / Spigot JIRA link
      * @param content the message content
-     * @param event the reaction event
      * @param msg the message itself
      */
-    public void handleMcIssue(String content, GuildMessageReactionAddEvent event, Message msg) {
+    public void handleMcIssue(String content, Message msg) {
         // Get PROJECT-NUM from URL
         String[] url = content.split("/");
         String issue = url[url.length - 1];
@@ -165,16 +163,15 @@ public class ReactListener extends ListenerAdapter {
         // Get response
         JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
         // Initialize GitHub and the response
-        event.getChannel().sendMessage(MCIssueCommand.generateEmbed(data, issue, apiUrl).build()).queue();
+        msg.reply(MCIssueCommand.generateEmbed(data, issue, apiUrl).build()).mentionRepliedUser(false).queue();
     }
 
     /**
      * Handles a Memerator Meme Link
      * @param content the message content
-     * @param event the reaction event
      * @param msg the message itself
      */
-    public void handleMemeratorMeme(String content, GuildMessageReactionAddEvent event, Message msg) {
+    public void handleMemeratorMeme(String content, Message msg) {
         String id = content.split("/")[content.split("/").length - 1];
         if (!id.toLowerCase().matches("([a-f]|[0-9]){6,7}")) {
             return;
@@ -186,11 +183,11 @@ public class ReactListener extends ListenerAdapter {
         if (meme == null) {
             return;
         }
-        event.getChannel().sendMessage(generateMemeEmbed(meme).build()).queue();
+        msg.reply(generateMemeEmbed(meme).build()).mentionRepliedUser(false).queue();
         msg.suppressEmbeds(true).queue();
     }
 
-    public void handleMemeratorUser(String content, GuildMessageReactionAddEvent event, Message msg) {
+    public void handleMemeratorUser(String content, Message msg) {
         String name = content.split("/")[content.split("/").length - 1];
         // Ignore if described
         described(msg.getId());
@@ -201,7 +198,7 @@ public class ReactListener extends ListenerAdapter {
         } catch (NotFound notFound) {
             return;
         }
-        event.getChannel().sendMessage(generateUserEmbed(user).build()).queue();
+        msg.reply(generateUserEmbed(user).build()).mentionRepliedUser(false).queue();
         msg.suppressEmbeds(true).queue();
     }
 
