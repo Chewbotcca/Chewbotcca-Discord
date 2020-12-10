@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.exceptions.MissingAccessException;
 
 public class UnsuppressCommand extends Command {
 
@@ -50,7 +51,7 @@ public class UnsuppressCommand extends Command {
         if (args.contains("discord.com/channels/")) {
             String[] components = args.split("/");
             if (!components[4].equals(server.getId())) {
-                throw new IllegalArgumentException("Server must be the same as thi server!");
+                throw new IllegalArgumentException("Server must be the same as this server!");
             }
             if (!components[5].equals(channel.getId())) {
                 channel = server.getTextChannelById(components[5]);
@@ -58,7 +59,11 @@ public class UnsuppressCommand extends Command {
             if (channel == null) {
                 throw new IllegalArgumentException("This channel does not exist on this server!");
             }
-            return channel.retrieveMessageById(components[6]).complete();
+            try {
+                return channel.retrieveMessageById(components[6]).complete();
+            } catch (MissingAccessException e) {
+                throw new IllegalArgumentException("Cannot access that channel!");
+            }
         }
 
         String[] info = args.split(" ");
