@@ -50,7 +50,7 @@ public class MCServerCommand extends Command {
         e.setTitle("**Server Info For** `" + commandEvent.getArgs() + "`");
 
         // Set thumbnail to favicon
-        e.setThumbnail(info.getFavicon());
+        // e.setThumbnail(info.getFavicon());
 
         // If online, green embed, else red
         String online;
