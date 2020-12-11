@@ -52,25 +52,23 @@ public class MCServerCommand extends Command {
         // Set thumbnail to favicon
         // e.setThumbnail(info.getFavicon());
 
-        // If online, green embed, else red
-        String online;
+        // If online, show stats, else don't.
         if (info.isOnline()) {
-            online = "Online";
+            e.addField("Status", "Online", true);
             e.setColor(Color.GREEN);
-        } else {
-            online = "Offline";
-            e.setColor(Color.RED);
-        }
 
-        // Show other stats too
-        e.setDescription(info.getCleanMOTD());
-        e.addField("Status", online, true);
-        e.addField("Players", info.getOnlinePlayerCount() + "/" + info.getMaxPlayerCount(), true);
-        if (info.isGeyser()) {
-            e.addField("Bedrock Version", info.getVersion().split(" ")[2], true);
-            e.addField("Geyser Version", info.getVersion().split(" ")[1].replaceAll("\\(|\\)", ""), true);
+            // Show other stats too
+            e.setDescription(info.getCleanMOTD());
+            e.addField("Players", info.getOnlinePlayerCount() + "/" + info.getMaxPlayerCount(), true);
+            if (info.isGeyser()) {
+                e.addField("Bedrock Version", info.getVersion().split(" ")[2], true);
+                e.addField("Geyser Version", info.getVersion().split(" ")[1].replaceAll("\\(|\\)", ""), true);
+            } else {
+                e.addField("Version", info.getVersion(), true);
+            }
         } else {
-            e.addField("Version", info.getVersion(), true);
+            e.addField("Status", "Offline", true);
+            e.setColor(Color.RED);
         }
 
         // Get last fetch time
