@@ -52,7 +52,7 @@ public class Profile {
      */
     public static Profile retrieveProfile(String id) {
         JSONObject response = new JSONObject(RestClient.get(
-                "https://chew.pw/chewbotcca/discord/profile/" + id + "/api/get",
+                "https://chew.pw/chewbotcca/discord/api/profile/" + id,
                 PropertiesManager.getChewKey()
         ));
         cache.put(id, new Profile(response));
@@ -65,7 +65,7 @@ public class Profile {
         inputMap.put(key, value);
         JSONObject response = new JSONObject(
                 RestClient.post(
-                        "https://chew.pw/chewbotcca/discord/profile/" + getId() + "/api/post",
+                        "https://chew.pw/chewbotcca/discord/api/profile/" + getId(),
                         inputMap,
                         PropertiesManager.getChewKey()
                 )
@@ -103,7 +103,7 @@ public class Profile {
 
     public void delete() {
         RestClient.delete(
-            "https://chew.pw/chewbotcca/discord/profile/" + getId() + "/api/delete",
+            "https://chew.pw/chewbotcca/discord/api/profile/" + getId(),
             PropertiesManager.getChewKey()
         );
         cache.remove(getId());

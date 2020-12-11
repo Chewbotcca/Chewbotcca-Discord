@@ -62,7 +62,7 @@ public class ServerSettings {
      */
     public static ServerSettings retrieveServer(String id) {
         JSONObject response = new JSONObject(RestClient.get(
-                "https://chew.pw/chewbotcca/discord/server/" + id + "/api/get",
+                "https://chew.pw/chewbotcca/discord/api/server/" + id,
                 PropertiesManager.getChewKey()
         ));
         cache.put(id, new ServerSettings(response));
@@ -75,7 +75,7 @@ public class ServerSettings {
         inputMap.put(key, value);
         JSONObject response = new JSONObject(
             RestClient.post(
-                "https://chew.pw/chewbotcca/discord/server/" + getId() + "/api/post",
+                "https://chew.pw/chewbotcca/discord/api/server/" + getId(),
                 inputMap,
                 PropertiesManager.getChewKey()
             )
