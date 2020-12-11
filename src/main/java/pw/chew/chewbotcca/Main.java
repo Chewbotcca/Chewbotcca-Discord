@@ -79,7 +79,8 @@ public class Main {
         client.setPrefixFunction(event -> {
             if (event.isFromGuild()) {
                 // Get server prefix, as long as it's cached.
-                return ServerSettings.getServerIfCached(event.getGuild().getId()).getPrefix();
+                ServerSettings ss = ServerSettings.getServerIfCached(event.getGuild().getId());
+                return ss == null ? null : ss.getPrefix();
             }
             return null;
         });
