@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
@@ -77,6 +78,10 @@ public class Main {
         client.setPrefix(PropertiesManager.getPrefix());
         client.setPrefixes(new String[]{"<@!" + PropertiesManager.getClientId() + "> "});
         client.setPrefixFunction(event -> {
+            // If a DM
+            if (event.getChannelType() == ChannelType.PRIVATE) {
+                return "";
+            }
             if (event.isFromGuild()) {
                 // Get server prefix, as long as it's cached.
                 ServerSettings ss = ServerSettings.getServerIfCached(event.getGuild().getId());
