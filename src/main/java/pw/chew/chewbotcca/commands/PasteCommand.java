@@ -20,7 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
@@ -46,14 +46,16 @@ public class PasteCommand extends Command {
         // Store message and file URL for later
         Message message = event.getMessage();
         String file;
-        // Check if there's no args, and we're in a TEXT channel.
-        if (event.getArgs().isBlank() && event.getChannelType() == ChannelType.TEXT) {
-            message = getRecentUpload(event.getTextChannel(), event.getMessage());
+        boolean fromAttachment = false;
+        // Check if there's no args, and we're in a TEXT channel or DM.
+        if (event.getArgs().isBlank() && (event.isFromType(ChannelType.TEXT) || event.isFromType(ChannelType.PRIVATE))) {
+            message = getRecentUpload(event.getChannel(), event.getMessage());
             if (message == null) {
                 event.reply("No recent messages have a file to paste!");
                 return;
             }
             file = message.getAttachments().get(0).getUrl();
+            fromAttachment = true;
         } else {
             file = event.getArgs();
         }
@@ -62,7 +64,7 @@ public class PasteCommand extends Command {
         String name = file.split("/")[file.split("/").length - 1];
 
         // We only support discord CDN files for now.
-        if (!file.contains("cdn.discordapp.com")) {
+        if (!file.contains("cdn.discordapp.com") && !fromAttachment) {
             event.reply("Only cdn.discordapp.com urls are supported at this time!");
             return;
         }
@@ -106,11 +108,11 @@ public class PasteCommand extends Command {
      * @param sentMessage the most recent sent message
      * @return a message that contains at least 1 valid attachment, if one exists.
      */
-    public Message getRecentUpload(TextChannel channel, Message sentMessage) {
+    public Message getRecentUpload(MessageChannel channel, Message sentMessage) {
         // First check if current message has an upload (e.g. %^paste [attach])
         if (!sentMessage.getAttachments().isEmpty()) {
             Message.Attachment attachment = sentMessage.getAttachments().get(0);
-            if (!(attachment.isImage() || attachment.isVideo())) {
+            if (!attachment.isImage() && !attachment.isVideo()) {
                 return sentMessage;
             }
         }
