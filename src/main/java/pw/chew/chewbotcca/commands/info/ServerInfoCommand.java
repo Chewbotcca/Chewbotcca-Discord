@@ -35,9 +35,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.awaitility.Awaitility.await;
 
 // %^sinfo command
 public class ServerInfoCommand extends Command {
@@ -45,49 +42,22 @@ public class ServerInfoCommand extends Command {
     public ServerInfoCommand() {
         this.name = "serverinfo";
         this.aliases = new String[]{"sinfo"};
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION};
+        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = true;
+        this.children = new Command[]{
+            new ServerBoostsInfoSubCommand(),
+            new ServerBotsSubCommand(),
+            new ServerChannelsInfoSubCommand(),
+            new ServerMemberByJoinSubCommand(),
+            new ServerRolesInfoSubCommand()
+        };
     }
 
     @Override
     protected void execute(CommandEvent event) {
         // Get args and the guild
-        String args = event.getArgs();
         Guild server = event.getGuild();
 
-        // Load members
-        new Thread(() -> event.getGuild().loadMembers().get());
-        await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
-
-        boolean renderMention = false;
-        if(args.contains(" --mention")) {
-            args = args.replace(" --mention", "");
-            renderMention = true;
-        }
-
-        // Find the method they want
-        if(args.contains("boost")) {
-            event.reply(gatherBoostInfo(server).build());
-        } else if(args.contains("role")) {
-            gatherRoles(event, server);
-        } else if(args.contains("bot")) {
-            gatherBots(event, server, renderMention);
-        } else if(args.contains("member")) {
-            event.reply(gatherMemberByJoin(server, args.split(" ")[1]).build());
-        } else if(args.contains("channel")) {
-            event.reply(gatherChannelInfo(server).build());
-        } else {
-            event.reply(gatherMainInfo(event, server).build());
-        }
-    }
-
-    /**
-     * Gather basic info about a server
-     * @param event the command event
-     * @param server the server
-     * @return the embed
-     */
-    public EmbedBuilder gatherMainInfo(CommandEvent event, Guild server) {
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Server Information");
         if(server.getDescription() != null)
@@ -117,11 +87,11 @@ public class ServerInfoCommand extends Command {
 
         String botpercent = df.format((float)bots / (float)membercount * 100);
         String humanpercent = df.format((float)humans / (float)membercount * 100);
-        
+
         e.addField("Member Count", "Total: " + membercount + "\n" +
                 "Bots: " + bots + " - (" + botpercent + "%)\n" +
                 "Users: " + humans + " - (" + humanpercent + "%)", true);
-        
+
         // Channel counts
         int totalchans = server.getChannels().size();
         int textchans = server.getTextChannels().size();
@@ -150,267 +120,65 @@ public class ServerInfoCommand extends Command {
         e.addField("Channel Count", String.join("\n", counts), true);
 
         // Server Boosting Stats
-        if(server.getBoostCount() > 0)
+        if(server.getBoostCount() > 0 && server.getBoostRole() != null) {
             e.addField("Server Boosting",
-                    "Level: " + server.getBoostTier().getKey() +
-                            "\nBoosts: " + server.getBoostCount() +
-                            "\nBoosters: " + server.getBoosters().size(), true);
+                "Level: " + server.getBoostTier().getKey() +
+                    "\nBoosts: " + server.getBoostCount() +
+                    "\nBoosters: " + server.getBoosters().size() +
+                    "\nRole: " + server.getBoostRole().getAsMention(), true);
+        }
 
         // Gather perk info
-        String perks = perkParser(server);
-        if(perks.length() > 0)
-            e.addField("Features", perks, true);
+        List<String> perks = new ArrayList<>();
+        String[] features = server.getFeatures().toArray(new String[0]);
+        Arrays.sort(features);
+        for (String perk : features) {
+            perks.add(perkParser(perk, server));
+        }
+        if(perks.size() > 0) {
+            e.addField("Features", String.join("\n", perks), true);
+        }
 
         e.addField("View More Info", """
             Roles - `%^sinfo roles`
             Boosts - `%^sinfo boosts`
             Bots - `%^sinfo bots`
             Channels - `%^sinfo channels`
-            """, false);
+            """.replaceAll("%\\^", event.getPrefix()), false);
 
         e.setFooter("Server Created on");
         e.setTimestamp(server.getTimeCreated());
 
         e.setColor(event.getSelfMember().getColor());
 
-        return e;
-    }
-
-    /**
-     * Gathers info about boosters and how long they've been boosting
-     * @param server the server
-     * @return an embed
-     */
-    public EmbedBuilder gatherBoostInfo(Guild server) {
-        // Get boosters
-        List<Member> boosters = server.getBoosters();
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Boosters for " + server.getName());
-        List<CharSequence> boostString = new ArrayList<>();
-        // Get a now time for a basis of comparison
-        Instant now = Instant.now();
-        for (Member booster : boosters) {
-            OffsetDateTime timeBoosted = booster.getTimeBoosted();
-            // If they're still boosting (in case they stop boosting between gathering boosters and finding how long they're boosting
-            if(timeBoosted != null)
-                boostString.add(booster.getAsMention() + " for " + DateTime.timeAgo(now.toEpochMilli() - timeBoosted.toInstant().toEpochMilli()));
-        }
-        embed.setDescription(String.join("\n", boostString));
-        if(boostString.isEmpty()) {
-            embed.setDescription("No one is boosting! Will you be the first?");
-        }
-        return embed;
-    }
-
-    /**
-     * Gather role information
-     * @param event the command event
-     * @param server the server
-     */
-    public void gatherRoles(CommandEvent event, Guild server) {
-        Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
-
-        List<CharSequence> roleNames = new ArrayList<>();
-
-        roleNames.add("Role List for " + server.getName());
-        roleNames.add("Members - Role Mention");
-        roleNames.add("Note: Roles that are integrations are skipped!");
-
-        // Gather roles and iterate over each to find stats
-        List<Role> roles = server.getRoles();
-        for (Role role : roles) {
-            List<Member> membersWithRole = server.getMembersWithRoles(role);
-            int members = membersWithRole.size();
-            // Skip if it's a bot role
-            boolean skip = false;
-            // Skip if managed, has 1 member, and that member is a bot
-            if (role.isManaged() && members == 1 && membersWithRole.get(0).getUser().isBot())
-                skip = true;
-            // Skip @everyone role
-            if (role.isPublicRole())
-                skip = true;
-
-            if (!skip)
-                pbuilder.addItems(membersWithRole.size() + " - " + role.getAsMention());
-        }
-
-        Paginator p = pbuilder.setText(String.join("\n", roleNames))
-                .build();
-
-        p.paginate(event.getChannel(), 1);
-    }
-
-    /**
-     * Gather server bots
-     * @param event the command event
-     * @param server the server
-     * @param renderMention whether or not to render a mention
-     */
-    public void gatherBots(CommandEvent event, Guild server, boolean renderMention) {
-        Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
-
-        pbuilder.setText("Bots on " + server.getName() + "\n" + "Newest bots on the bottom");
-        // Get all members as an array an sort it by join time
-        Member[] members = server.getMembers().toArray(new Member[0]);
-        Arrays.sort(members, (o1, o2) -> {
-            if (o1.getTimeJoined().toEpochSecond() > o2.getTimeJoined().toEpochSecond())
-                return 1;
-            else if (o1.getTimeJoined() == o2.getTimeJoined())
-                return 0;
-            else
-                return -1;
-        });
-        // Iterate over each bot to find how long they've been on
-        for (Member member : members) {
-            if (member.getUser().isBot()) {
-                if(renderMention) {
-                    pbuilder.addItems(member.getAsMention() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
-                } else {
-                    pbuilder.addItems(member.getUser().getAsTag() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
-                }
-            }
-        }
-
-        pbuilder.setUsers(event.getAuthor())
-                .build()
-                .paginate(event.getChannel(), 1);
-    }
-
-    /**
-     * Get a member by join position
-     * @param server the server
-     * @param positionString the join position
-     * @return an embed
-     */
-    public EmbedBuilder gatherMemberByJoin(Guild server, String positionString) {
-        int position;
-        try {
-            position = Integer.parseInt(positionString);
-        } catch (NumberFormatException e) {
-            return new EmbedBuilder().setTitle("Error occurred!").setDescription("Invalid input! Must be an integer!");
-        }
-
-        if (position > server.getMemberCache().size() || position <= 0)
-            return new EmbedBuilder().setTitle("Error occurred!").setDescription("Invalid input! Must be 1 <= x <=" + server.getMemberCache().size());
-
-        List<Member> members = server.getMemberCache().asList();
-        Member[] bruh = members.toArray(new Member[0]);
-        Arrays.sort(bruh, (o1, o2) -> {
-            if (o1.getTimeJoined().toEpochSecond() > o2.getTimeJoined().toEpochSecond())
-                return 1;
-            else if (o1.getTimeJoined() == o2.getTimeJoined())
-                return 0;
-            else
-                return -1;
-        });
-        return new UserInfoCommand().gatherMemberInfo(server, bruh[position - 1]);
-    }
-
-    /**
-     * Get channel info, like count and other info
-     * @param server the server
-     * @return an embed
-     */
-    public EmbedBuilder gatherChannelInfo(Guild server) {
-        DecimalFormat df = new DecimalFormat("#.##");
-
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Channel Info and Stats for " + server.getName());
-        embed.setDescription("Total Channels: " + server.getChannels().size());
-
-        // Channel counts
-        int totalChannels = server.getChannels().size();
-        int textChannels = server.getTextChannels().size();
-        int voiceChannels = server.getVoiceChannels().size();
-        int categories = server.getCategories().size();
-        int storeChannels = server.getStoreChannels().size();
-        int newsChannels = 0;
-        int nsfw = 0;
-        int inVoice = 0;
-
-        for(TextChannel channel : server.getTextChannels()) {
-            if(channel.isNews()) {
-                newsChannels++;
-                textChannels--;
-            }
-            if (channel.isNSFW()) {
-                nsfw++;
-            }
-        }
-
-        for (VoiceChannel vc : server.getVoiceChannels()) {
-            inVoice += vc.getMembers().size();
-        }
-
-        String percentText = df.format((float) textChannels / (float) totalChannels * 100);
-        String percentVoice = df.format((float) voiceChannels / (float) totalChannels * 100);
-        String percentCategory = df.format((float)categories / (float) totalChannels * 100);
-        String percentStore = df.format((float) storeChannels / (float) totalChannels * 100);
-        String percentNews = df.format((float) newsChannels / (float) totalChannels * 100);
-        String percentNSFW = df.format((float) nsfw / (float) textChannels * 100);
-
-        embed.addField(
-            "Text Channels",
-            "Total: " + textChannels + " (" + percentText + "%)" + "\n" +
-            "NSFW: " + nsfw,
-            true
-        );
-
-        embed.addField(
-            "Voice Channels",
-            "Total: " + voiceChannels + " (" + percentVoice + "%)" + "\n" +
-                "Members in Voice: " + inVoice,
-            true
-        );
-
-        embed.addField(
-            "Categories",
-            "Total: " + categories + " (" + percentCategory + "%)",
-            true
-        );
-
-        if(server.getFeatures().contains("COMMERCE")) {
-            embed.addField(
-                "Store",
-                "Total: " + storeChannels + " (" + percentStore + "%)",
-                true
-            );
-        }
-
-        if(server.getFeatures().contains("NEWS")) {
-            embed.addField(
-                "Announcement Channels",
-                "Total: " + newsChannels + " (" + percentNews + "%)",
-                true
-            );
-        }
-
-        return embed;
+        event.reply(e.build());
     }
 
     /**
      * Parse the perk list and make it fancy if necessary
+     * @param feature the feature
      * @param server the server
      * @return the perks as nice list
      */
-    public String perkParser(Guild server) {
-        List<CharSequence> perks = new ArrayList<>();
-        String[] features = server.getFeatures().toArray(new String[0]);
-        Arrays.sort(features);
-        for(String feature : features) {
-            switch (feature) {
-                default -> perks.add(capitalize(feature));
-                case "BANNER" -> perks.add("[Banner](" + server.getBannerUrl() + "?size=2048)");
-                case "COMMERCE" -> perks.add("<:store_tag:725504846924611584> Store Channels");
-                case "NEWS" -> perks.add("<:news:725504846937063595> News Channels");
-                case "INVITE_SPLASH" -> perks.add("[Invite Splash](" + server.getSplashUrl() + "?size=2048)");
-                case "PARTNERED" -> perks.add("<:partner:753433398005071872> Partnered Server");
-                case "VANITY_URL" -> perks.add("Vanity URL: " + "[" + server.getVanityCode() + "](https://discord.gg/" + server.getVanityCode() + ")");
-                case "VERIFIED" -> perks.add("<:verifiedserver:753433397933899826> Verified");
-            }
-        }
+    public String perkParser(String feature, Guild server) {
+        return switch (feature) {
+            default -> capitalize(feature);
+            case "BANNER" -> "[Banner](" + server.getBannerUrl() + "?size=2048)";
+            case "COMMERCE" -> "<:store_tag:725504846924611584> Store Channels";
+            case "NEWS" -> "<:news:725504846937063595> News Channels";
+            case "INVITE_SPLASH" -> "[Invite Splash](" + server.getSplashUrl() + "?size=2048)";
+            case "PARTNERED" -> "<:partner:753433398005071872> Partnered Server";
+            case "VANITY_URL" -> parseVanityUrl(server.getVanityCode());
+            case "VERIFIED" -> "<:verifiedserver:753433397933899826> Verified";
+        };
+    }
 
-        return String.join("\n", perks);
+    private String parseVanityUrl(String vanity) {
+        if (vanity == null) {
+            return "Vanity URL: None Set!";
+        } else {
+            return "Vanity URL: " + "[" + vanity + "](https://discord.gg/" + vanity + ")";
+        }
     }
 
     /*
@@ -429,6 +197,265 @@ public class ServerInfoCommand extends Command {
             newword.append(first).append(rest).append(" ");
         }
         return newword.toString();
+    }
+
+    /**
+     * Gathers info about boosters and how long they've been boosting
+     */
+    private static class ServerBoostsInfoSubCommand extends Command {
+
+        public ServerBoostsInfoSubCommand() {
+            this.name = "boost";
+            this.aliases = new String[]{"boosts"};
+            this.guildOnly = true;
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        }
+
+        @Override
+        protected void execute(CommandEvent event) {
+            // Get boosters
+            List<Member> boosters = event.getGuild().getBoosters();
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.setTitle("Boosters for " + event.getGuild().getName());
+            List<CharSequence> boostString = new ArrayList<>();
+            // Get a now time for a basis of comparison
+            Instant now = Instant.now();
+            for (Member booster : boosters) {
+                OffsetDateTime timeBoosted = booster.getTimeBoosted();
+                // If they're still boosting (in case they stop boosting between gathering boosters and finding how long they're boosting
+                if(timeBoosted != null)
+                    boostString.add(booster.getAsMention() + " for " + DateTime.timeAgo(now.toEpochMilli() - timeBoosted.toInstant().toEpochMilli()));
+            }
+            embed.setDescription(String.join("\n", boostString));
+            if(boostString.isEmpty()) {
+                embed.setDescription("No one is boosting! Will you be the first?");
+            }
+            event.reply(embed.build());
+        }
+    }
+
+    /**
+     * Gather role information
+     */
+    private static class ServerRolesInfoSubCommand extends Command {
+
+        public ServerRolesInfoSubCommand() {
+            this.name = "roles";
+            this.guildOnly = true;
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION};
+        }
+
+        @Override
+        protected void execute(CommandEvent event)  {
+            Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
+
+            List<CharSequence> roleNames = new ArrayList<>();
+
+            roleNames.add("Role List for " + event.getGuild().getName());
+            roleNames.add("Members - Role Mention");
+            roleNames.add("Note: Roles that are bot roles are skipped!");
+
+            // Gather roles and iterate over each to find stats
+            List<Role> roles = event.getGuild().getRoles();
+            for (Role role : roles) {
+                // Skip if bot role
+                if (role.getTags().isBot())
+                    continue;
+                // Skip @everyone role
+                if (role.isPublicRole())
+                    continue;
+
+                List<Member> membersWithRole = event.getGuild().getMembersWithRoles(role);
+
+                pbuilder.addItems(membersWithRole.size() + " - " + role.getAsMention());
+            }
+
+            Paginator p = pbuilder.setText(String.join("\n", roleNames))
+                .build();
+
+            p.paginate(event.getChannel(), 1);
+        }
+    }
+
+    /**
+     * Gather server bots
+     */
+    private static class ServerBotsSubCommand extends Command {
+
+        public ServerBotsSubCommand() {
+            this.name = "bots";
+            this.aliases = new String[]{"bot"};
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION};
+            this.guildOnly = true;
+        }
+
+        @Override
+        protected void execute(CommandEvent event) {
+            boolean renderMention = false;
+            if(event.getArgs().contains("--mention")) {
+                renderMention = true;
+            }
+
+            Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
+
+            pbuilder.setText("Bots on " + event.getGuild().getName() + "\n" + "Newest bots on the bottom");
+            // Get all members as an array an sort it by join time
+            Member[] members = event.getGuild().getMembers().toArray(new Member[0]);
+            Arrays.sort(members, (o1, o2) -> {
+                if (o1.getTimeJoined().toEpochSecond() > o2.getTimeJoined().toEpochSecond())
+                    return 1;
+                else if (o1.getTimeJoined() == o2.getTimeJoined())
+                    return 0;
+                else
+                    return -1;
+            });
+            // Iterate over each bot to find how long they've been on
+            for (Member member : members) {
+                if (member.getUser().isBot()) {
+                    if(renderMention) {
+                        pbuilder.addItems(member.getAsMention() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
+                    } else {
+                        pbuilder.addItems(member.getUser().getAsTag() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
+                    }
+                }
+            }
+
+            pbuilder.setUsers(event.getAuthor())
+                .build()
+                .paginate(event.getChannel(), 1);
+        }
+    }
+
+    /**
+     * Get a member by join position
+     */
+    private static class ServerMemberByJoinSubCommand extends Command {
+
+        public ServerMemberByJoinSubCommand() {
+            this.name = "member";
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+            this.guildOnly = true;
+        }
+
+        @Override
+        protected void execute(CommandEvent event) {
+            int position;
+            try {
+                position = Integer.parseInt(event.getArgs());
+            } catch (NumberFormatException e) {
+                event.reply(new EmbedBuilder().setTitle("Error occurred!").setDescription("Invalid input! Must be an integer!").build());
+                return;
+            }
+
+            if (position > event.getGuild().getMemberCache().size() || position <= 0) {
+                event.reply(new EmbedBuilder().setTitle("Error occurred!").setDescription("Invalid input! Must be 1 <= x <=" + event.getGuild().getMemberCache().size()).build());
+                return;
+            }
+
+            List<Member> members = event.getGuild().getMemberCache().asList();
+            Member[] bruh = members.toArray(new Member[0]);
+            Arrays.sort(bruh, (o1, o2) -> {
+                if (o1.getTimeJoined().toEpochSecond() > o2.getTimeJoined().toEpochSecond())
+                    return 1;
+                else if (o1.getTimeJoined() == o2.getTimeJoined())
+                    return 0;
+                else
+                    return -1;
+            });
+            event.reply(new UserInfoCommand().gatherMemberInfo(event.getGuild(), bruh[position - 1]).build());
+        }
+    }
+
+    /**
+     * Get channel info, like count and other info
+     */
+    private static class ServerChannelsInfoSubCommand extends Command {
+
+        public ServerChannelsInfoSubCommand() {
+            this.name = "channel";
+            this.aliases = new String[]{"channels"};
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+            this.guildOnly = true;
+        }
+
+        @Override
+        protected void execute(CommandEvent event) {
+            Guild server = event.getGuild();
+            DecimalFormat df = new DecimalFormat("#.##");
+
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.setTitle("Channel Info and Stats for " + server.getName());
+            embed.setDescription("Total Channels: " + server.getChannels().size());
+
+            // Channel counts
+            int totalChannels = server.getChannels().size();
+            int textChannels = server.getTextChannels().size();
+            int voiceChannels = server.getVoiceChannels().size();
+            int categories = server.getCategories().size();
+            int storeChannels = server.getStoreChannels().size();
+            int newsChannels = 0;
+            int nsfw = 0;
+            int inVoice = 0;
+
+            for(TextChannel channel : server.getTextChannels()) {
+                if(channel.isNews()) {
+                    newsChannels++;
+                    textChannels--;
+                }
+                if (channel.isNSFW()) {
+                    nsfw++;
+                }
+            }
+
+            for (VoiceChannel vc : server.getVoiceChannels()) {
+                inVoice += vc.getMembers().size();
+            }
+
+            String percentText = df.format((float) textChannels / (float) totalChannels * 100);
+            String percentVoice = df.format((float) voiceChannels / (float) totalChannels * 100);
+            String percentCategory = df.format((float)categories / (float) totalChannels * 100);
+            String percentStore = df.format((float) storeChannels / (float) totalChannels * 100);
+            String percentNews = df.format((float) newsChannels / (float) totalChannels * 100);
+            String percentNSFW = df.format((float) nsfw / (float) textChannels * 100);
+
+            embed.addField(
+                "Text Channels",
+                "Total: " + textChannels + " (" + percentText + "%)" + "\n" +
+                    "NSFW: " + nsfw,
+                true
+            );
+
+            embed.addField(
+                "Voice Channels",
+                "Total: " + voiceChannels + " (" + percentVoice + "%)" + "\n" +
+                    "Members in Voice: " + inVoice,
+                true
+            );
+
+            embed.addField(
+                "Categories",
+                "Total: " + categories + " (" + percentCategory + "%)",
+                true
+            );
+
+            if(server.getFeatures().contains("COMMERCE")) {
+                embed.addField(
+                    "Store",
+                    "Total: " + storeChannels + " (" + percentStore + "%)",
+                    true
+                );
+            }
+
+            if(server.getFeatures().contains("NEWS")) {
+                embed.addField(
+                    "Announcement Channels",
+                    "Total: " + newsChannels + " (" + percentNews + "%)",
+                    true
+                );
+            }
+
+            event.reply(embed.build());
+        }
     }
 }
 

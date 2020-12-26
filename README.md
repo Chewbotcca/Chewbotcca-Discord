@@ -19,17 +19,17 @@ It's mostly fun commands like `%^roll`ing some dice, getting cats with `%^cat`, 
 
 However, it can also be used to find information like getting RubyGem information with `%^rubygem`, ironic considering this is a Java bot now.
 
-It also has powerful server info commands, 
-for example, you can run `%^sinfo bot` to find all bots on the server and when they got added,
-being able to find role and member counts (`%^sinfo roles`), 
-finding a member by join position (`%^sinfo member [position]`), 
+It also has powerful server info commands,
+for example, you can run `%^sinfo bot` to find all bots on the server, and when they got added,
+being able to find role and member counts (`%^sinfo roles`),
+finding a member by join position (`%^sinfo member [position]`),
 finding boosters and boost time (`%^sinfo boost`),
 and more!
 
-There's also commands such as `%^youtube` to find YouTube videos, 
+There's also commands such as `%^youtube` to find YouTube videos,
 and `%^ghuser` to detail your favorite developers on GitHub.
 
-I'm always open to suggestions on what to add, please let me know what you would like to see!
+I'm always open to suggestions on what to add. Please let me know what you would like to see!
 
 ## Links
 
@@ -43,7 +43,7 @@ You can view the GitHub repository @ [Chewbotcca/Discord](https://github.com/Che
 
 ## Licensing
 
-This project is licensed under GPL-3.0. As a result, any modifications must use the same license and any changes you make to this project must be disclosed. Read more [here](https://choosealicense.com/licenses/gpl-3.0/).
+This project is licensed under GPL-3.0. As a result, any modifications must use the same license. Any changes you make to this project must be disclosed. Read more [here](https://choosealicense.com/licenses/gpl-3.0/).
 
 ## Sponsored
 

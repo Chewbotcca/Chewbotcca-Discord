@@ -17,7 +17,6 @@
 package pw.chew.chewbotcca.objects;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.mcprohosting.MCProHostingAPI;
 import net.dv8tion.jda.api.JDA;
 import org.kohsuke.github.GitHub;
 import pro.chew.api.ChewAPI;
@@ -29,14 +28,12 @@ public class Memory {
     private static EventWaiter waiter;
     private static JDA jda;
     private static ChewAPI chewAPI;
-    private static MCProHostingAPI mcproAPI;
     private static GitHub github;
 
-    public Memory(EventWaiter waiter, JDA jda, ChewAPI chewAPI, MCProHostingAPI mcproAPI, GitHub github) {
+    public Memory(EventWaiter waiter, JDA jda, ChewAPI chewAPI, GitHub github) {
         Memory.waiter = waiter;
         Memory.jda = jda;
         Memory.chewAPI = chewAPI;
-        Memory.mcproAPI = mcproAPI;
         Memory.github = github;
     }
 
@@ -52,13 +49,6 @@ public class Memory {
      */
     public static ChewAPI getChewAPI() {
         return chewAPI;
-    }
-
-    /**
-     * @return the MCPro API used for MCPro API stuff
-     */
-    public static MCProHostingAPI getMcproAPI() {
-        return mcproAPI;
     }
 
     /**

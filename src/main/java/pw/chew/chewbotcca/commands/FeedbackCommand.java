@@ -50,7 +50,8 @@ public class FeedbackCommand extends Command {
         embed.setAuthor(commandEvent.getAuthor().getAsTag(), null, commandEvent.getAuthor().getAvatarUrl());
         embed.setFooter("User ID: " + commandEvent.getAuthor().getId());
         // Get the feedback channel and send
-        Objects.requireNonNull(commandEvent.getJDA().getTextChannelById("745164378659225651")).sendMessage(embed.build()).queue();
-        commandEvent.reply("I have successfully sent the feedback! Feel free to see it on the help server with `%^invite`");
+        Objects.requireNonNull(commandEvent.getJDA().getTextChannelById("745164378659225651")).sendMessage(embed.build()).queue(
+            message -> commandEvent.reply("I have successfully sent the feedback! Feel free to see it on the help server with `" + commandEvent.getPrefix() + "invite`")
+        );
     }
 }

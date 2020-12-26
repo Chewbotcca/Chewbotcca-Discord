@@ -67,7 +67,13 @@ public class BotInfoCommand extends Command {
             case "dbl", "top.gg", "topgg" -> commandEvent.reply(gatherTopggInfo(botId, commandEvent).build());
             case "dbots" -> commandEvent.reply(gatherDBotsInfo(botId, commandEvent).build());
             case "del" -> commandEvent.reply(gatherDELInfo(botId, commandEvent).build());
-            default -> commandEvent.reply("Invalid Bot List! Possible: ```dbots, topgg, del```");
+            default -> commandEvent.reply("""
+                Invalid Bot List! Supported lists:
+                `dbots` -> <https://discord.bots.gg>
+                `topgg` -> <https://top.gg>
+                `del` -> <https://discordextremelist.xyz>
+                
+                Got one to suggest? Open an issue on GitHub or suggest one with `%^feedback`!""".replace("%^", commandEvent.getPrefix()));
         }
     }
 

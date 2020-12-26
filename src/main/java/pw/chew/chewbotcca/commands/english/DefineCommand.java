@@ -18,10 +18,13 @@ package pw.chew.chewbotcca.commands.english;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.menu.EmbedPaginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
@@ -41,30 +44,56 @@ public class DefineCommand extends Command {
         // Attempt to grab the word, if it doesn't exist let them know
         JSONArray grabbedword;
         try {
-            grabbedword = new JSONArray(RestClient.get("http://api.wordnik.com/v4/word.json/" + word + "/definitions?limit=1&includeRelated=true&useCanonical=false&includeTags=false&api_key=" + PropertiesManager.getWordnikToken()));
+            grabbedword = new JSONArray(RestClient.get("http://api.wordnik.com/v4/word.json/" + word + "/definitions?includeRelated=true&useCanonical=false&includeTags=false&api_key=" + PropertiesManager.getWordnikToken()));
         } catch(JSONException e) {
             commandEvent.reply("Word not found! Check your local spell-checker!");
             return;
         }
 
-        if(!grabbedword.getJSONObject(0).has("text")) {
-            commandEvent.reply("Word has no definition! Why does it exist then!");
-            return;
-        }
+        EmbedPaginator.Builder paginator = JDAUtilUtil.makeEmbedPaginator();
+        paginator.setUsers(commandEvent.getAuthor());
 
-        // Build the definition embed
-        EmbedBuilder e = new EmbedBuilder()
-                .setTitle("Definition for " + word)
+        int definitions = grabbedword.length();
+
+        for(int i = 0; i < definitions; i++) {
+            JSONObject definition = grabbedword.getJSONObject(i);
+
+            String defined = "*No definition available, try navigating with the reactions below.*";
+
+            if (definition.has("text")) {
+                defined = definition.getString("text")
+                    // Get rid of xrefs and other unused tags entirely
+                    .replaceAll("<xref (.*?)>(.*?)<\\/xref>", "$2")
+                    .replaceAll("<internalXref (.*?)>(.*?)<\\/internalXref>", "$2")
+                    .replaceAll("<xref>(.*?)<\\/xref>", "$1")
+                    .replaceAll("<altname>(.*?)<\\/altname>", "$1")
+                    .replaceAll("<spn>(.*?)<\\/spn>", "$1")
+                    .replaceAll("<stype>(.*?)<\\/stype>", "$1")
+                    // Italics
+                    .replaceAll("<em>(.*?)</em>", "*$1*")
+                    .replaceAll("<i>(.*?)</i>", "*$1*")
+                    // Bold
+                    .replaceAll("<strong>(.*?)</strong>", "**$1**");
+            }
+
+            // Build the definition embed
+            EmbedBuilder e = new EmbedBuilder()
+                .setTitle("Definition for " + word, definition.getString("wordnikUrl"))
                 .setColor(0xd084)
-                .setDescription(grabbedword.getJSONObject(0).getString("text"))
+                .setDescription(defined)
                 .setAuthor("Dictionary", null, "https://icons.iconarchive.com/icons/johanchalibert/mac-osx-yosemite/1024/dictionary-icon.png");
 
-        // Only put part of speech if there is one
-        if(grabbedword.getJSONObject(0).has("partOfSpeech")) {
-            e.addField("Part of Speech", grabbedword.getJSONObject(0).getString("partOfSpeech"), true);
-        }
+            // Only put part of speech if there is one
+            if (definition.has("partOfSpeech")) {
+                e.addField("Part of Speech", definition.getString("partOfSpeech"), true);
+            }
 
+            e.setFooter("Definition " + (i+1) + "/" + definitions);
+
+            paginator.addItems(e.build());
+        }
         // Send it off!
-        commandEvent.reply(e.build());
+        paginator.setText("");
+        paginator.build().paginate(commandEvent.getChannel(), 1);
     }
 }

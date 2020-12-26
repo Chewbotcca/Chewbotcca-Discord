@@ -18,6 +18,7 @@ package pw.chew.chewbotcca.listeners;
 
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import pw.chew.chewbotcca.objects.ServerSettings;
 
 public class MessageHandler extends ListenerAdapter {
     @Override
@@ -28,5 +29,8 @@ public class MessageHandler extends ListenerAdapter {
                 event.getChannel().sendMessage("Updating...").queue(message -> System.exit(0));
             }
         }
+
+        // Get server and ensure it's cached
+        ServerSettings.getServer(event.getGuild().getId());
     }
 }

@@ -37,7 +37,7 @@ public class SpigotDramaCommand extends Command {
         SpigotDrama response = Memory.getChewAPI().generateSpigotDrama();
         // Make an embed and send it off
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setAuthor("md678685", "https://github.com/md678685/spigot-drama-generator", "https://avatars0.githubusercontent.com/u/1917406");
+        embed.setAuthor("mdcfe", "https://github.com/mdcfe/spigot-drama-generator", "https://avatars0.githubusercontent.com/u/1917406");
         embed.setTitle("Spigot Drama Generator", "https://drama.essentialsx.net/");
         embed.setDescription(response.getPhrase() + "\n\n" + "[Permalink](" + response.getPermalink() + ")");
 

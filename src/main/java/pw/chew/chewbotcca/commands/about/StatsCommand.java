@@ -19,6 +19,7 @@ package pw.chew.chewbotcca.commands.about;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.Permission;
 import pw.chew.chewbotcca.util.DateTime;
 
@@ -40,7 +41,7 @@ public class StatsCommand extends Command {
                 .setTitle("Chewbotcca - A basic, yet functioning, discord bot")
                 .addField("Author", "<@!476488167042580481>", true)
                 .addField("Code", "[View code on GitHub](http://github.com/Chewbotcca/Discord)", true)
-                .addField("Library", "JDA 4.2.0_207", true)
+                .addField("Library", "[JDA " + JDAInfo.VERSION + "](" + JDAInfo.GITHUB + ")", true)
                 // Convert the time difference into a time ago
                 .addField("Uptime", DateTime.timeAgo(Instant.now().toEpochMilli() - startTime.toEpochMilli()), true)
                 // Get the server count. NOT GUILD NOT GUILD NOT GUILD

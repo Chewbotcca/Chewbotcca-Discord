@@ -19,12 +19,12 @@ package pw.chew.chewbotcca;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.mcprohosting.MCProHostingAPI;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
@@ -39,6 +39,7 @@ import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ReactListener;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
 import pw.chew.chewbotcca.objects.Memory;
+import pw.chew.chewbotcca.objects.ServerSettings;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import javax.security.auth.login.LoginException;
@@ -62,7 +63,10 @@ public class Main {
         PropertiesManager.loadProperties(prop);
 
         // Initialize Sentry to catch errors
-        Sentry.init(PropertiesManager.getSentryDsn()).setEnvironment(PropertiesManager.getSentryEnv());
+        Sentry.init(options -> {
+            options.setDsn(PropertiesManager.getSentryDsn());
+            options.setEnvironment(PropertiesManager.getSentryEnv());
+        });
 
         // Initialize the waiter and client
         EventWaiter waiter = new EventWaiter();
@@ -72,6 +76,19 @@ public class Main {
         client.useDefaultGame();
         client.setOwnerId(PropertiesManager.getOwnerId());
         client.setPrefix(PropertiesManager.getPrefix());
+        client.setPrefixes(new String[]{"<@!" + PropertiesManager.getClientId() + "> "});
+        client.setPrefixFunction(event -> {
+            // If a DM
+            if (event.getChannelType() == ChannelType.PRIVATE) {
+                return "";
+            }
+            if (event.isFromGuild()) {
+                // Get server prefix, as long as it's cached.
+                ServerSettings ss = ServerSettings.getServerIfCached(event.getGuild().getId());
+                return ss == null ? null : ss.getPrefix();
+            }
+            return null;
+        });
 
         client.useHelpBuilder(false);
 
@@ -84,10 +101,6 @@ public class Main {
             logger.error("Error occurred initializing GitHub. How did this happen?");
         }
 
-        // Initialize APIs
-        ChewAPI chew = new ChewAPI();
-        MCProHostingAPI mcpro = new MCProHostingAPI();
-
         client.addCommands(getCommands());
 
         // Register JDA
@@ -97,6 +110,7 @@ public class Main {
             .enableIntents(GatewayIntent.GUILD_MEMBERS)
             .enableIntents(GatewayIntent.GUILD_PRESENCES)
             .enableCache(CacheFlag.ACTIVITY)
+            .enableCache(CacheFlag.ROLE_TAGS)
             .setStatus(OnlineStatus.ONLINE)
             .setActivity(Activity.playing("Booting..."))
             .addEventListeners(waiter, client.build())
@@ -109,7 +123,7 @@ public class Main {
                 new ServerJoinLeaveListener()
         );
 
-        new Memory(waiter, jda, chew, mcpro, github);
+        new Memory(waiter, jda, new ChewAPI(), github);
     }
 
     /**
@@ -126,7 +140,7 @@ public class Main {
             if (theClass.getName().contains("SubCommand"))
                 continue;
             commands.add(theClass.getDeclaredConstructor().newInstance());
-            logger.debug("Loaded " + theClass.getSimpleName());
+            LoggerFactory.getLogger(theClass).debug("Loaded Successfully!");
         }
 
         return commands.toArray(new Command[0]);

@@ -20,14 +20,15 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.Color;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 // %^mcserver command
 public class MCServerCommand extends Command {
@@ -43,74 +44,117 @@ public class MCServerCommand extends Command {
         // Start typing, this may take a while
         commandEvent.getChannel().sendTyping().queue();
         // Get info from API
-        JSONObject data = new JSONObject(RestClient.get("https://eu.mc-api.net/v3/server/ping/" + commandEvent.getArgs()));
+        JSONObject data = new JSONObject(RestClient.get("https://api.mcsrvstat.us/2/" + commandEvent.getArgs()));
+        ServerInfo info = new ServerInfo(data);
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("**Server Info For** `" + commandEvent.getArgs() + "`");
-        // If there's an error
-        if(data.has("error")) {
-            e.setColor(Color.decode("#ff0000"));
-            e.addField("Error", data.getString("error"), true);
-            commandEvent.reply(e.build());
-            return;
-        }
-        // Set thumbnail to favicon
-        e.setThumbnail(data.getString("favicon"));
 
-        // If online, green embed, else red
-        String online;
-        if (data.getBoolean("online")) {
-            online = "Online";
+        // Set thumbnail to favicon
+        // e.setThumbnail(info.getFavicon());
+
+        // If online, show stats, else don't.
+        if (info.isOnline()) {
+            e.addField("Status", "Online", true);
             e.setColor(Color.GREEN);
+
+            // Show other stats too
+            e.setDescription(info.getCleanMOTD());
+            e.addField("Players", info.getOnlinePlayerCount() + "/" + info.getMaxPlayerCount(), true);
+            if (info.isGeyser()) {
+                e.addField("Bedrock Version", info.getVersion().split(" ")[2], true);
+                e.addField("Geyser Version", info.getVersion().split(" ")[1].replaceAll("\\(|\\)", ""), true);
+            } else {
+                e.addField("Version", info.getVersion(), true);
+            }
         } else {
-            online = "Offline";
+            e.addField("Status", "Offline", true);
             e.setColor(Color.RED);
         }
 
-        // Show other stats too
-        e.setDescription(generateDescription(data).replaceAll("§([a-f]|[k-o]|r|[0-9])", ""));
-        e.addField("Status", online, true);
-        e.addField("Players", data.getJSONObject("players").getInt("online") + "/" + data.getJSONObject("players").getInt("max"), true);
-        e.addField("Version", data.getJSONObject("version").getString("name"), true);
-
-        // Parse date because Java weird
-        String fetched = data.getString("fetch");
-        DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSX");
-        OffsetDateTime odtInstanceAtOffset = OffsetDateTime.parse(fetched, DATE_TIME_FORMATTER);
+        // Get last fetch time
         e.setFooter("Last fetched");
-        e.setTimestamp(odtInstanceAtOffset);
+        e.setTimestamp(info.getCacheTime());
 
         commandEvent.reply(e.build());
     }
 
-    public String generateDescription(JSONObject data) {
-        if (!data.has("description") || data.isNull("description")) {
-            return "";
+    /**
+     * Parsed object from a mcsrvstat.us response
+     */
+    private static class ServerInfo {
+        private final JSONObject data;
+
+        public ServerInfo(JSONObject data) {
+            this.data = data;
         }
-        Object description = data.get("description");
-        try {
-            return data.getString("description");
-        } catch (JSONException e) {
-            if (data.getJSONObject("description").has("text")) {
-                return data.getJSONObject("description").getString("text");
+
+        /**
+         * @return if the server is online
+         */
+        public boolean isOnline() {
+            return data.getBoolean("online");
+        }
+
+        /**
+         * @return a "clean" version of the MOTD.
+         */
+        public String getCleanMOTD() {
+            JSONArray motdLines = data.getJSONObject("motd").getJSONArray("clean");
+            List<String> motd = new ArrayList<>();
+            for (Object line : motdLines) {
+                motd.add(String.valueOf(line));
             }
-            JSONArray stuff = data.getJSONObject("description").getJSONArray("extra");
-            StringBuilder string = new StringBuilder();
-            for (int i = 0; i < stuff.length(); i++) {
-                JSONObject object = stuff.getJSONObject(i);
-                String text = object.getString("text");
-                if (object.has("strikethrough"))
-                    text = "~~" + text + "~~";
-                if (object.has("underline"))
-                    text = "__" + text + "__";
-                if (object.has("italic"))
-                    text = "_" + text + "_";
-                if (object.has("bold"))
-                    text = "**" + text + "**";
-                string.append(text);
+            return String.join("\n", motd);
+        }
+
+        /**
+         * @return the "Version" string
+         */
+        public String getVersion() {
+            return data.getString("version");
+        }
+
+        /**
+         * A "Geyser" server is a server running Geyser. A specific version is checked.
+         * Only works if Geyser version is build 513 or above
+         * @return whether or not this is a Geyser
+         */
+        public boolean isGeyser() {
+            return data.getString("version").startsWith("Geyser");
+        }
+
+        /**
+         * @return get the online player count
+         */
+        public int getOnlinePlayerCount() {
+            return data.getJSONObject("players").getInt("online");
+        }
+
+        /**
+         * @return get the max player count
+         */
+        public int getMaxPlayerCount() {
+            return data.getJSONObject("players").getInt("max");
+        }
+
+        /**
+         * @return the favicon
+         */
+        @Nullable
+        public String getFavicon() {
+            return data.has("icon") ? data.getString("icon") : null;
+        }
+
+        /**
+         * UNIX timestamp of the time the result was cached. Returns 0 when the result was not fetched from cache.
+         * @return the last cache time
+         */
+        public Instant getCacheTime() {
+            long cacheTime = data.getJSONObject("debug").getLong("cachetime");
+            if (cacheTime == 0) {
+                return Instant.now();
             }
-            String response = string.toString();
-            response = response.replace("****", "").replace("~~~~", "");
-            return response;
+            return Instant.ofEpochSecond(cacheTime);
         }
     }
 }

@@ -23,6 +23,7 @@ import net.dv8tion.jda.api.Permission;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHUser;
 import pw.chew.chewbotcca.objects.Memory;
+import pw.chew.chewbotcca.objects.Profile;
 
 import java.io.IOException;
 
@@ -40,6 +41,16 @@ public class GHUserCommand extends Command {
     protected void execute(CommandEvent commandEvent) {
         // Get the input
         String username = commandEvent.getArgs();
+        if(username.isBlank()) {
+            Profile profile = Profile.getProfile(commandEvent.getAuthor().getId());
+            if (profile.getGitHub() != null) {
+                username = profile.getGitHub();
+            } else {
+                commandEvent.reply("You don't have a GitHub username set on your profile. " +
+                    "Please specify a user with `" + commandEvent.getPrefix() + "ghuser user` or set your username with `" + commandEvent.getPrefix() + "profile set github yourname`!");
+                return;
+            }
+        }
         commandEvent.getChannel().sendTyping().queue();
         // Find the GitHub user and notify if errored
         GHUser user;

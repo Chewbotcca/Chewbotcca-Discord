@@ -102,7 +102,7 @@ public class EightBallCommand extends Command {
     }
 
     // Method to get a random string from an array
-    public String getRandom(String[] array) {
+    public static String getRandom(String[] array) {
         int rnd = new Random().nextInt(array.length);
         return array[rnd];
     }

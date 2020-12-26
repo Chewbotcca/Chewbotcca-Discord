@@ -35,6 +35,7 @@ public class MCUserCommand extends Command {
 
     public MCUserCommand() {
         this.name = "mcuser";
+        this.aliases = new String[]{"namemc"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
     }

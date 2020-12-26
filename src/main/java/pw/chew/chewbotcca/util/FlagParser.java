@@ -14,22 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package pw.chew.chewbotcca.commands.owner;
+package pw.chew.chewbotcca.util;
 
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
-import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
+import java.util.HashMap;
+import java.util.Map;
 
-public class SyncServersCommand extends Command {
-
-    public SyncServersCommand() {
-        this.name = "syncservers";
-        this.ownerCommand = true;
-        this.guildOnly = false;
-    }
-
-    @Override
-    protected void execute(CommandEvent event) {
-        ServerJoinLeaveListener.syncStats(1, event.getJDA().getGuildCache().size());
+public class FlagParser {
+    public static Map<String, String> parse(String args) {
+        String[] ar = args.split("--");
+        Map<String, String> output = new HashMap<>();
+        for (String arg : ar) {
+            String name = arg.split(" ")[0];
+            String data = arg.replace(name + " ", "");
+            output.put(name, data);
+        }
+        return output;
     }
 }

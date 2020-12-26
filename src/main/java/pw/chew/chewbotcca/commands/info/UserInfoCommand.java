@@ -22,9 +22,11 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.Mention;
 
@@ -55,47 +57,48 @@ public class UserInfoCommand extends Command {
         commandEvent.getChannel().sendTyping().queue();
         // gather args
         String args = commandEvent.getArgs();
-        User user;
+        User user = null;
 
         String mode = "";
 
         // If they want member info
-        if(args.contains("--member")) {
+        if(args.contains("--member") && commandEvent.isFromType(ChannelType.TEXT)) {
             mode = "member";
             args = args.replace("--member", "").trim();
-        }
 
-        // Get server members (in sync) for join position
-        new Thread(() -> commandEvent.getGuild().loadMembers().get());
-        await().atMost(30, TimeUnit.SECONDS).until(() -> commandEvent.getGuild().getMemberCache().size() == commandEvent.getGuild().getMemberCount());
+            // Get server members (in sync) for join position
+            new Thread(() -> commandEvent.getGuild().loadMembers().get());
+            await().atMost(30, TimeUnit.SECONDS).until(() -> commandEvent.getGuild().getMemberCache().size() == commandEvent.getGuild().getMemberCount());
+        }
 
         // Attempt to find the author if they exist
         if(args.length() == 0) {
             user = commandEvent.getAuthor();
         } else {
-            Object mention = Mention.parseMention(args, commandEvent.getGuild(), commandEvent.getJDA());
+            User mention = Mention.parseUserMention(args, commandEvent.getJDA());
             if(mention != null) {
-                if (mention instanceof Member) {
-                    user = ((Member)mention).getUser();
-                } else {
-                    user = (User)mention;
-                }
+                user = mention;
             } else {
                 try {
                     user = commandEvent.getJDA().getUserById(args);
                     if (user == null) {
-                        user = commandEvent.getJDA().retrieveUserById(args).complete();
+                        try {
+                            user = commandEvent.getJDA().retrieveUserById(args).complete();
+                        } catch (ErrorResponseException ignored) {
+                        }
                     }
                 } catch (NullPointerException | NumberFormatException e) {
-                    List<Member> users = commandEvent.getGuild().getMembersByName(args, true);
-                    List<Member> byNick = commandEvent.getGuild().getMembersByEffectiveName(args, true);
-                    if (users.size() == 0 && byNick.size() == 0) {
-                        commandEvent.reply("No members found for the given input");
-                        return;
-                    } else if (users.size() > 0 && byNick.size() == 0) {
-                        user = users.get(0).getUser();
-                    } else {
-                        user = byNick.get(0).getUser();
+                    if (commandEvent.isFromType(ChannelType.TEXT)) {
+                        List<Member> users = commandEvent.getGuild().getMembersByName(args, true);
+                        List<Member> byNick = commandEvent.getGuild().getMembersByEffectiveName(args, true);
+                        if (users.size() == 0 && byNick.size() == 0) {
+                            commandEvent.reply("No members found for the given input");
+                            return;
+                        } else if (users.size() > 0 && byNick.size() == 0) {
+                            user = users.get(0).getUser();
+                        } else {
+                            user = byNick.get(0).getUser();
+                        }
                     }
                 }
             }
@@ -106,7 +109,10 @@ public class UserInfoCommand extends Command {
         }
 
         // Generate and respond
-        Member member = commandEvent.getGuild().getMemberById(user.getId());
+        Member member = null;
+        if (commandEvent.isFromType(ChannelType.TEXT)) {
+            member = commandEvent.getGuild().getMemberById(user.getId());
+        }
         if(member != null && mode.equals("member")) {
             commandEvent.reply(gatherMemberInfo(commandEvent.getGuild(), member).build());
         } else if(member == null && mode.equals("member")) {
@@ -124,7 +130,10 @@ public class UserInfoCommand extends Command {
      */
     public EmbedBuilder gatherMainInfo(CommandEvent commandEvent, User user) {
         // Get the member
-        Member member = commandEvent.getGuild().getMemberById(user.getId());
+        Member member = null;
+        if (commandEvent.isFromType(ChannelType.TEXT)) {
+            member = commandEvent.getGuild().getMemberById(user.getId());
+        }
         boolean onServer = false;
         if(member != null) {
             onServer = true;

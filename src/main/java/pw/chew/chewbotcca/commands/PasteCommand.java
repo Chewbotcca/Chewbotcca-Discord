@@ -1,10 +1,26 @@
+/*
+ * Copyright (C) 2020 Chewbotcca
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package pw.chew.chewbotcca.commands;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
@@ -14,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// %^paste command
 public class PasteCommand extends Command {
     Map<String, String> pasted = new HashMap<>();
 
@@ -26,23 +43,32 @@ public class PasteCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
+        // Store message and file URL for later
+        Message message = event.getMessage();
         String file;
-        if (event.getArgs().isBlank() && event.getChannelType() == ChannelType.TEXT) {
-            file = getRecentUpload(event.getTextChannel());
+        boolean fromAttachment = false;
+        // Check if there's no args, and we're in a TEXT channel or DM.
+        if (event.getArgs().isBlank() && (event.isFromType(ChannelType.TEXT) || event.isFromType(ChannelType.PRIVATE))) {
+            message = getRecentUpload(event.getChannel(), event.getMessage());
+            if (message == null) {
+                event.reply("No recent messages have a file to paste!");
+                return;
+            }
+            file = message.getAttachments().get(0).getUrl();
+            fromAttachment = true;
         } else {
             file = event.getArgs();
         }
-        if (file == null) {
-            event.reply("Please link to the file you want to embed!");
-            return;
-        }
 
+        // Get file name if URL. If no slashes, the name itself is fine.
         String name = file.split("/")[file.split("/").length - 1];
 
-        if (!file.contains("cdn.discordapp.com")) {
+        // We only support discord CDN files for now.
+        if (!file.contains("cdn.discordapp.com") && !fromAttachment) {
             event.reply("Only cdn.discordapp.com urls are supported at this time!");
             return;
         }
+        // Check if we've pasted this before
         if (pasted.containsKey(file)) {
             event.reply("Already pasted " + name + "! Link: https://paste.gg/chewbotcca/" + pasted.get(file));
             return;
@@ -50,8 +76,10 @@ public class PasteCommand extends Command {
 
         event.getChannel().sendTyping().queue();
 
+        // Get the contents of the file
         String contents = RestClient.get(file);
 
+        // Create the payload
         JSONObject payload = new JSONObject()
             .put("name", "Uploaded file from Chewbotcca Discord Bot")
             .put("files", new JSONArray().put(new JSONObject()
@@ -63,15 +91,32 @@ public class PasteCommand extends Command {
                 )
             ));
 
+        // Upload to paste.gg
         JSONObject response = new JSONObject(RestClient.post("https://api.paste.gg/v1/pastes", "Key " + PropertiesManager.getPasteGgKey(), payload));
 
+        // Return response
         if (response.getString("status").equals("success")) {
-            event.reply("Your paste for " + name + " is available at: https://paste.gg/chewbotcca/" + response.getJSONObject("result").getString("id"));
+            String url = "https://paste.gg/chewbotcca/" + response.getJSONObject("result").getString("id");
+            message.reply("Your paste for " + name + " is available at: " + url).mentionRepliedUser(false).queue();
             pasted.put(file, response.getJSONObject("result").getString("id"));
         }
     }
 
-    public String getRecentUpload(TextChannel channel) {
+    /**
+     * Searches channel for any recent messages that may contain something paste-able
+     * @param channel the current channel
+     * @param sentMessage the most recent sent message
+     * @return a message that contains at least 1 valid attachment, if one exists.
+     */
+    public Message getRecentUpload(MessageChannel channel, Message sentMessage) {
+        // First check if current message has an upload (e.g. %^paste [attach])
+        if (!sentMessage.getAttachments().isEmpty()) {
+            Message.Attachment attachment = sentMessage.getAttachments().get(0);
+            if (!attachment.isImage() && !attachment.isVideo()) {
+                return sentMessage;
+            }
+        }
+        // Then retrieve 10 messages and go through them
         List<Message> messages = channel.getHistory().retrievePast(10).complete();
         for (Message message : messages) {
             if (message.getAttachments().isEmpty())
@@ -81,7 +126,7 @@ public class PasteCommand extends Command {
             if (attachment.isImage() || attachment.isVideo())
                 continue;
 
-            return attachment.getUrl();
+            return message;
         }
         return null;
     }

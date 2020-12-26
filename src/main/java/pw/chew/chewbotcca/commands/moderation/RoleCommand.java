@@ -111,7 +111,12 @@ public class RoleCommand extends Command {
         }
 
         String mention = args[0];
-        String rolename = input.replace(args[0] + " ", "");
+        String role = input.replace(args[0] + " ", "");
+        while (role.startsWith(" ")) {
+            role = role.substring(1);
+        }
+
+        String rolename = role;
 
         Object parse = Mention.parseMention(mention, event.getGuild(), event.getJDA());
 
@@ -159,7 +164,12 @@ public class RoleCommand extends Command {
         }
 
         String mention = args[0];
-        String rolename = input.replace(args[0] + " ", "");
+        String role = input.replace(args[0] + " ", "");
+        while (role.startsWith(" ")) {
+            role = role.substring(1);
+        }
+
+        String rolename = role;
 
         Object parse = Mention.parseMention(mention, event.getGuild(), event.getJDA());
 

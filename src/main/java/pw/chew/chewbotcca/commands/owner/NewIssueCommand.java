@@ -22,8 +22,10 @@ import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueBuilder;
 import org.kohsuke.github.GHRepository;
 import pw.chew.chewbotcca.objects.Memory;
+import pw.chew.chewbotcca.util.FlagParser;
 
 import java.io.IOException;
+import java.util.Map;
 
 // %^newissue command
 public class NewIssueCommand extends Command {
@@ -47,30 +49,15 @@ public class NewIssueCommand extends Command {
         }
 
         String args = commandEvent.getArgs();
-
-        boolean hasDescription = args.contains("--description");
-        boolean hasLabel = args.contains("--label");
-
-        String title;
-        String description = null;
-        String label = null;
-        if(!hasDescription && !hasLabel) {
-            title = args;
-        } else if (hasDescription && !hasLabel) {
-            title = args.split(" --description")[0];
-            description = args.split("--description ")[1];
-        } else {
-            title = args.split(" --description")[0];
-            description = args.split("--description ")[1].split(" --label")[0];
-            label = args.split("--label ")[1];
-        }
+        String title = args.split(" --")[0];
+        Map<String, String> flags = FlagParser.parse(args);
 
         try {
             GHIssueBuilder issueBuilder = repo.createIssue(title).assignee(Memory.getGithub().getMyself());
-            if(hasDescription)
-                issueBuilder.body(description);
-            if(hasLabel)
-                issueBuilder.label(label);
+            if(flags.containsKey("description"))
+                issueBuilder.body(flags.get("description"));
+            if(flags.containsKey("label"))
+                issueBuilder.label(flags.get("label"));
             GHIssue issue = issueBuilder.create();
             commandEvent.reply("Issue created @ " + issue.getHtmlUrl());
         } catch (IOException e) {

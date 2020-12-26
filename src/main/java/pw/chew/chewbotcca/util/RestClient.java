@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.objects.Memory;
 
+import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -155,20 +156,25 @@ public class RestClient {
             String body;
             ResponseBody responseBody = response.body();
             if(responseBody == null) {
-                body = null;
+                body = "{}";
             } else {
                 body = responseBody.string();
             }
             LoggerFactory.getLogger(RestClient.class).debug("Response is " + body);
             return body;
+        } catch (SSLHandshakeException e) {
+            LoggerFactory.getLogger(RestClient.class).warn("Call to " + request.url() + " failed with SSLHandshakeException!");
+            return "{error: 'SSLHandshakeException'}";
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(RestClient.class).warn("Call to " + request.url() + " failed with IOException!");
+            return "{error: 'IOException'}";
         }
-        return null;
     }
 
     public static RequestBody bodyFromHash(HashMap<String, Object> args) {
         FormBody.Builder bodyArgs = new FormBody.Builder();
+        if (args == null)
+            return bodyArgs.build();
         for(Map.Entry<String, Object> entry : args.entrySet()) {
             bodyArgs.add(entry.getKey(), String.valueOf(entry.getValue()));
         }

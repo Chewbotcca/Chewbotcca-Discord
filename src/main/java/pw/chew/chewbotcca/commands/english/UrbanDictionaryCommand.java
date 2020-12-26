@@ -18,11 +18,13 @@ package pw.chew.chewbotcca.commands.english;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.menu.EmbedPaginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.net.URLEncoder;
@@ -49,31 +51,46 @@ public class UrbanDictionaryCommand extends Command {
         String word = event.getArgs();
         JSONObject parse = new JSONObject(RestClient.get("http://api.urbandictionary.com/v0/define?term=" + URLEncoder.encode(word, StandardCharsets.UTF_8)));
         JSONArray list = parse.getJSONArray("list");
-        if (list.length() == 0) {
+        if (list.isEmpty()) {
             event.reply("No results found for term `" + word + "`!");
             return;
         }
-        // Gather information about the word
-        JSONObject info = list.getJSONObject(0);
-        String definition = info.getString("definition").replace("\n", " ");
-        int up = info.getInt("thumbs_up");
-        int down = info.getInt("thumbs_down");
-        String author = info.getString("author");
-        String example = info.getString("example").replace("\n", " ");
-        int total = up + down;
-        // Find like/dislike ratio
-        float ratio = ((float)up / (float)total * 100);
-        word = info.getString("word");
-        String url = info.getString("permalink");
-        // Build embed and send it off!
-        event.reply(new EmbedBuilder()
-                .setTitle("Urban Dictionary definition for **" + word + "**")
-                .addField("Definition", definition, false)
+
+        EmbedPaginator.Builder paginator = JDAUtilUtil.makeEmbedPaginator();
+        paginator.setUsers(event.getAuthor());
+
+        int definitions = list.length();
+
+        for(int i = 0; i < definitions; i++) {
+            // Gather information about the word
+            JSONObject info = list.getJSONObject(i);
+            String definition = info.getString("definition").replaceAll("\n", " ")
+                // Remove brackets from words
+                .replaceAll("\\[(.*?)]", "$1");
+            String example = info.getString("example").replace("\n", " ")
+                // Remove brackets from words
+                .replaceAll("\\[(.*?)]", "$1");
+            int up = info.getInt("thumbs_up");
+            int down = info.getInt("thumbs_down");
+            String author = info.getString("author");
+            int total = up + down;
+            // Find like/dislike ratio
+            float ratio = ((float) up / (float) total * 100);
+            word = info.getString("word");
+            String url = info.getString("permalink");
+            // Build embed and send it off!
+            paginator.addItems(new EmbedBuilder()
+                .setTitle("Urban Dictionary definition for **" + word + "**", url)
+                .setDescription(definition)
                 .addField("Author", author, true)
                 .addField("Rating", "**" + up + "** 👍 - **" + down + "** 👎 (**" + ratio + "%**)", true)
                 .addField("Example", example, false)
-                .addField("URL", url, false)
+                .setFooter("Definition " + (i+1) + "/" + definitions)
                 .build()
-        );
+            );
+        }
+
+        paginator.setText("");
+        paginator.build().paginate(event.getChannel(), 1);
     }
 }

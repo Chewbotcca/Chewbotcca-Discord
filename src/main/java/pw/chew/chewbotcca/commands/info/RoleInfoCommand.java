@@ -29,9 +29,11 @@ import pw.chew.chewbotcca.util.Mention;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
@@ -127,13 +129,24 @@ public class RoleInfoCommand extends Command {
         List<String> info = new ArrayList<>();
         info.add(getInfoFormat(role.isHoisted(), "Hoisted"));
         info.add(getInfoFormat(role.isMentionable(), "Mentionable"));
-        info.add(getInfoFormat(role.isMentionable(), "Managed"));
+        info.add(getInfoFormat(role.getTags().isBot(), "Bot Role"));
+        info.add(getInfoFormat(role.getTags().isBoost(), "Boost Role"));
+        info.add(getInfoFormat(role.getTags().isIntegration(), "Integration Role"));
         embed.addField("Information", String.join("\n", info), true);
         embed.setColor(role.getColor());
         embed.setFooter("Created");
         // If the user has permission to manage roles, show the permissions
-        if(event.getMember().hasPermission(Permission.MANAGE_ROLES))
-            embed.setDescription(generatePermissionList(role.getPermissions()));
+        if(event.getMember().hasPermission(Permission.MANAGE_ROLES)) {
+            Permission[] perms = role.getPermissions().toArray(new Permission[0]);
+            Set<Permission> temp = new TreeSet<>(Arrays.asList(perms));
+            String description = "";
+            if (!role.isPublicRole()) {
+                Permission[] every = event.getGuild().getPublicRole().getPermissions().toArray(new Permission[0]);
+                temp.removeAll(Arrays.asList(every));
+                description = "Elevated permissions (perms this role has that everyone role doesn't)\n\n";
+            }
+            embed.setDescription(description + generatePermissionList(temp));
+        }
         embed.setTimestamp(role.getTimeCreated());
 
         return embed;
@@ -179,7 +192,7 @@ public class RoleInfoCommand extends Command {
      * @param permissions the permissions
      * @return a permission list
      */
-    public String generatePermissionList(EnumSet<Permission> permissions) {
+    public String generatePermissionList(Set<Permission> permissions) {
         ArrayList<CharSequence> perms = new ArrayList<>();
         Permission[] permList = permissions.toArray(new Permission[0]);
         if (permissions.isEmpty()) {

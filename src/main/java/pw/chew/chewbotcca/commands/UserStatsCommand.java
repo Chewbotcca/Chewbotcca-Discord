@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Chewbotcca
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package pw.chew.chewbotcca.commands;
 
 import com.jagrosh.jdautilities.command.Command;
@@ -54,35 +70,16 @@ public class UserStatsCommand extends Command {
         embed.setFooter("Cached users: " + event.getJDA().getUserCache().size());
         int i = 1;
         for (User.UserFlag flag : ranked.keySet()) {
-            rankings.add("#" + i + ": " + toFriendlyString(flag) + " - " + ranked.get(flag) + " users");
+            rankings.add("#" + i + ": " + flag.getName() + " - " + ranked.get(flag) + " users");
             i++;
         }
         embed.setDescription(String.join("\n", rankings));
         event.reply(embed.build());
     }
 
-    public String toFriendlyString(User.UserFlag flag) {
-        return switch (flag) {
-            case STAFF -> "Staff";
-            case SYSTEM -> "System";
-            case PARTNER -> "Partnered Server Owner";
-            case HYPESQUAD -> "Hypesquad Events";
-            case VERIFIED_BOT -> "Verified Bot";
-            case EARLY_SUPPORTER -> "Early Supporter";
-            case BUG_HUNTER_LEVEL_1 -> "Bug Hunter Level 1";
-            case BUG_HUNTER_LEVEL_2 -> "Bug Hunter Level 2";
-            case HYPESQUAD_BALANCE -> "Hypesquad: Balance";
-            case HYPESQUAD_BRAVERY -> "Hypesquad: Bravery";
-            case HYPESQUAD_BRILLIANCE -> "Hypesquad: Brilliance";
-            case VERIFIED_DEVELOPER -> "Early Verified Bot Developer";
-            case TEAM_USER -> "Team User";
-            default -> "Unknown";
-        };
-    }
-
     public Paginator buildUserPaginator(List<User> list, User.UserFlag flag, JDA jda) {
         Paginator.Builder pbuilder = JDAUtilUtil.makePaginator();
-        pbuilder.setText("Users with user flag " + toFriendlyString(flag)
+        pbuilder.setText("Users with user flag " + flag.getName()
             + "\nCached users: " + jda.getUserCache().size());
         for (User user : list) {
             pbuilder.addItems(user.getAsTag());

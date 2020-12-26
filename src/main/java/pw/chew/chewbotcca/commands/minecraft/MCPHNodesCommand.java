@@ -18,12 +18,12 @@ package pw.chew.chewbotcca.commands.minecraft;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.mcprohosting.MCProHostingAPI;
 import com.mcprohosting.objects.Node;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import pw.chew.chewbotcca.objects.Memory;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 // %^mcphnodes command
 public class MCPHNodesCommand extends Command {
+    private final MCProHostingAPI mcproAPI = new MCProHostingAPI();
 
     public MCPHNodesCommand() {
         this.name = "mcphnodes";
@@ -57,7 +58,7 @@ public class MCPHNodesCommand extends Command {
      */
     public EmbedBuilder allNodes() {
         // Gather info
-        List<Node> downNodes = Memory.getMcproAPI().getNodeStatuses().stream().filter(node -> !node.isOnline()).collect(Collectors.toList());
+        List<Node> downNodes = mcproAPI.getNodeStatuses().stream().filter(node -> !node.isOnline()).collect(Collectors.toList());
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("MCProHosting Node Statuses", "https://panel.mcprohosting.com/status");
         embed.setDescription("Only showing status for locations with at least 1 down node.");
@@ -100,7 +101,7 @@ public class MCPHNodesCommand extends Command {
             return new EmbedBuilder().setTitle("Error occurred!").setDescription("Invalid input!").setColor(Color.decode("#ff0000"));
         }
         // Gather info
-        List<Node> nodes = Memory.getMcproAPI().getNodeStatuses();
+        List<Node> nodes = mcproAPI.getNodeStatuses();
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("MCProHosting Status for Node " + nodeId, "https://panel.mcprohosting.com/status");
         Node node = getNode(nodes, nodeId);
@@ -112,10 +113,10 @@ public class MCPHNodesCommand extends Command {
         embed.addField("Location", node.getLocation(), true);
         if (node.isOnline()) {
             embed.addField("Status", "Online", true);
-            embed.setColor(Color.decode("#00ff00"));
+            embed.setColor(Color.GREEN);
         } else {
             embed.addField("Status", "Offline", true);
-            embed.setColor(Color.decode("#ff0000"));
+            embed.setColor(Color.RED);
             embed.setDescription(node.getMessage());
         }
         embed.setFooter("Last Heartbeat");

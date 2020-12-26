@@ -14,31 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package pw.chew.chewbotcca.commands.about;
+package pw.chew.chewbotcca.commands.fun;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 
-// %^invite command
-public class InviteCommand extends Command {
-    public InviteCommand() {
-        this.name = "invite";
+import static pw.chew.chewbotcca.commands.fun.EightBallCommand.getRandom;
+
+public class CoinFlipCommand extends Command {
+
+    public CoinFlipCommand() {
+        this.name = "coinflip";
+        this.aliases = new String[]{"flip"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
     }
 
     @Override
-    protected void execute(CommandEvent commandEvent) {
-        commandEvent.reply(new EmbedBuilder()
-                .setTitle("Invite me!")
-                .setDescription("""
-                    [Click me to invite me to your server (recommended)](https://discord.com/api/oauth2/authorize?client_id=604362556668248095&permissions=939879492&scope=bot%20applications.commands)!
-                    [Click me to invite me to your server (admin)](https://discord.com/api/oauth2/authorize?client_id=604362556668248095&permissions=8&scope=bot%20applications.commands)!
-                    
-                    [Need help? Click me to join my help server](https://discord.gg/UjxQ3Bh)!
-                    
-                    [Sponsored: Click me to get a VPS from SkySilk Cloud Services](https://www.skysilk.com/ref/4PRQpuQraD)!""").build());
+    protected void execute(CommandEvent event) {
+        String first = getRandom(new String[]{
+            "I flipped a coin, and it landed on",
+            "I threw the coin into the air and it finally landed on",
+            "I dropped the coin, it landed on"});
+        String headsOrTails = getRandom(new String[]{
+            "heads",
+            "tails"});
+        EmbedBuilder e = new EmbedBuilder();
+        e.setTitle("Coin Flip");
+        e.setDescription(first + " **" + headsOrTails + "**!");
+        event.reply(e.build());
     }
 }
