@@ -30,11 +30,14 @@ import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 // %^sinfo command
 public class ServerInfoCommand extends Command {
@@ -49,7 +52,8 @@ public class ServerInfoCommand extends Command {
             new ServerBotsSubCommand(),
             new ServerChannelsInfoSubCommand(),
             new ServerMemberByJoinSubCommand(),
-            new ServerRolesInfoSubCommand()
+            new ServerRolesInfoSubCommand(),
+            new ServerMemberMilestoneSubCommand()
         };
     }
 
@@ -144,6 +148,7 @@ public class ServerInfoCommand extends Command {
             Boosts - `%^sinfo boosts`
             Bots - `%^sinfo bots`
             Channels - `%^sinfo channels`
+            Member Milestones - `%^sinfo milestones`
             """.replaceAll("%\\^", event.getPrefix()), false);
 
         e.setFooter("Server Created on");
@@ -453,6 +458,63 @@ public class ServerInfoCommand extends Command {
                     true
                 );
             }
+
+            event.reply(embed.build());
+        }
+    }
+
+    /**
+     * Get member milestone (estimated)
+     */
+    private static class ServerMemberMilestoneSubCommand extends Command {
+        final static int[] milestones = new int[]{10, 25, 50, 100, 500, 1000, 5000, 7000, 10000, 20000, 50000, 100000, 200000, 300000, 400000, 500000, 1000000};
+
+        public ServerMemberMilestoneSubCommand() {
+            this.name = "milestone";
+            this.aliases = new String[]{"milestones"};
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+            this.guildOnly = true;
+        }
+
+        @Override
+        protected void execute(CommandEvent event) {
+            Guild server = event.getGuild();
+
+            EmbedBuilder embed = new EmbedBuilder();
+
+            embed.setTitle("Upcoming Member Milestones for " + server.getName());
+
+            int members = server.getMemberCount();
+            int days = Math.round((float)(Instant.now().toEpochMilli() - server.getTimeCreated().toInstant().toEpochMilli()) / 1000 / 60 / 60 / 24);
+
+            float membersPerDay = (float)members / (float)days;
+
+            List<String> daysToMilestone = new ArrayList<>();
+
+            daysToMilestone.add("Members per day (linear): " + membersPerDay);
+            daysToMilestone.add("Dates are based on average members per day. Dates may vary based on any number of circumstances.");
+            daysToMilestone.add("If year is >100 years in the future, it will not be included.");
+            daysToMilestone.add("");
+
+            DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM d, uuuu");
+            DecimalFormat df = new DecimalFormat("#.##");
+
+            for (int milestone : milestones) {
+                if (milestone < members)
+                    continue;
+
+                float daysNeeded = ((float)milestone / membersPerDay);
+                Instant timeAtMilestone = server.getTimeCreated().toInstant().plusMillis((long)(daysNeeded * 24 * 60 * 60 * 1000));
+                OffsetDateTime date = timeAtMilestone.atOffset(server.getTimeCreated().getOffset());
+                String day = date.format(format);
+                int year = date.getYear();
+                if (year - 100 > OffsetDateTime.now().getYear())
+                    continue;
+
+                daysToMilestone.add(NumberFormat.getNumberInstance(Locale.US).format(milestone) + " Members - " + day);
+            }
+
+            embed.setDescription(String.join("\n", daysToMilestone));
 
             event.reply(embed.build());
         }
