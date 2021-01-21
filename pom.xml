@@ -117,12 +117,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.mcprohosting</groupId>
-            <artifactId>mcprohosting-api</artifactId>
-            <version>0.1.0-b3</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.9.12</version>
