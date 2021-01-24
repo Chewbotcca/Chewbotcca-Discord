@@ -18,14 +18,12 @@ package pw.chew.chewbotcca.commands;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import io.sentry.Sentry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 
-import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DiffCommand extends Command {
@@ -42,7 +40,7 @@ public class DiffCommand extends Command {
     protected void execute(CommandEvent event) {
         String[] args = event.getArgs().split(" ");
         if (args.length != 3) {
-            event.reply("Invalid amount of arguments specified. Example: " + event.getPrefix() + "diff role moderator admin");
+            event.reply("Invalid amount of arguments specified. Example: " + event.getPrefix() + "diff ROLE 708085624514543728 134445052805120001");
             return;
         }
 
@@ -51,7 +49,7 @@ public class DiffCommand extends Command {
 
     /**
      * Compares roles.
-     * Takes 2 String arguments that have to be roles.  Example:  diff role moderator admin
+     * Takes as input 2 role IDs.  Example:  diff role 708085624514543728 134445052805120001
      */
     private static class CompareRolesSubCommand extends Command {
 
@@ -66,30 +64,18 @@ public class DiffCommand extends Command {
             String[] args = event.getArgs().split(" ");
 
             if (args.length != 2) {
-                event.reply("Invalid number of arguments provided. Please provide valid role names.");
+                event.reply("Invalid number of arguments provided. Please provide valid role IDs for this server.");
                 return;
             }
 
-            String baseString = args[0].toLowerCase();
-            String compareString = args[1].toLowerCase();
-            Role base = null;
-            Role compare = null;
-
-            // iterate through roles to check if base and compare are actual roles.
-            for (Role role : event.getGuild().getRoles()){
-                if(role.getName().toLowerCase().equals(baseString)){
-                    base = role;
-                }
-                if(role.getName().toLowerCase().equals(compareString)){
-                    compare = role;
-                }
-            }
+            Role base = event.getGuild().getRoleById(args[0]);
             if (base == null) {
-                event.reply("Unable to find base (first) role. Please ensure you are providing a valid role name.");
+                event.reply("Unable to find base (first) role. Please ensure you are providing a valid ID to compare.");
                 return;
             }
+            Role compare = event.getGuild().getRoleById(args[1]);
             if (compare == null) {
-                event.reply("Unable to find compare (second) role. Please ensure you are providing a valid role to compare.");
+                event.reply("Unable to find compare (second) role. Please ensure you are providing a valid ID to compare.");
                 return;
             }
 
@@ -97,40 +83,65 @@ public class DiffCommand extends Command {
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Comparing roles")
                     .setDescription("Comparing name, color, permissions, and other information.\n" +
-                        "Base role: " + base.getName()  + "\n" + "Compare role: " + compare.getName())
-                    .setColor(new Color(96, 70, 184));
-            try {
-                embed.setThumbnail("https://c1.wallpaperflare.com/preview/634/485/143/analysis-antique-background-balance.jpg");
-            }catch (Exception e){
-                Sentry.captureException(e);
-            }
+                        "Base role: " + base.getName() + " ( " + base.getId()  + " ) " + "\n" +
+                            "Compare role: " + compare.getName() + " ( " + compare.getId() + " ) ");
 
-            // compare names
             if (base.getName().equals(compare.getName())) {
-                embed.addField("Try again with different roles", "*Nothing to compare. Roles are identical*", true);
-                event.reply(embed.build());
-                return;
+                embed.addField("Name", "*Nothing to compare.\n Names are identical.*", true);
             } else {
                 String name = base.getName() + "\n" +
                         compare.getName();
-                embed.addField("Name ", name, true);
+                embed.addField("Name", name, true);
             }
 
-            // compare colors ( RGB values )
-            if (base.getColorRaw() == compare.getColorRaw()) {
-                embed.addField("Color 🔴🟠🟡🟢🔵🟣🟤⚫⚪", "*Nothing to compare. Colors are identical*", true);
+
+            if (base.getColor() == compare.getColor()) {
+                embed.addField("Color", "*Nothing to compare.\n Colors are identical.*", true);
             } else {
-                String color = base.getColor()+ "\n" +
-                    compare.getColor();
-                embed.addField("Color 🔴🟠🟡🟢🔵🟣🟤⚫⚪", color, true);
+                String baseHex = colorToHex(base.getColor().getRed(), base.getColor().getGreen(), base.getColor().getBlue());
+                String compareHex = colorToHex(compare.getColor().getRed(), compare.getColor().getGreen(), compare.getColor().getBlue());
+                String color = (base.getColorRaw() == Role.DEFAULT_COLOR_RAW ? "Default color" : baseHex) + "\n" +
+                        (compare.getColorRaw() == Role.DEFAULT_COLOR_RAW ? "Default color" : compareHex);
+                embed.addField("Color", color, true);
             }
+            embed.addBlankField(false);
 
-            // compare permissions
+            // compare info section
+
+            String information = """
+                    Hoisted
+                    Mentionable
+                    Bot role
+                    Boost role
+                    Integration role""";
+            embed.addField("Information",information,true);
+
+            List<String> baseInfo = new ArrayList<>();
+            baseInfo.add(getInfoState(base.isHoisted()));
+            baseInfo.add(getInfoState(base.isMentionable()));
+            baseInfo.add(getInfoState(base.getTags().isBot()));
+            baseInfo.add(getInfoState(base.getTags().isBoost()));
+            baseInfo.add(getInfoState(base.getTags().isIntegration()));
+
+            embed.addField(base.getName(),String.join("\n", baseInfo),true);
+
+            List<String> compareInfo = new ArrayList<>();
+            compareInfo.add(getInfoState(compare.isHoisted()));
+            compareInfo.add(getInfoState(compare.isMentionable()));
+            compareInfo.add(getInfoState(compare.getTags().isBot()));
+            compareInfo.add(getInfoState(compare.getTags().isBoost()));
+            compareInfo.add(getInfoState(compare.getTags().isIntegration()));
+
+            embed.addField(compare.getName(),String.join("\n", compareInfo),true);
+
+
+
             if (base.getPermissionsRaw() == compare.getPermissionsRaw()) {
-                embed.addField("✅ Permissions 🚫", "*Nothing to compare. Permissions are identical*", false);
+                embed.addField("✅ Permissions 🚫", "*Nothing to compare.\n Permissions are identical*", false);
             } else {
                 List<Permission> baseOnly = new ArrayList<>();
                 List<Permission> compareOnly = new ArrayList<>();
+
 
                 for (Permission perm : base.getPermissions()) {
                     if (!compare.getPermissions().contains(perm)) {
@@ -144,13 +155,13 @@ public class DiffCommand extends Command {
                     }
                 }
 
-
                 List<String> perms = new ArrayList<>();
-                String start = """
+
+                perms.add("""
                     + means compare role has the permission, and base doesn't.
                     - means compare role doesn't have the perm, but base does.
-                     ```diff""".replaceAll("compare",compare.getName()).replaceAll("base",base.getName());
-                perms.add(start);
+                    ```diff""");
+
                 for (Permission perm : compareOnly) {
                     perms.add("+ " + perm.getName());
                 }
@@ -160,17 +171,42 @@ public class DiffCommand extends Command {
                 }
 
                 perms.add("```");
-                embed.addField("✅ Permissions 🚫", String.join("\n", perms), false);
 
+                embed.addField("✅ Permissions 🚫", String.join("\n", perms), false);
             }
 
             event.reply(embed.build());
         }
+
+        /**
+         * Helper method for %^diff role command about a role's info state
+         * @param yes if it's green or not
+         * @return a green sign if true, red if false
+         */
+        private String getInfoState(boolean yes) {
+            if (yes) {
+                return "\uD83D\uDFE2" ;
+            } else {
+                return "\uD83D\uDD34" ;
+            }
+        }
+
+        /**
+         * Source: https://stackoverflow.com/questions/3607858/convert-a-rgb-color-value-to-a-hexadecimal-string
+         * Function that converts RGB values to hexadecimal code.
+         * @param red red value of color
+         * @param green green value of color
+         * @param blue blue value of color
+         * @return the hexadecimal code of the color
+         */
+        private String colorToHex(int red, int green, int blue){
+            return String.format("#%02x%02x%02x", red, green, blue);
+        }
     }
 
     /**
-     * Compares users
-     * Takes 2 arguments of type userIdTag. Example: diff member Query#1234 random#4567
+     * Compares members
+     * Takes as input 2 mentioned members. Example diff member @random @random2
      */
     private static class CompareMembersSubCommand extends Command{
 
@@ -182,113 +218,91 @@ public class DiffCommand extends Command {
 
         @Override
         protected void execute(CommandEvent event) {
-            String[] args = event.getArgs().split(" ");
+            List<Member> members = event.getMessage().getMentionedMembers();
 
-            if (args.length != 2) {
-                event.reply("Invalid number of arguments provided. Please provide valid member names.");
+            if (members.size() != 2) {
+                event.reply("""
+                        Invalid number of arguments provided or you're trying to compare the same member.
+                        Please provide valid members.
+                        Example : diff member @random @random2.""");
                 return;
             }
 
-            Member member1 = null;
-            Member member2 = null;
-
-            try {
-                member1 = event.getGuild().getMemberByTag(args[0]);
-                member2 = event.getGuild().getMemberByTag(args[1]);
-            }catch (Exception e){
-                Sentry.captureException(e);
-            }
-
-            if (member1 == null){
-                event.reply("Unable to find first member. Please ensure you are providing a valid tag .");
-                return;
-            }
-            if (member2 == null){
-                event.reply("Unable to find second member. Please ensure you are providing a valid tag .");
-                return;
-            }
+            Member base = members.get(0);
+            Member compare = members.get(1);
 
 
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Comparing members")
-                    .setDescription("Comparing Time joined,Time boosted , Roles, and other information.\n" +
-                        "First member: " + member1.getUser().getName() + "\n" + "Second member : " + member2.getUser().getName())
-                    .setColor(new Color(117, 46, 134));
-
-                try {
-                    embed.setThumbnail("https://c1.wallpaperflare.com/preview/634/485/143/analysis-antique-background-balance.jpg");
-                }catch (Exception e){
-                    Sentry.captureException(e);
-                }
+                    .setDescription("Comparing time joined, time boosted, roles and other information.\n" +
+                        "Base member: " + base.getUser().getName() + " ( " + base.getUser().getAsTag() + " ) " + "\n" +
+                            "Compare member : " + compare.getUser().getName() + " ( " + compare.getUser().getAsTag() + " ) ");
 
 
-                if (member1.getUser().getAsTag().equals(member2.getUser().getAsTag())) {
-                    embed.addField("Try again with different members", "*Nothing to compare. Members are identical*", true);
-                    event.reply(embed.build());
-                    return;
-                } else {
-                    String names = member1.getUser().getName() + "\n" +
-                            member2.getUser().getName();
-                    embed.addField("Name", names, true);
-                }
+            // Names
+            String names = base.getUser().getName() + "\n" +
+                    compare.getUser().getName();
+            embed.addField("Name", names, true);
 
-                // Dates of arrival in server
-                String date = member1.getTimeJoined().toString().substring(0,10) + "\n" +
-                        member2.getTimeJoined().toString().substring(0,10);
-                embed.addField("🛬 Date of Arrival 🛬", date, true);
-                embed.addBlankField(false);
-                // Status comparison
-                String onlineStatus = member1.getUser().getName() + " :   " + member1.getOnlineStatus().name() + "\n" +
-                        member2.getUser().getName() + " :   " + member2.getOnlineStatus().name();
-                embed.addField("🟢 🌙 Status 💤 ⛔", onlineStatus, true);
+            // Dates of arrival in server
+            String date = base.getTimeJoined().toString().substring(0,10) + "\n" +
+                    compare.getTimeJoined().toString().substring(0,10);
+            embed.addField(" Date of Arrival ", date, true);
+            embed.addBlankField(false);
 
-                // Starting date of boosting time for a member.
-                String boostingTime1;
-                String boostingTime2;
-                if (member1.getTimeBoosted() != null){
-                    // keeps yyyy-mm-dd
-                    boostingTime1 = member1.getTimeBoosted().toString().substring(0,10);
-                }else{
-                    boostingTime1 = "Currently not boosting";
-                }
+            // Status comparison
+            String onlineStatus = base.getUser().getName() + " :   " + base.getOnlineStatus().name() + "\n" +
+                    compare.getUser().getName() + " :   " + compare.getOnlineStatus().name();
+            embed.addField(" Status ", onlineStatus, true);
 
-                if (member2.getTimeBoosted() != null){
-                    // keeps yyyy-mm-dd
-                    boostingTime2 = member2.getTimeBoosted().toString().substring(0,10);
-                }else{
-                    boostingTime2 = "Currently not boosting";
-                }
+            // Starting date of boosting time for a member.
+            String baseBoostingTime;
+            String compareBoostingTime;
+            if (base.getTimeBoosted() != null){
+                // keeps yyyy-mm-dd
+                baseBoostingTime = "Boosting since : " + base.getTimeBoosted().toString().substring(0,10);
+            }else{
+                baseBoostingTime = "Currently not boosting";
+            }
 
-                embed.addField("💎 Nitro Boosting 💎", boostingTime1 + "\n" + boostingTime2, true);
+            if (compare.getTimeBoosted() != null){
+                // keeps yyyy-mm-dd
+                compareBoostingTime = "Boosting since : " + compare.getTimeBoosted().toString().substring(0,10);
+            }else{
+                compareBoostingTime = "Currently not boosting";
+            }
 
-                embed.addBlankField(false);
+            embed.addField(" Server Boosting ", baseBoostingTime + "\n" + compareBoostingTime, true);
 
-                // Roles comparison of members
-                List<String> member1Roles = new ArrayList<>();
-                List<String> member2Roles = new ArrayList<>();
+            embed.addBlankField(false);
 
-                member1Roles.add("""
-                        ```diff""");
-                member2Roles.add("""
-                        ```diff""");
-                for (Role role : member1.getRoles()){
-                    member1Roles.add(role.getName());
-                }
+            // Roles comparison of members
+            List<String> baseRoles = new ArrayList<>();
+            List<String> compareRoles = new ArrayList<>();
 
-                for (Role role : member2.getRoles()){
-                    member2Roles.add(role.getName());
-                }
+            baseRoles.add("""
+                    ```diff""");
+            compareRoles.add("""
+                    ```diff""");
+            for (Role role : base.getRoles()){
+                baseRoles.add(role.getName());
+            }
 
-                member1Roles.add("```");
-                member2Roles.add("```");
+            for (Role role : compare.getRoles()){
+                compareRoles.add(role.getName());
+            }
 
-                embed.addField( member1.getUser().getName() + "' Roles 🐱‍👤", String.join("\n", member1Roles), true);
-                embed.addField( member2.getUser().getName() + "' Roles 🐱‍👓", String.join("\n", member2Roles), true);
+            baseRoles.add("```");
+            compareRoles.add("```");
+
+            embed.addField( base.getUser().getName() + "' Roles ", String.join("\n", baseRoles), true);
+            embed.addField( compare.getUser().getName() + "' Roles ", String.join("\n", compareRoles), true);
 
 
-                event.reply(embed.build());
+            event.reply(embed.build());
 
         }
 
     }
+
 }
