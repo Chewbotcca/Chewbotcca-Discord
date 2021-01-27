@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 // %^sinfo command
 public class ServerInfoCommand extends Command {
@@ -251,14 +253,34 @@ public class ServerInfoCommand extends Command {
         }
 
         @Override
-        protected void execute(CommandEvent event)  {
+        protected void execute(CommandEvent event) {
+            boolean displayMode = false;
+            boolean onlineMode = false;
+            if (event.getArgs().contains("--display")) {
+                displayMode = true;
+            }
+            if (event.getArgs().contains("--online")) {
+                onlineMode = true;
+            }
+
             Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
 
             List<CharSequence> roleNames = new ArrayList<>();
 
             roleNames.add("Role List for " + event.getGuild().getName());
-            roleNames.add("Members - Role Mention");
-            roleNames.add("Note: Roles that are bot roles are skipped!");
+            String format = "Format: %ONLINE%Total members with this role%DISPLAY% - Role Mention";
+            if (onlineMode) {
+                format = format.replace("%ONLINE%", "Online Members / ");
+            } else {
+                format = format.replace("%ONLINE%", "");
+            }
+            if (displayMode) {
+                format = format.replace("%DISPLAY%", " (Members with this role as display role)");
+            } else {
+                format = format.replace("%DISPLAY%", "");
+            }
+            roleNames.add(format);
+            roleNames.add("Note: Bot roles and everyone role are skipped!");
 
             // Gather roles and iterate over each to find stats
             List<Role> roles = event.getGuild().getRoles();
@@ -271,12 +293,50 @@ public class ServerInfoCommand extends Command {
                     continue;
 
                 List<Member> membersWithRole = event.getGuild().getMembersWithRoles(role);
+                if (membersWithRole.isEmpty()) {
+                    pbuilder.addItems("0" + " - " + role.getAsMention());
+                    continue;
+                }
 
-                pbuilder.addItems(membersWithRole.size() + " - " + role.getAsMention());
+                int online = 0;
+                int total = membersWithRole.size();
+                int display = 0;
+
+                if (!displayMode && !onlineMode) {
+                    pbuilder.addItems(total + " - " + role.getAsMention());
+                    continue;
+                }
+
+                for (Member member : membersWithRole) {
+                    if (onlineMode && member.getOnlineStatus() == OnlineStatus.ONLINE) {
+                        online++;
+                    }
+
+                    if (displayMode) {
+                        List<Role> userRoles = member.getRoles().stream().filter(Role::isHoisted).collect(Collectors.toList());
+                        if (!userRoles.isEmpty() && userRoles.get(0).equals(role)) {
+                            display++;
+                        }
+                    }
+                }
+
+                String rowFormat = "%ONLINE%%TOTAL%%DISPLAY% - %MENTION%";
+                if (onlineMode) {
+                    rowFormat = rowFormat.replace("%ONLINE%", online + " / ");
+                } else {
+                    rowFormat = rowFormat.replace("%ONLINE%", "");
+                }
+                if (displayMode) {
+                    rowFormat = rowFormat.replace("%DISPLAY%", " (" + display + ")");
+                } else {
+                    rowFormat = rowFormat.replace("%DISPLAY%", "");
+                }
+                rowFormat = rowFormat.replace("%MENTION%", role.getAsMention());
+                rowFormat = rowFormat.replace("%TOTAL%", total + "");
+                pbuilder.addItems(rowFormat);
             }
 
-            Paginator p = pbuilder.setText(String.join("\n", roleNames))
-                .build();
+            Paginator p = pbuilder.setText(String.join("\n", roleNames)).build();
 
             p.paginate(event.getChannel(), 1);
         }
