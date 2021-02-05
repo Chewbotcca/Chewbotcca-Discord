@@ -178,7 +178,7 @@ public class DiffCommand extends Command {
         }
 
         /**
-         * Helper method for %^diff role command about a role's info state
+         * Helper method for %^diff role command about a role's info state.
          *
          * @param yes if it's green or not
          * @return a green sign if true, red if false
