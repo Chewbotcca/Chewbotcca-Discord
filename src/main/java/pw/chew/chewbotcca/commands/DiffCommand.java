@@ -83,7 +83,7 @@ public class DiffCommand extends Command {
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Comparing roles")
                     .setDescription("Comparing name, color, permissions, and other information.\n" +
-                        "Base role: " + base.getName() + " ( " + base.getId()  + " ) " + "\n" +
+                            "Base role: " + base.getName() + " ( " + base.getId() + " ) " + "\n" +
                             "Compare role: " + compare.getName() + " ( " + compare.getId() + " ) ");
 
             if (base.getName().equals(compare.getName())) {
@@ -114,7 +114,7 @@ public class DiffCommand extends Command {
                     Bot role
                     Boost role
                     Integration role""";
-            embed.addField("Information",information,true);
+            embed.addField("Information", information, true);
 
             List<String> baseInfo = new ArrayList<>();
             baseInfo.add(getInfoState(base.isHoisted()));
@@ -123,7 +123,7 @@ public class DiffCommand extends Command {
             baseInfo.add(getInfoState(base.getTags().isBoost()));
             baseInfo.add(getInfoState(base.getTags().isIntegration()));
 
-            embed.addField(base.getName(),String.join("\n", baseInfo),true);
+            embed.addField(base.getName(), String.join("\n", baseInfo), true);
 
             List<String> compareInfo = new ArrayList<>();
             compareInfo.add(getInfoState(compare.isHoisted()));
@@ -132,8 +132,7 @@ public class DiffCommand extends Command {
             compareInfo.add(getInfoState(compare.getTags().isBoost()));
             compareInfo.add(getInfoState(compare.getTags().isIntegration()));
 
-            embed.addField(compare.getName(),String.join("\n", compareInfo),true);
-
+            embed.addField(compare.getName(), String.join("\n", compareInfo), true);
 
 
             if (base.getPermissionsRaw() == compare.getPermissionsRaw()) {
@@ -158,9 +157,9 @@ public class DiffCommand extends Command {
                 List<String> perms = new ArrayList<>();
 
                 perms.add("""
-                    + means compare role has the permission, and base doesn't.
-                    - means compare role doesn't have the perm, but base does.
-                    ```diff""");
+                        + means compare role has the permission, and base doesn't.
+                        - means compare role doesn't have the perm, but base does.
+                        ```diff""");
 
                 for (Permission perm : compareOnly) {
                     perms.add("+ " + perm.getName());
@@ -180,26 +179,28 @@ public class DiffCommand extends Command {
 
         /**
          * Helper method for %^diff role command about a role's info state
+         *
          * @param yes if it's green or not
          * @return a green sign if true, red if false
          */
         private String getInfoState(boolean yes) {
             if (yes) {
-                return "\uD83D\uDFE2" ;
+                return "\uD83D\uDFE2";
             } else {
-                return "\uD83D\uDD34" ;
+                return "\uD83D\uDD34";
             }
         }
 
         /**
          * Source: https://stackoverflow.com/questions/3607858/convert-a-rgb-color-value-to-a-hexadecimal-string
          * Function that converts RGB values to hexadecimal code.
-         * @param red red value of color
+         *
+         * @param red   red value of color
          * @param green green value of color
-         * @param blue blue value of color
+         * @param blue  blue value of color
          * @return the hexadecimal code of the color
          */
-        private String colorToHex(int red, int green, int blue){
+        private String colorToHex(int red, int green, int blue) {
             return String.format("#%02x%02x%02x", red, green, blue);
         }
     }
@@ -208,7 +209,7 @@ public class DiffCommand extends Command {
      * Compares members
      * Takes as input 2 mentioned members. Example diff member @random @random2
      */
-    private static class CompareMembersSubCommand extends Command{
+    private static class CompareMembersSubCommand extends Command {
 
         public CompareMembersSubCommand() {
             this.name = "member";
@@ -235,7 +236,7 @@ public class DiffCommand extends Command {
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Comparing members")
                     .setDescription("Comparing time joined, time boosted, roles and other information.\n" +
-                        "Base member: " + base.getUser().getName() + " ( " + base.getUser().getAsTag() + " ) " + "\n" +
+                            "Base member: " + base.getUser().getName() + " ( " + base.getUser().getAsTag() + " ) " + "\n" +
                             "Compare member : " + compare.getUser().getName() + " ( " + compare.getUser().getAsTag() + " ) ");
 
 
@@ -245,8 +246,8 @@ public class DiffCommand extends Command {
             embed.addField("Name", names, true);
 
             // Dates of arrival in server
-            String date = base.getTimeJoined().toString().substring(0,10) + "\n" +
-                    compare.getTimeJoined().toString().substring(0,10);
+            String date = base.getTimeJoined().toString().substring(0, 10) + "\n" +
+                    compare.getTimeJoined().toString().substring(0, 10);
             embed.addField(" Date of Arrival ", date, true);
             embed.addBlankField(false);
 
@@ -258,17 +259,17 @@ public class DiffCommand extends Command {
             // Starting date of boosting time for a member.
             String baseBoostingTime;
             String compareBoostingTime;
-            if (base.getTimeBoosted() != null){
+            if (base.getTimeBoosted() != null) {
                 // keeps yyyy-mm-dd
-                baseBoostingTime = "Boosting since : " + base.getTimeBoosted().toString().substring(0,10);
-            }else{
+                baseBoostingTime = "Boosting since : " + base.getTimeBoosted().toString().substring(0, 10);
+            } else {
                 baseBoostingTime = "Currently not boosting";
             }
 
-            if (compare.getTimeBoosted() != null){
+            if (compare.getTimeBoosted() != null) {
                 // keeps yyyy-mm-dd
-                compareBoostingTime = "Boosting since : " + compare.getTimeBoosted().toString().substring(0,10);
-            }else{
+                compareBoostingTime = "Boosting since : " + compare.getTimeBoosted().toString().substring(0, 10);
+            } else {
                 compareBoostingTime = "Currently not boosting";
             }
 
@@ -284,19 +285,19 @@ public class DiffCommand extends Command {
                     ```diff""");
             compareRoles.add("""
                     ```diff""");
-            for (Role role : base.getRoles()){
+            for (Role role : base.getRoles()) {
                 baseRoles.add(role.getName());
             }
 
-            for (Role role : compare.getRoles()){
+            for (Role role : compare.getRoles()) {
                 compareRoles.add(role.getName());
             }
 
             baseRoles.add("```");
             compareRoles.add("```");
 
-            embed.addField( base.getUser().getName() + "' Roles ", String.join("\n", baseRoles), true);
-            embed.addField( compare.getUser().getName() + "' Roles ", String.join("\n", compareRoles), true);
+            embed.addField(base.getUser().getName() + "' Roles ", String.join("\n", baseRoles), true);
+            embed.addField(compare.getUser().getName() + "' Roles ", String.join("\n", compareRoles), true);
 
 
             event.reply(embed.build());
