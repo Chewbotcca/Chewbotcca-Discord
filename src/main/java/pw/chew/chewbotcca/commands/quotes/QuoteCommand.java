@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,16 +19,12 @@ package pw.chew.chewbotcca.commands.quotes;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.awaitility.Awaitility.await;
+import pw.chew.chewbotcca.util.Mention;
 
 // %^quote
 public class QuoteCommand extends Command {
@@ -43,61 +39,75 @@ public class QuoteCommand extends Command {
     protected void execute(CommandEvent event) {
         // Start typing
         event.getChannel().sendTyping().queue();
-        String[] args = event.getArgs().split(" ");
-        // Get the message ID (first arg)
-        String mesId = args[0];
-        AtomicReference<Message> message = new AtomicReference<>();
-        if(args.length == 1) {
-            // Retrieve the message
-            event.getChannel().retrieveMessageById(mesId).queue(message::set,
-                    (exception) -> event.reply("Invalid Message ID. If this message is in a separate channel, provide its ID as well.")
-            );
-            await().atMost(5, TimeUnit.SECONDS).until(() -> message.get() != null);
-        } else {
-            // Get the second (channel id) arg
-            String chanId = args[1];
-            chanId = chanId.replace("<#", "").replace(">", "");
-            TextChannel channel;
-            // Get the text channel
-            channel = event.getJDA().getTextChannelById(chanId);
-            // If it's not null
-            if (channel != null) {
-                channel.retrieveMessageById(mesId).queue(message::set,
-                        (exception) -> event.reply("Invalid Message ID. That message might not exist in the channel provided.")
-                );
-                await().atMost(5, TimeUnit.SECONDS).until(() -> message.get() != null);
-            } else {
-                event.reply("Invalid Channel ID.");
-                return;
-            }
-        }
 
-        if(message.get() == null) {
+        Message message;
+        try {
+            message = retrieveMessage(event.getArgs(), event.getTextChannel(), event.getJDA());
+        } catch (IllegalArgumentException e) {
+            event.reply("Could not get message! " + e.getMessage());
             return;
         }
 
         // Get message details and send
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Quote");
-        embed.setDescription(message.get().getContentRaw());
-        embed.setTimestamp(message.get().getTimeCreated());
-        embed.setAuthor(message.get().getAuthor().getAsTag(), null, message.get().getAuthor().getAvatarUrl());
-        boolean thisGuild = event.getGuild() == message.get().getGuild();
-        if(!thisGuild)
-            embed.addField("Server", message.get().getGuild().getName(), true);
-        if(args.length > 1 && !thisGuild) {
-            embed.addField("Channel", message.get().getChannel().getName(), true);
-        } else if (args.length > 1) {
-            embed.addField("Channel", ((TextChannel) message.get().getChannel()).getAsMention(), true);
+        embed.setDescription(message.getContentRaw());
+        embed.setTimestamp(message.getTimeCreated());
+        embed.setAuthor(message.getAuthor().getAsTag(), null, message.getAuthor().getAvatarUrl());
+        boolean thisGuild = event.getGuild().getId().equals(message.getGuild().getId());
+        boolean thisChannel = event.getChannel().getId().equals(message.getChannel().getId());
+        if (!thisGuild) {
+            embed.addField("Server", message.getGuild().getName(), true);
         }
-        embed.addField("Jump", "[Link](" + message.get().getJumpUrl() + ")", true);
-        AtomicReference<Member> member = new AtomicReference<>();
-        AtomicBoolean bruh = new AtomicBoolean(false);
-        event.getGuild().retrieveMember(message.get().getAuthor()).queue(member::set, (oh) -> bruh.set(true));
-        await().atMost(5, TimeUnit.SECONDS).until(() -> member.get() != null || bruh.get());
+        if (!thisChannel && !thisGuild) {
+            embed.addField("Channel", message.getChannel().getName(), true);
+        } else if (!thisChannel) {
+            embed.addField("Channel", ((TextChannel) message.getChannel()).getAsMention(), true);
+        }
+        embed.addField("Jump", "[Link](" + message.getJumpUrl() + ")", true);
+        Member member = event.getGuild().retrieveMember(message.getAuthor()).complete();
+        embed.setColor(member.getColor());
 
-        if(!bruh.get())
-            embed.setColor(member.get().getColor());
         event.reply(embed.build());
+    }
+
+    private Message retrieveMessage(String arg, TextChannel current, JDA jda) {
+        String[] args = arg.split(" ");
+
+        // If one argument is provided
+        if (args.length == 1) {
+            // Check if it's a link
+            String[] link = arg.split("/");
+            if (link.length == 7) {
+                String channelId = link[5];
+                String messageId = link[6];
+                TextChannel channel = jda.getTextChannelById(channelId);
+                if (channel == null)
+                    throw new IllegalArgumentException("Channel was invalid!");
+
+                try {
+                    return channel.retrieveMessageById(messageId).complete();
+                } catch (NullPointerException | IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Message ID doesn't exist or is invalid!");
+                }
+            }
+
+            return current.retrieveMessageById(arg).complete();
+        }
+
+        // Assuming channel then message ID
+        if (args.length == 2) {
+            try {
+                TextChannel channel = (TextChannel) Mention.parseMention(args[0], current.getGuild(), jda);
+                if (channel == null) {
+                    throw new IllegalArgumentException("Channel does not exist!");
+                }
+                return channel.retrieveMessageById(args[1]).complete();
+            } catch (ClassCastException | NullPointerException | IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid or illegal Channel/Message ID provided!");
+            }
+        }
+
+        throw new IllegalArgumentException("Too many arguments provided!");
     }
 }
