@@ -65,7 +65,7 @@ public class QuoteCommand extends Command {
             embed.addField("Channel", ((TextChannel) message.getChannel()).getAsMention(), true);
         }
         embed.addField("Jump", "[Link](" + message.getJumpUrl() + ")", true);
-        Member member = event.getGuild().retrieveMember(message.getAuthor()).complete();
+        Member member = message.getGuild().retrieveMember(message.getAuthor()).complete();
         embed.setColor(member.getColor());
 
         event.reply(embed.build());
