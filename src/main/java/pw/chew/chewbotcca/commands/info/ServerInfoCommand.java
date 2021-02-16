@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,12 +33,16 @@ import pw.chew.chewbotcca.util.JDAUtilUtil;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 // %^sinfo command
@@ -55,7 +59,8 @@ public class ServerInfoCommand extends Command {
             new ServerChannelsInfoSubCommand(),
             new ServerMemberByJoinSubCommand(),
             new ServerRolesInfoSubCommand(),
-            new ServerMemberMilestoneSubCommand()
+            new ServerMemberMilestoneSubCommand(),
+            new ServerMemberStatsSubCommand()
         };
     }
 
@@ -151,6 +156,7 @@ public class ServerInfoCommand extends Command {
             Bots - `%^sinfo bots`
             Channels - `%^sinfo channels`
             Member Milestones - `%^sinfo milestones`
+            Member Stats - `%^sinfo memberstats`
             """.replaceAll("%\\^", event.getPrefix()), false);
 
         e.setFooter("Server Created on");
@@ -575,6 +581,61 @@ public class ServerInfoCommand extends Command {
             }
 
             embed.setDescription(String.join("\n", daysToMilestone));
+
+            event.reply(embed.build());
+        }
+    }
+
+    private static class ServerMemberStatsSubCommand extends Command {
+
+        public ServerMemberStatsSubCommand() {
+            this.name = "memberstats";
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+            this.guildOnly = true;
+        }
+
+        @Override
+        protected void execute(CommandEvent event) {
+            List<Member> members = event.getGuild().getMemberCache().asList();
+            Map<LocalDate, Integer> bestDays = new TreeMap<>();
+
+            // Toss it all into the hashmap
+            for (Member member : members) {
+                LocalDate date = member.getTimeJoined().toLocalDate();
+                int amount = bestDays.getOrDefault(date, 0);
+                bestDays.put(date, amount + 1);
+            }
+
+            // Find longest slump
+            long slumpDays = 0;
+            LocalDate startSlump = LocalDate.now();
+
+            LocalDate[] keys = bestDays.keySet().toArray(new LocalDate[0]);
+
+            for (int i = 1; i < bestDays.size(); i++) {
+                LocalDate base = keys[i-1];
+                LocalDate compare = keys[i];
+
+                if (compare.toEpochDay() - base.toEpochDay() > slumpDays) {
+                    slumpDays = compare.toEpochDay() - base.toEpochDay();
+                    startSlump = base;
+                }
+            }
+
+            int best = bestDays.values().stream().max(Comparator.comparingInt(Integer::intValue)).get();
+            List<LocalDate> bestDay = new ArrayList<>();
+            for (LocalDate date : keys) {
+                if (bestDays.get(date) == best) {
+                    bestDay.add(date);
+                }
+            }
+
+            EmbedBuilder embed = new EmbedBuilder()
+                .setTitle("Member Stats for " + event.getGuild().getName())
+                .setDescription("A collection of simple stats for the server!");
+
+            embed.addField("Most Members in A Day", "Members: " + best + "\n" + bestDay.stream().map(LocalDate::toString).collect(Collectors.joining("\n")), true);
+            embed.addField("Largest Slump", "Days: " + slumpDays + "\nRange: " + startSlump.toString() + " - " + startSlump.atStartOfDay().plusDays(slumpDays).toLocalDate().toString(), true);
 
             event.reply(embed.build());
         }
