@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import java.util.Map;
 // Off brand RestClient based on the ruby gem of the same name
 public class RestClient {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static final String userAgent = "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095";
 
     /**
      * Make a GET request
@@ -44,7 +45,7 @@ public class RestClient {
         Request request = new Request.Builder()
                 .url(url)
                 .get()
-                .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+                .addHeader("User-Agent", userAgent)
                 .build();
 
         LoggerFactory.getLogger(RestClient.class).debug("Making call to GET " + url);
@@ -61,7 +62,7 @@ public class RestClient {
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Authorization", key)
-                .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+                .addHeader("User-Agent", userAgent)
                 .get()
                 .build();
 
@@ -81,7 +82,7 @@ public class RestClient {
                 .url(url)
                 .post(bodyFromHash(args))
                 .addHeader("Authorization", key)
-                .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+                .addHeader("User-Agent", userAgent)
                 .build();
 
         LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
@@ -100,7 +101,7 @@ public class RestClient {
         Request request = new Request.Builder()
             .url(url)
             .post(body)
-            .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+            .addHeader("User-Agent", userAgent)
             .build();
 
         LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
@@ -121,7 +122,7 @@ public class RestClient {
             .url(url)
             .post(body)
             .addHeader("Authorization", key)
-            .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+            .addHeader("User-Agent", userAgent)
             .build();
 
         LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
@@ -139,7 +140,7 @@ public class RestClient {
             .url(url)
             .delete()
             .addHeader("Authorization", key)
-            .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+            .addHeader("User-Agent", userAgent)
             .build();
 
         LoggerFactory.getLogger(RestClient.class).debug("Making call to DELETE " + url);
