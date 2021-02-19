@@ -22,6 +22,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import pw.chew.chewbotcca.util.ArgsParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -219,11 +220,13 @@ public class DiffCommand extends Command {
 
         @Override
         protected void execute(CommandEvent event) {
-            List<Member> members = event.getMessage().getMentionedMembers();
+            List<Member> members;
 
-            if (members.size() != 2) {
+            try {
+                members = ArgsParser.parseMembers(event.getArgs(), 2, event.getMessage());
+            } catch (IllegalArgumentException e) {
                 event.reply("""
-                        Invalid number of arguments provided or you're trying to compare the same member.
+                        Invalid number of arguments provided.
                         Please provide valid members.
                         Example : diff member @random @random2.""");
                 return;
@@ -232,49 +235,44 @@ public class DiffCommand extends Command {
             Member base = members.get(0);
             Member compare = members.get(1);
 
-
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Comparing members")
                     .setDescription("Comparing time joined, time boosted, roles and other information.\n" +
-                            "Base member: " + base.getUser().getName() + " ( " + base.getUser().getAsTag() + " ) " + "\n" +
-                            "Compare member : " + compare.getUser().getName() + " ( " + compare.getUser().getAsTag() + " ) ");
-
-
-            // Names
-            String names = base.getUser().getName() + "\n" +
-                    compare.getUser().getName();
-            embed.addField("Name", names, true);
+                            "Base member: " + base.getUser().getAsTag() + "\n" +
+                            "Compare member: " + compare.getUser().getAsTag());
 
             // Dates of arrival in server
-            String date = base.getTimeJoined().toString().substring(0, 10) + "\n" +
-                    compare.getTimeJoined().toString().substring(0, 10);
-            embed.addField(" Date of Arrival ", date, true);
+            String date = base.getTimeJoined().toString().substring(0, 10) + "\n" + compare.getTimeJoined().toString().substring(0, 10);
+            embed.addField("Date Joined", date, true);
             embed.addBlankField(false);
 
             // Status comparison
-            String onlineStatus = base.getUser().getName() + " :   " + base.getOnlineStatus().name() + "\n" +
-                    compare.getUser().getName() + " :   " + compare.getOnlineStatus().name();
-            embed.addField(" Status ", onlineStatus, true);
+            String onlineStatus = base.getUser().getAsTag() + ":   " + base.getOnlineStatus().name() + "\n" +
+                    compare.getUser().getAsTag() + ":   " + compare.getOnlineStatus().name();
+            if (base.getOnlineStatus().equals(compare.getOnlineStatus())) {
+                embed.addField("Status", "Nothing to compare.", true);
+            } else {
+                embed.addField("Status", onlineStatus, true);
+            }
 
             // Starting date of boosting time for a member.
             String baseBoostingTime;
             String compareBoostingTime;
             if (base.getTimeBoosted() != null) {
                 // keeps yyyy-mm-dd
-                baseBoostingTime = "Boosting since : " + base.getTimeBoosted().toString().substring(0, 10);
+                baseBoostingTime = "Boosting since: " + base.getTimeBoosted().toString().substring(0, 10);
             } else {
-                baseBoostingTime = "Currently not boosting";
+                baseBoostingTime = "Not boosting";
             }
 
             if (compare.getTimeBoosted() != null) {
                 // keeps yyyy-mm-dd
-                compareBoostingTime = "Boosting since : " + compare.getTimeBoosted().toString().substring(0, 10);
+                compareBoostingTime = "Boosting since: " + compare.getTimeBoosted().toString().substring(0, 10);
             } else {
-                compareBoostingTime = "Currently not boosting";
+                compareBoostingTime = "Not boosting";
             }
 
-            embed.addField(" Server Boosting ", baseBoostingTime + "\n" + compareBoostingTime, true);
-
+            embed.addField("Server Boosting", baseBoostingTime + "\n" + compareBoostingTime, true);
             embed.addBlankField(false);
 
             // Roles comparison of members
@@ -299,11 +297,7 @@ public class DiffCommand extends Command {
             embed.addField(base.getUser().getName() + "' Roles ", String.join("\n", baseRoles), true);
             embed.addField(compare.getUser().getName() + "' Roles ", String.join("\n", compareRoles), true);
 
-
             event.reply(embed.build());
-
         }
-
     }
-
 }
