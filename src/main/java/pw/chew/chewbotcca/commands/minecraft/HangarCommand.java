@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ public class HangarCommand extends Command {
 
         embed.setTitle(plugin.getString("name"), projectURL);
         embed.setDescription(plugin.getString("description"));
-        embed.setThumbnail(plugin.getString("icon_url"));
+        embed.setThumbnail(projectURL + "/icon?nocache" + Instant.now());
         if (plugin.getJSONArray("promoted_versions").length() > 0) {
             embed.addField("Latest", plugin.getJSONArray("promoted_versions").getJSONObject(0).getString("version"), true);
         }
