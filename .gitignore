@@ -9,3 +9,5 @@ bot.properties
 *.iml
 lib/*.jar
 !lib/jda-chewtils-1.0.0-all.jar
+build/
+.gradle/
