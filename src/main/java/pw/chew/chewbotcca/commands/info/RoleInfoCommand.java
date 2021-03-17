@@ -142,7 +142,7 @@ public class RoleInfoCommand extends Command {
             String description = "";
             if (!role.isPublicRole()) {
                 Permission[] every = event.getGuild().getPublicRole().getPermissions().toArray(new Permission[0]);
-                temp.removeAll(Arrays.asList(every));
+                Arrays.asList(every).forEach(temp::remove);
                 description = "Elevated permissions (perms this role has that everyone role doesn't)\n\n";
             }
             embed.setDescription(description + generatePermissionList(temp));

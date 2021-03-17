@@ -81,12 +81,7 @@ public class MCServerCommand extends Command {
     /**
      * Parsed object from a mcsrvstat.us response
      */
-    private static class ServerInfo {
-        private final JSONObject data;
-
-        public ServerInfo(JSONObject data) {
-            this.data = data;
-        }
+    private record ServerInfo(JSONObject data) {
 
         /**
          * @return if the server is online
@@ -117,6 +112,7 @@ public class MCServerCommand extends Command {
         /**
          * A "Geyser" server is a server running Geyser. A specific version is checked.
          * Only works if Geyser version is build 513 or above
+         *
          * @return whether or not this is a Geyser
          */
         public boolean isGeyser() {
@@ -147,6 +143,7 @@ public class MCServerCommand extends Command {
 
         /**
          * UNIX timestamp of the time the result was cached. Returns 0 when the result was not fetched from cache.
+         *
          * @return the last cache time
          */
         public Instant getCacheTime() {

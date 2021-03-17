@@ -362,10 +362,7 @@ public class ServerInfoCommand extends Command {
 
         @Override
         protected void execute(CommandEvent event) {
-            boolean renderMention = false;
-            if(event.getArgs().contains("--mention")) {
-                renderMention = true;
-            }
+            boolean renderMention = event.getArgs().contains("--mention");
 
             Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
 
@@ -635,7 +632,7 @@ public class ServerInfoCommand extends Command {
                 .setDescription("A collection of simple stats for the server!");
 
             embed.addField("Most Members in A Day", "Members: " + best + "\n" + bestDay.stream().map(LocalDate::toString).collect(Collectors.joining("\n")), true);
-            embed.addField("Largest Slump", "Days: " + slumpDays + "\nRange: " + startSlump.toString() + " - " + startSlump.atStartOfDay().plusDays(slumpDays).toLocalDate().toString(), true);
+            embed.addField("Largest Slump", "Days: " + slumpDays + "\nRange: " + startSlump + " - " + startSlump.atStartOfDay().plusDays(slumpDays).toLocalDate().toString(), true);
 
             event.reply(embed.build());
         }

@@ -141,12 +141,10 @@ public class RoleCommand extends Command {
 
             Object parse = Mention.parseMention(mention, event.getGuild(), event.getJDA());
 
-            if (!(parse instanceof Member)) {
+            if (!(parse instanceof Member member)) {
                 event.reply("Unable to find specified member!");
                 return;
             }
-
-            Member member = (Member) parse;
 
             // Attempt to find role
             List<Role> roles = event.getGuild().getRolesByName(rolename, true);
@@ -202,12 +200,10 @@ public class RoleCommand extends Command {
 
             Object parse = Mention.parseMention(mention, event.getGuild(), event.getJDA());
 
-            if (!(parse instanceof Member)) {
+            if (!(parse instanceof Member member)) {
                 event.reply("Unable to find specified member!");
                 return;
             }
-
-            Member member = (Member) parse;
 
             // Attempt to find role
             List<Role> roles = event.getGuild().getRolesByName(rolename, true);
