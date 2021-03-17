@@ -40,7 +40,7 @@ public class StatsCommand extends Command {
         commandEvent.reply(new EmbedBuilder()
                 .setTitle("Chewbotcca - A basic, yet functioning, discord bot")
                 .addField("Author", "<@!476488167042580481>", true)
-                .addField("Code", "[View code on GitHub](http://github.com/Chewbotcca/Discord)", true)
+                .addField("Code", "[View code on GitHub](https://github.com/Chewbotcca/Discord)", true)
                 .addField("Library", "[JDA " + JDAInfo.VERSION + "](" + JDAInfo.GITHUB + ")", true)
                 // Convert the time difference into a time ago
                 .addField("Uptime", DateTime.timeAgo(Instant.now().toEpochMilli() - startTime.toEpochMilli()), true)

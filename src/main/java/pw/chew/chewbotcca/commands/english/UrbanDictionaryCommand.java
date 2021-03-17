@@ -49,7 +49,7 @@ public class UrbanDictionaryCommand extends Command {
 
         // Get the word from Urban Dictionary and if it doesn't exist, let them know.
         String word = event.getArgs();
-        JSONObject parse = new JSONObject(RestClient.get("http://api.urbandictionary.com/v0/define?term=" + URLEncoder.encode(word, StandardCharsets.UTF_8)));
+        JSONObject parse = new JSONObject(RestClient.get("https://api.urbandictionary.com/v0/define?term=" + URLEncoder.encode(word, StandardCharsets.UTF_8)));
         JSONArray list = parse.getJSONArray("list");
         if (list.isEmpty()) {
             event.reply("No results found for term `" + word + "`!");

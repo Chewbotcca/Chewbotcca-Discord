@@ -58,7 +58,7 @@ public class LastFMCommand extends Command {
                 return;
             }
         }
-        JSONObject parse = new JSONObject(RestClient.get("http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&limit=1&user=" + args + "&api_key=" + key + "&format=json"));
+        JSONObject parse = new JSONObject(RestClient.get("https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&limit=1&user=" + args + "&api_key=" + key + "&format=json"));
         // But if I got bamboozled
         if(parse.has("message") && parse.getString("message").equals("User not found")) {
             event.reply("No user found for the provided input!");

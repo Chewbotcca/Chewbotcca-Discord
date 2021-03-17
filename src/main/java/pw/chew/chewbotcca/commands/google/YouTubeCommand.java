@@ -125,7 +125,7 @@ public class YouTubeCommand extends Command {
             disPercent = df.format(dislike / totalLikes * 100);
         }
 
-        String urlpls = "http://youtu.be/" + id;
+        String urlpls = "https://youtu.be/" + id;
 
         // Finally make the embed
         EmbedBuilder embed = new EmbedBuilder();

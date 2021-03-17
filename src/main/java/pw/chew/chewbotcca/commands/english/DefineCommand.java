@@ -44,7 +44,7 @@ public class DefineCommand extends Command {
         // Attempt to grab the word, if it doesn't exist let them know
         JSONArray grabbedword;
         try {
-            grabbedword = new JSONArray(RestClient.get("http://api.wordnik.com/v4/word.json/" + word + "/definitions?includeRelated=true&useCanonical=false&includeTags=false&api_key=" + PropertiesManager.getWordnikToken()));
+            grabbedword = new JSONArray(RestClient.get("https://api.wordnik.com/v4/word.json/" + word + "/definitions?includeRelated=true&useCanonical=false&includeTags=false&api_key=" + PropertiesManager.getWordnikToken()));
         } catch(JSONException e) {
             commandEvent.reply("Word not found! Check your local spell-checker!");
             return;

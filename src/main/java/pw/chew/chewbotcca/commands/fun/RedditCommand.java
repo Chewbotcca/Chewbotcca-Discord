@@ -39,7 +39,7 @@ public class RedditCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String baseUrl = "http://reddit.com/r/%s/.json";
+        String baseUrl = "https://reddit.com/r/%s/.json";
         String url;
         int num = -1;
         // If no args, just use the front page json
