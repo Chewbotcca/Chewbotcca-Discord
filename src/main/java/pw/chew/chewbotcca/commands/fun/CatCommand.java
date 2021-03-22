@@ -37,7 +37,7 @@ public class CatCommand extends Command {
     protected void execute(CommandEvent commandEvent) {
         // Try to gather a cat from the Cat API
         try {
-            String showcat = new JSONObject(RestClient.get("http://aws.random.cat/meow")).getString("file");
+            String showcat = new JSONObject(RestClient.get("https://aws.random.cat/meow")).getString("file");
 
             commandEvent.reply(new EmbedBuilder()
                 .setTitle("Adorable.", showcat)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@ import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.util.List;
+import java.io.IOException;
+import java.time.Instant;
 
 public class RoryCommand extends Command {
 
@@ -50,7 +52,7 @@ public class RoryCommand extends Command {
 
         EmbedBuilder embed = new EmbedBuilder()
             .setTitle("Rory :3", permalink)
-            .setImage(rory.getString("url"))
+            .setImage(rory.getString("url") + "?nocache" + Instant.now().getEpochSecond())
             .setFooter("ID: " + rory.getInt("id"));
         if (event.getChannelType() == ChannelType.TEXT && event.getMember().hasPermission(Permission.MANAGE_WEBHOOKS) && event.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
             embed.setDescription("Stay up to date with new Rory images by running `" + event.getPrefix() + "rory follow`!");

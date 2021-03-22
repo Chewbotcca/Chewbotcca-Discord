@@ -26,6 +26,6 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v1
       with:
-        java-version: 15
+        java-version: 16
     - name: Compile
       run: mvn clean package

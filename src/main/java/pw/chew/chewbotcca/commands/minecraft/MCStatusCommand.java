@@ -29,7 +29,7 @@ import pw.chew.chewbotcca.util.RestClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class MCStatusCommand extends Command {
@@ -45,7 +45,7 @@ public class MCStatusCommand extends Command {
         commandEvent.getChannel().sendTyping().queue();
         // Get stats
         JSONArray statusurl = new JSONArray(RestClient.get("https://status.mojang.com/check"));
-        List<String> forbiddenSites = Arrays.asList("minecraft.net", "sessionserver.mojang.com", "mojang.com");
+        List<String> forbiddenSites = Collections.singletonList("sessionserver.mojang.com");
         List<CharSequence> up = new ArrayList<>();
         List<CharSequence> shakey = new ArrayList<>();
         List<CharSequence> red = new ArrayList<>();
@@ -64,12 +64,6 @@ public class MCStatusCommand extends Command {
             }
         }
 
-        if(isUp("https://www.minecraft.net/en-us/")) {
-            up.add("minecraft.net");
-        } else {
-            red.add("minecraft.net");
-        }
-
         if(isUp("https://sessionserver.mojang.com/blockedservers")) {
             up.add("sessionserver.mojang.com");
         } else {
@@ -79,7 +73,7 @@ public class MCStatusCommand extends Command {
         // Return gathered info
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Minecraft/Mojang Statuses");
-        e.setDescription("minecraft.net and sessionserver.mojang.com were manually checked, see [WEB-2303](https://bugs.mojang.com/browse/WEB-2303).");
+        e.setDescription("sessionserver.mojang.com was manually checked, see [WEB-2303](https://bugs.mojang.com/browse/WEB-2303).");
         if(!up.isEmpty()) {
             e.addField("Up", String.join("\n", up), true);
         }

@@ -51,8 +51,8 @@ public class MCWikiCommand extends Command {
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String apiUrl = "http://minecraft.gamepedia.com/api.php?action=opensearch&search=";
-        String mcUrl = "http://minecraft.gamepedia.com/";
+        String apiUrl = "https://minecraft.gamepedia.com/api.php?action=opensearch&search=";
+        String mcUrl = "https://minecraft.gamepedia.com/";
 
         JSONArray j;
 

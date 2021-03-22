@@ -134,10 +134,7 @@ public class UserInfoCommand extends Command {
         if (commandEvent.isFromType(ChannelType.TEXT)) {
             member = commandEvent.getGuild().getMemberById(user.getId());
         }
-        boolean onServer = false;
-        if(member != null) {
-            onServer = true;
-        }
+        boolean onServer = member != null;
         boolean self = user == commandEvent.getAuthor();
 
         EmbedBuilder e = new EmbedBuilder();

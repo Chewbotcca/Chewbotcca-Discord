@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -30,11 +31,19 @@ import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 // %^sinfo command
 public class ServerInfoCommand extends Command {
@@ -49,7 +58,9 @@ public class ServerInfoCommand extends Command {
             new ServerBotsSubCommand(),
             new ServerChannelsInfoSubCommand(),
             new ServerMemberByJoinSubCommand(),
-            new ServerRolesInfoSubCommand()
+            new ServerRolesInfoSubCommand(),
+            new ServerMemberMilestoneSubCommand(),
+            new ServerMemberStatsSubCommand()
         };
     }
 
@@ -144,6 +155,8 @@ public class ServerInfoCommand extends Command {
             Boosts - `%^sinfo boosts`
             Bots - `%^sinfo bots`
             Channels - `%^sinfo channels`
+            Member Milestones - `%^sinfo milestones`
+            Member Stats - `%^sinfo memberstats`
             """.replaceAll("%\\^", event.getPrefix()), false);
 
         e.setFooter("Server Created on");
@@ -246,14 +259,34 @@ public class ServerInfoCommand extends Command {
         }
 
         @Override
-        protected void execute(CommandEvent event)  {
+        protected void execute(CommandEvent event) {
+            boolean displayMode = false;
+            boolean onlineMode = false;
+            if (event.getArgs().contains("--display")) {
+                displayMode = true;
+            }
+            if (event.getArgs().contains("--online")) {
+                onlineMode = true;
+            }
+
             Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
 
             List<CharSequence> roleNames = new ArrayList<>();
 
             roleNames.add("Role List for " + event.getGuild().getName());
-            roleNames.add("Members - Role Mention");
-            roleNames.add("Note: Roles that are bot roles are skipped!");
+            String format = "Format: %ONLINE%Total members with this role%DISPLAY% - Role Mention";
+            if (onlineMode) {
+                format = format.replace("%ONLINE%", "Online Members / ");
+            } else {
+                format = format.replace("%ONLINE%", "");
+            }
+            if (displayMode) {
+                format = format.replace("%DISPLAY%", " (Members with this role as display role)");
+            } else {
+                format = format.replace("%DISPLAY%", "");
+            }
+            roleNames.add(format);
+            roleNames.add("Note: Bot roles and everyone role are skipped!");
 
             // Gather roles and iterate over each to find stats
             List<Role> roles = event.getGuild().getRoles();
@@ -266,12 +299,50 @@ public class ServerInfoCommand extends Command {
                     continue;
 
                 List<Member> membersWithRole = event.getGuild().getMembersWithRoles(role);
+                if (membersWithRole.isEmpty()) {
+                    pbuilder.addItems("0" + " - " + role.getAsMention());
+                    continue;
+                }
 
-                pbuilder.addItems(membersWithRole.size() + " - " + role.getAsMention());
+                int online = 0;
+                int total = membersWithRole.size();
+                int display = 0;
+
+                if (!displayMode && !onlineMode) {
+                    pbuilder.addItems(total + " - " + role.getAsMention());
+                    continue;
+                }
+
+                for (Member member : membersWithRole) {
+                    if (onlineMode && member.getOnlineStatus() == OnlineStatus.ONLINE) {
+                        online++;
+                    }
+
+                    if (displayMode) {
+                        List<Role> userRoles = member.getRoles().stream().filter(Role::isHoisted).collect(Collectors.toList());
+                        if (!userRoles.isEmpty() && userRoles.get(0).equals(role)) {
+                            display++;
+                        }
+                    }
+                }
+
+                String rowFormat = "%ONLINE%%TOTAL%%DISPLAY% - %MENTION%";
+                if (onlineMode) {
+                    rowFormat = rowFormat.replace("%ONLINE%", online + " / ");
+                } else {
+                    rowFormat = rowFormat.replace("%ONLINE%", "");
+                }
+                if (displayMode) {
+                    rowFormat = rowFormat.replace("%DISPLAY%", " (" + display + ")");
+                } else {
+                    rowFormat = rowFormat.replace("%DISPLAY%", "");
+                }
+                rowFormat = rowFormat.replace("%MENTION%", role.getAsMention());
+                rowFormat = rowFormat.replace("%TOTAL%", total + "");
+                pbuilder.addItems(rowFormat);
             }
 
-            Paginator p = pbuilder.setText(String.join("\n", roleNames))
-                .build();
+            Paginator p = pbuilder.setText(String.join("\n", roleNames)).build();
 
             p.paginate(event.getChannel(), 1);
         }
@@ -291,10 +362,7 @@ public class ServerInfoCommand extends Command {
 
         @Override
         protected void execute(CommandEvent event) {
-            boolean renderMention = false;
-            if(event.getArgs().contains("--mention")) {
-                renderMention = true;
-            }
+            boolean renderMention = event.getArgs().contains("--mention");
 
             Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
 
@@ -453,6 +521,118 @@ public class ServerInfoCommand extends Command {
                     true
                 );
             }
+
+            event.reply(embed.build());
+        }
+    }
+
+    /**
+     * Get member milestone (estimated)
+     */
+    private static class ServerMemberMilestoneSubCommand extends Command {
+        final static int[] milestones = new int[]{10, 25, 50, 100, 500, 1000, 5000, 7000, 10000, 20000, 50000, 100000, 200000, 300000, 400000, 500000, 1000000};
+
+        public ServerMemberMilestoneSubCommand() {
+            this.name = "milestone";
+            this.aliases = new String[]{"milestones"};
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+            this.guildOnly = true;
+        }
+
+        @Override
+        protected void execute(CommandEvent event) {
+            Guild server = event.getGuild();
+
+            EmbedBuilder embed = new EmbedBuilder();
+
+            embed.setTitle("Upcoming Member Milestones for " + server.getName());
+
+            int members = server.getMemberCount();
+            int days = Math.round((float)(Instant.now().toEpochMilli() - server.getTimeCreated().toInstant().toEpochMilli()) / 1000 / 60 / 60 / 24);
+
+            float membersPerDay = (float)members / (float)days;
+
+            List<String> daysToMilestone = new ArrayList<>();
+
+            daysToMilestone.add("Members per day (linear): " + membersPerDay);
+            daysToMilestone.add("Dates are based on average members per day. Dates may vary based on any number of circumstances.");
+            daysToMilestone.add("If year is >100 years in the future, it will not be included.");
+            daysToMilestone.add("");
+
+            DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM d, uuuu");
+            DecimalFormat df = new DecimalFormat("#.##");
+
+            for (int milestone : milestones) {
+                if (milestone < members)
+                    continue;
+
+                float daysNeeded = ((float)milestone / membersPerDay);
+                Instant timeAtMilestone = server.getTimeCreated().toInstant().plusMillis((long)(daysNeeded * 24 * 60 * 60 * 1000));
+                OffsetDateTime date = timeAtMilestone.atOffset(server.getTimeCreated().getOffset());
+                String day = date.format(format);
+                int year = date.getYear();
+                if (year - 100 > OffsetDateTime.now().getYear())
+                    continue;
+
+                daysToMilestone.add(NumberFormat.getNumberInstance(Locale.US).format(milestone) + " Members - " + day);
+            }
+
+            embed.setDescription(String.join("\n", daysToMilestone));
+
+            event.reply(embed.build());
+        }
+    }
+
+    private static class ServerMemberStatsSubCommand extends Command {
+
+        public ServerMemberStatsSubCommand() {
+            this.name = "memberstats";
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+            this.guildOnly = true;
+        }
+
+        @Override
+        protected void execute(CommandEvent event) {
+            List<Member> members = event.getGuild().getMemberCache().asList();
+            Map<LocalDate, Integer> bestDays = new TreeMap<>();
+
+            // Toss it all into the hashmap
+            for (Member member : members) {
+                LocalDate date = member.getTimeJoined().toLocalDate();
+                int amount = bestDays.getOrDefault(date, 0);
+                bestDays.put(date, amount + 1);
+            }
+
+            // Find longest slump
+            long slumpDays = 0;
+            LocalDate startSlump = LocalDate.now();
+
+            LocalDate[] keys = bestDays.keySet().toArray(new LocalDate[0]);
+
+            for (int i = 1; i < bestDays.size(); i++) {
+                LocalDate base = keys[i-1];
+                LocalDate compare = keys[i];
+
+                if (compare.toEpochDay() - base.toEpochDay() > slumpDays) {
+                    slumpDays = compare.toEpochDay() - base.toEpochDay();
+                    startSlump = base;
+                }
+            }
+
+            int best = bestDays.values().stream().max(Comparator.comparingInt(Integer::intValue)).get();
+            List<LocalDate> bestDay = new ArrayList<>();
+            for (LocalDate date : keys) {
+                if (bestDays.get(date) == best) {
+                    bestDay.add(date);
+                }
+            }
+
+            EmbedBuilder embed = new EmbedBuilder()
+                .setTitle("Member Stats for " + event.getGuild().getName())
+                .setDescription("A collection of simple stats for the server!");
+
+            embed.addField("Most Members in A Day", "Members: " + best + "\n" + bestDay.stream().map(LocalDate::toString).collect(Collectors.joining("\n")), true);
+            embed.addField("Largest Slump", "Days: " + slumpDays + "\nRange: " + startSlump + " - " + startSlump.atStartOfDay().plusDays(slumpDays).toLocalDate().toString(), true);
 
             event.reply(embed.build());
         }
