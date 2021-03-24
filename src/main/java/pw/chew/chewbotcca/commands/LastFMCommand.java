@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.objects.Profile;
+import pw.chew.chewbotcca.objects.UserProfile;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
@@ -50,7 +50,7 @@ public class LastFMCommand extends Command {
         // Get args, assume it's a username, and find their stats
         String args = event.getArgs();
         if(args.length() == 0) {
-            Profile profile = Profile.getProfile(event.getAuthor().getId());
+            UserProfile profile = UserProfile.getProfile(event.getAuthor().getId());
             if (profile.getLastFm() != null) {
                 args = profile.getLastFm();
             } else {

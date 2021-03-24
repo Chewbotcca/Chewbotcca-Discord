@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,7 +68,9 @@ public class ServerSettingsCommand extends Command {
         List<String> supported = Arrays.asList("prefix");
         if(supported.contains(args[1].toLowerCase())) {
             server.saveData(args[1].toLowerCase(), args[2]);
+            commandEvent.reply("If you see this message, then it saved successfully... hopefully.");
+        } else {
+            commandEvent.reply("Invalid argument!");
         }
-        commandEvent.reply("If you see this message, then it saved successfully... hopefully.");
     }
 }

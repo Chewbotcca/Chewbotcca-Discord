@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,13 +110,6 @@ public class PropertiesManager {
     }
 
     /**
-     * @return Chew's API key for Chew's bot profiles/server settings.
-     */
-    public static String getChewKey() {
-        return properties.getProperty("chewkey");
-    }
-
-    /**
      * @return a DiscordExtremeList api token
      */
     public static String getDELToken() {
@@ -135,5 +128,26 @@ public class PropertiesManager {
      */
     public static String getMemeratorKey() {
         return properties.getProperty("memerator");
+    }
+
+    /**
+     * @return the Database Host
+     */
+    public static String getDatabaseHost() {
+        return properties.getProperty("database_host");
+    }
+
+    /**
+     * @return the Database username
+     */
+    public static String getDatabaseUsername() {
+        return properties.getProperty("database_user");
+    }
+
+    /**
+     * @return the Database password
+     */
+    public static String getDatabasePassword() {
+        return properties.getProperty("database_pass");
     }
 }

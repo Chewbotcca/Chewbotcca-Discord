@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,18 +16,17 @@
  */
 package pw.chew.chewbotcca.objects;
 
-import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
-import pw.chew.chewbotcca.util.PropertiesManager;
-import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.chewbotcca.models.Server;
+import pw.chew.chewbotcca.util.DatabaseHelper;
 
 import java.util.HashMap;
 
 // Server settings
 public class ServerSettings {
     static final HashMap<String, ServerSettings> cache = new HashMap<>();
-    final JSONObject data;
-    public ServerSettings(JSONObject input) {
+    final Server data;
+    public ServerSettings(Server input) {
         data = input;
     }
 
@@ -61,27 +60,22 @@ public class ServerSettings {
      * @return a server settings
      */
     public static ServerSettings retrieveServer(String id) {
-        JSONObject response = new JSONObject(RestClient.get(
-                "https://chew.pw/chewbotcca/discord/api/server/" + id,
-                PropertiesManager.getChewKey()
-        ));
-        cache.put(id, new ServerSettings(response));
-        LoggerFactory.getLogger(Profile.class).debug("Saving " + id + " to Server cache");
-        return new ServerSettings(response);
+        DatabaseHelper.openConnectionIfClosed();
+        Server server = Server.findOrCreateIt("serverid", id);
+        if (!server.exists()) {
+            server.insert();
+        }
+        ServerSettings settings = new ServerSettings(server);
+        cache.put(id, settings);
+        LoggerFactory.getLogger(ServerSettings.class).debug("Saving " + id + " to Server cache");
+        return settings;
     }
 
     public void saveData(String key, String value) {
-        HashMap<String, Object> inputMap = new HashMap<>();
-        inputMap.put(key, value);
-        JSONObject response = new JSONObject(
-            RestClient.post(
-                "https://chew.pw/chewbotcca/discord/api/server/" + getId(),
-                inputMap,
-                PropertiesManager.getChewKey()
-            )
-        );
-        cache.put(getId(), new ServerSettings(response));
-        LoggerFactory.getLogger(Profile.class).debug("Saving " + getId() + " to Server cache");
+        DatabaseHelper.openConnectionIfClosed();
+        data.setString(key, value).saveIt();
+        cache.put(getId(), new ServerSettings(data));
+        LoggerFactory.getLogger(ServerSettings.class).debug("Setting " + key + " to " + value + " for " + getId());
     }
 
     /**
@@ -95,6 +89,6 @@ public class ServerSettings {
      * @return the server's prefix, if there is one
      */
     public String getPrefix() {
-        return data.isNull("prefix") ? null : data.getString("prefix");
+        return data.get("prefix") == null ? null : data.getString("prefix");
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import net.dv8tion.jda.api.Permission;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHUser;
 import pw.chew.chewbotcca.objects.Memory;
-import pw.chew.chewbotcca.objects.Profile;
+import pw.chew.chewbotcca.objects.UserProfile;
 
 import java.io.IOException;
 
@@ -42,7 +42,7 @@ public class GHUserCommand extends Command {
         // Get the input
         String username = commandEvent.getArgs();
         if(username.isBlank()) {
-            Profile profile = Profile.getProfile(commandEvent.getAuthor().getId());
+            UserProfile profile = UserProfile.getProfile(commandEvent.getAuthor().getId());
             if (profile.getGitHub() != null) {
                 username = profile.getGitHub();
             } else {

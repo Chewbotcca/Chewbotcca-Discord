@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import pw.chew.chewbotcca.objects.Profile;
+import pw.chew.chewbotcca.objects.UserProfile;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +39,7 @@ public class ProfileCommand extends Command {
         // Start typing
         commandEvent.getChannel().sendTyping().queue();
         // Get Bot Profile details and send
-        Profile profile = Profile.retrieveProfile(commandEvent.getAuthor().getId());
+        UserProfile profile = UserProfile.retrieveProfile(commandEvent.getAuthor().getId());
         if(commandEvent.getArgs().equals("delete")) {
             profile.delete();
             commandEvent.reply("Your profile has been deleted from the database!");
@@ -70,7 +70,9 @@ public class ProfileCommand extends Command {
         List<String> supported = Arrays.asList("github", "lastfm");
         if(supported.contains(args[1].toLowerCase())) {
             profile.saveData(args[1].toLowerCase(), args[2]);
+            commandEvent.reply("If you see this message, then it saved successfully... hopefully.");
+        } else {
+            commandEvent.reply("Unsupported argument!");
         }
-        commandEvent.reply("If you see this message, then it saved successfully... hopefully.");
     }
 }

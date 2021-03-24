@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,18 +16,17 @@
  */
 package pw.chew.chewbotcca.objects;
 
-import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
-import pw.chew.chewbotcca.util.PropertiesManager;
-import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.chewbotcca.models.Profile;
+import pw.chew.chewbotcca.util.DatabaseHelper;
 
 import java.util.HashMap;
 
 // Bot Profile class
-public class Profile {
-    static final HashMap<String, Profile> cache = new HashMap<>();
-    final JSONObject data;
-    public Profile(JSONObject input) {
+public class UserProfile {
+    static final HashMap<String, UserProfile> cache = new HashMap<>();
+    final Profile data;
+    public UserProfile(Profile input) {
         data = input;
     }
 
@@ -37,7 +36,7 @@ public class Profile {
      * @param id the user id
      * @return a Profile
      */
-    public static Profile getProfile(String id) {
+    public static UserProfile getProfile(String id) {
         if(cache.containsKey(id)) {
             return cache.get(id);
         } else {
@@ -50,28 +49,23 @@ public class Profile {
      * @param id the user id
      * @return a Profile
      */
-    public static Profile retrieveProfile(String id) {
-        JSONObject response = new JSONObject(RestClient.get(
-                "https://chew.pw/chewbotcca/discord/api/profile/" + id,
-                PropertiesManager.getChewKey()
-        ));
-        cache.put(id, new Profile(response));
-        LoggerFactory.getLogger(Profile.class).debug("Saving " + id + " to Profile cache");
-        return new Profile(response);
+    public static UserProfile retrieveProfile(String id) {
+        DatabaseHelper.openConnectionIfClosed();
+        Profile user = Profile.findOrCreateIt("userid", id);
+        if (!user.exists()) {
+            user.insert();
+        }
+        UserProfile profile = new UserProfile(user);
+        cache.put(id, profile);
+        LoggerFactory.getLogger(UserProfile.class).debug("Saving " + id + " to Profile cache");
+        return profile;
     }
 
     public void saveData(String key, String value) {
-        HashMap<String, Object> inputMap = new HashMap<>();
-        inputMap.put(key, value);
-        JSONObject response = new JSONObject(
-                RestClient.post(
-                        "https://chew.pw/chewbotcca/discord/api/profile/" + getId(),
-                        inputMap,
-                        PropertiesManager.getChewKey()
-                )
-        );
-        cache.put(getId(), new Profile(response));
-        LoggerFactory.getLogger(Profile.class).debug("Saving " + getId() + " to Profile cache");
+        DatabaseHelper.openConnectionIfClosed();
+        data.setString(key, value).saveIt();
+        cache.put(getId(), new UserProfile(data));
+        LoggerFactory.getLogger(UserProfile.class).debug("Setting " + key + " to " + value + " for " + getId());
     }
 
     /**
@@ -86,7 +80,7 @@ public class Profile {
      * @return their last.fm username
      */
     public String getLastFm() {
-        if(data.isNull("lastfm"))
+        if(data.get("lastfm") == null)
             return null;
         return data.getString("lastfm");
     }
@@ -96,16 +90,16 @@ public class Profile {
      * @return their GitHub username
      */
     public String getGitHub() {
-        if(data.isNull("github"))
+        if(data.get("github") == null)
             return null;
         return data.getString("github");
     }
 
     public void delete() {
-        RestClient.delete(
-            "https://chew.pw/chewbotcca/discord/api/profile/" + getId(),
-            PropertiesManager.getChewKey()
-        );
-        cache.remove(getId());
+        DatabaseHelper.openConnectionIfClosed();
+        String id = getId();
+        data.delete();
+        cache.remove(id);
+        LoggerFactory.getLogger(UserProfile.class).debug("Removing from profile cache for " + id);
     }
 }

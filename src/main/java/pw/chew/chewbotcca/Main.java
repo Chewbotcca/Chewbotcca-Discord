@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ import pw.chew.chewbotcca.listeners.ReactListener;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
 import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.objects.ServerSettings;
+import pw.chew.chewbotcca.util.DatabaseHelper;
 import pw.chew.chewbotcca.util.PropertiesManager;
 
 import javax.security.auth.login.LoginException;
@@ -61,6 +62,11 @@ public class Main {
         Properties prop = new Properties();
         prop.load(new FileInputStream("bot.properties"));
         PropertiesManager.loadProperties(prop);
+
+        // Initialize Database for Server and Profile storage
+        logger.info("Connecting to database...");
+        DatabaseHelper.openConnection();
+        logger.info("Connected!");
 
         // Initialize Sentry to catch errors
         Sentry.init(options -> {
