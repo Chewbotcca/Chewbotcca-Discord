@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,28 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package pw.chew.chewbotcca.commands.quotes;
+package pw.chew.chewbotcca.commands.bot;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import pw.chew.chewbotcca.objects.Memory;
 
-// %^acronym command
-public class AcronymCommand extends Command {
+public class PrivacyCommand extends Command {
 
-    public AcronymCommand() {
-        this.name = "acronym";
+    public PrivacyCommand() {
+        this.name = "privacy";
         this.guildOnly = false;
     }
 
     @Override
     protected void execute(CommandEvent event) {
-        // Get acronym and send if the acronym is valid
-        try {
-            String phrase = Memory.getChewAPI().generateAcronym(event.getArgs());
-            event.reply("Acronym for " + event.getArgs() + " is " + phrase);
-        } catch (IllegalArgumentException e) {
-            event.reply("Args must only contain letters!");
-        }
+        event.reply("You can view the Chewbotcca privacy policy here: https://chew.pw/chewbotcca/discord/privacy");
     }
 }

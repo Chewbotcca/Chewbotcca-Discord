@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,10 @@ import org.json.JSONObject;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GitHub;
 import org.slf4j.LoggerFactory;
-import pw.chew.chewbotcca.commands.fun.MemeratorCommand;
-import pw.chew.chewbotcca.commands.github.GHIssueCommand;
-import pw.chew.chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.chewbotcca.commands.minecraft.MCIssueCommand;
+import pw.chew.chewbotcca.commands.services.MemeratorCommand;
+import pw.chew.chewbotcca.commands.services.github.GHIssueCommand;
+import pw.chew.chewbotcca.commands.services.google.YouTubeCommand;
 import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
@@ -40,8 +40,8 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pw.chew.chewbotcca.commands.fun.MemeratorCommand.MemeratorMemeSubCommand.generateMemeEmbed;
-import static pw.chew.chewbotcca.commands.fun.MemeratorCommand.MemeratorUserSubCommand.generateUserEmbed;
+import static pw.chew.chewbotcca.commands.services.MemeratorCommand.MemeratorMemeSubCommand.generateMemeEmbed;
+import static pw.chew.chewbotcca.commands.services.MemeratorCommand.MemeratorUserSubCommand.generateUserEmbed;
 
 // Listen to reactions
 public class ReactListener extends ListenerAdapter {
