@@ -49,6 +49,7 @@ public class ToSDRCommand extends Command {
     }
 
     public static JSONObject getServiceData(String query) {
+        query = query.replaceAll("[^0-9a-z_]", "");
         JSONObject data;
         try {
             data = new JSONObject(RestClient.get("https://api.tosdr.org/v1/service/" + query + ".json"));
