@@ -22,6 +22,7 @@ import com.jagrosh.jdautilities.menu.EmbedPaginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.RestClient;
@@ -48,7 +49,12 @@ public class ToSDRCommand extends Command {
     }
 
     public static JSONObject getServiceData(String query) {
-        JSONObject data = new JSONObject(RestClient.get("https://api.tosdr.org/v1/service/" + query + ".json"));
+        JSONObject data;
+        try {
+            data = new JSONObject(RestClient.get("https://api.tosdr.org/v1/service/" + query + ".json"));
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("JSON wasn't returned. Please fix your input before I send out another AMBER alert...");
+        }
 
         if (data.has("error") && data.getJSONArray("error").get(0).equals("INVALID_SERVICE")) {
             data = new JSONObject(RestClient.get("https://search.tosdr.org/" + query));
@@ -97,7 +103,11 @@ public class ToSDRCommand extends Command {
             embed.setAuthor("Terms of Service; Didn't Read Lookup", "https://tosdr.org", "https://cdn.discordapp.com/icons/324969783508467715/64cee34d12d9bda16cb0d6abf8c530a7.png?size=1024");
             embed.setTitle("Service: " + data.getString("name"));
             embed.setThumbnail(data.getString("image"));
-            embed.addField("Class", emoji[data.getString("class").charAt(0) - 65], true);
+            if (data.get("class") instanceof String) {
+                embed.addField("Class", emoji[data.getString("class").charAt(0) - 65], true);
+            } else {
+                embed.addField("Class", "Not yet classified!", true);
+            }
             embed.addField("Points", "[View on Phoenix](https://edit.tosdr.org/services/" + data.getInt("id") + ")\n" +
                 "Run `" + event.getPrefix() + "tosdr points " + event.getArgs() + "`", false);
             embed.addField("Documents", "Run `" + event.getPrefix() + "tosdr docs " + event.getArgs() + "`", false);
