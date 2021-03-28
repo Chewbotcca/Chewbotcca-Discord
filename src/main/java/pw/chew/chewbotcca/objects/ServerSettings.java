@@ -65,6 +65,7 @@ public class ServerSettings {
         if (!server.exists()) {
             server.insert();
         }
+        DatabaseHelper.closeConnectionIfOpen();
         ServerSettings settings = new ServerSettings(server);
         cache.put(id, settings);
         LoggerFactory.getLogger(ServerSettings.class).debug("Saving " + id + " to Server cache");
@@ -74,6 +75,7 @@ public class ServerSettings {
     public void saveData(String key, String value) {
         DatabaseHelper.openConnectionIfClosed();
         data.setString(key, value).saveIt();
+        DatabaseHelper.closeConnectionIfOpen();
         cache.put(getId(), new ServerSettings(data));
         LoggerFactory.getLogger(ServerSettings.class).debug("Setting " + key + " to " + value + " for " + getId());
     }

@@ -55,6 +55,7 @@ public class UserProfile {
         if (!user.exists()) {
             user.insert();
         }
+        DatabaseHelper.closeConnectionIfOpen();
         UserProfile profile = new UserProfile(user);
         cache.put(id, profile);
         LoggerFactory.getLogger(UserProfile.class).debug("Saving " + id + " to Profile cache");
@@ -64,6 +65,7 @@ public class UserProfile {
     public void saveData(String key, String value) {
         DatabaseHelper.openConnectionIfClosed();
         data.setString(key, value).saveIt();
+        DatabaseHelper.closeConnectionIfOpen();
         cache.put(getId(), new UserProfile(data));
         LoggerFactory.getLogger(UserProfile.class).debug("Setting " + key + " to " + value + " for " + getId());
     }

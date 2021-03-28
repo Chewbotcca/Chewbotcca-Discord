@@ -28,4 +28,10 @@ public class DatabaseHelper {
             openConnection();
         }
     }
+
+    public static void closeConnectionIfOpen() {
+        if (Base.hasConnection()) {
+            Base.close();
+        }
+    }
 }
