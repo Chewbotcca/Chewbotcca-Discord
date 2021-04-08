@@ -39,15 +39,15 @@
     </repositories>
 
     <dependencies>
-        <!-- The JDA API -->
+        <!-- The JDA API... finally putting the "Discord Bot" in "Chewbotcca Discord Bot" -->
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.2.0_252</version>
+            <version>4.2.1_255</version>
             <scope>compile</scope>
         </dependency>
 
-        <!-- The sdcf4j core module -->
+        <!-- The command wapper, well, my fork of it -->
         <dependency>
             <groupId>pw.chew</groupId>
             <artifactId>jda-chewtils</artifactId>
@@ -56,7 +56,7 @@
             <type>pom</type>
         </dependency>
 
-        <!-- Logback classic as out logging framework -->
+        <!-- Logback classic as our logging framework -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -64,7 +64,7 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- OkHttp for REST request -->
+        <!-- A more up-to-date version of OkHttp for REST requests -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
@@ -76,10 +76,11 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20201115</version>
+            <version>20210307</version>
             <scope>compile</scope>
         </dependency>
 
+        <!-- Async destroyer -->
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
@@ -87,58 +88,65 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Error catcher, not very good with our current logger -->
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-logback</artifactId>
-            <version>4.2.0</version>
+            <version>4.3.0</version>
             <scope>compile</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.kohsuke/github-api -->
+        <!-- The GitHub API for GitHub commands -->
         <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
-            <version>1.123</version>
+            <version>1.125</version>
             <scope>compile</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/net.sourceforge.htmlcleaner/htmlcleaner -->
+        <!-- Nokogiri for Java? Idk, we use it for the Wiki command -->
         <dependency>
             <groupId>net.sourceforge.htmlcleaner</groupId>
             <artifactId>htmlcleaner</artifactId>
             <version>2.24</version>
         </dependency>
 
+        <!-- My API for My THINGS -->
         <dependency>
             <groupId>pro.chew.api</groupId>
             <artifactId>ChewAPI</artifactId>
             <version>1.0-b5</version>
         </dependency>
 
+        <!-- The Discord.bio API for discord.bio related things, like come on it's obvious at this point -->
         <dependency>
             <groupId>bio.discord.api</groupId>
             <artifactId>dbio4j</artifactId>
             <version>0.1.0_5</version>
         </dependency>
 
+        <!-- Lazy command loading -->
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.9.12</version>
         </dependency>
 
+        <!-- MEMERATOR API FOR MEMERATOR COMMANDS -->
         <dependency>
             <groupId>me.memerator.api</groupId>
             <artifactId>MemeratorAPI</artifactId>
             <version>1.1.0_70</version>
         </dependency>
 
+        <!-- ActiveRecord, almost -->
         <dependency>
             <groupId>org.javalite</groupId>
             <artifactId>activejdbc</artifactId>
-            <version>2.4-j8</version>
+            <version>2.5-j8</version>
         </dependency>
 
+        <!-- mysql2 but 8 -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
