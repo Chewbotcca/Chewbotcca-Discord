@@ -213,7 +213,7 @@
             <plugin>
                 <groupId>org.javalite</groupId>
                 <artifactId>activejdbc-instrumentation</artifactId>
-                <version>2.4-j8</version>
+                <version>3.0-j11</version>
                 <executions>
                     <execution>
                         <phase>process-classes</phase>
