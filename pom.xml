@@ -43,7 +43,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.2.1_255</version>
+            <version>4.2.1_259</version>
             <scope>compile</scope>
         </dependency>
 
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
-            <version>1.125</version>
+            <version>1.127</version>
             <scope>compile</scope>
         </dependency>
 
@@ -143,14 +143,14 @@
         <dependency>
             <groupId>org.javalite</groupId>
             <artifactId>activejdbc</artifactId>
-            <version>2.5-j8</version>
+            <version>3.0-j11</version>
         </dependency>
 
         <!-- mysql2 but 8 -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.23</version>
+            <version>8.0.24</version>
         </dependency>
     </dependencies>
 
@@ -213,7 +213,7 @@
             <plugin>
                 <groupId>org.javalite</groupId>
                 <artifactId>activejdbc-instrumentation</artifactId>
-                <version>2.4-j8</version>
+                <version>3.0-j11</version>
                 <executions>
                     <execution>
                         <phase>process-classes</phase>
