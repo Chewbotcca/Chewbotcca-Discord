@@ -18,6 +18,7 @@ package pw.chew.chewbotcca;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.JDA;
@@ -108,6 +109,10 @@ public class Main {
         }
 
         client.addCommands(getCommands());
+        client.addSlashCommands(getSlashCommands());
+
+        // Temporary measure to test Slash Commands
+        client.forceGuildOnly("148195924567392257");
 
         // Register JDA
         JDA jda = JDABuilder.createDefault(PropertiesManager.getToken())
@@ -134,10 +139,11 @@ public class Main {
 
     /**
      * Gathers all commands from "commands" package.
+     *
      * @return an array of commands
      */
-    private static Command[] getCommands() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        Reflections reflections =  new Reflections("pw.chew.chewbotcca.commands");
+    private static Command[] getCommands() throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        Reflections reflections = new Reflections("pw.chew.chewbotcca.commands");
         Set<Class<? extends Command>> subTypes = reflections.getSubTypesOf(Command.class);
         List<Command> commands = new ArrayList<>();
 
@@ -145,10 +151,35 @@ public class Main {
             // Don't load SubCommands
             if (theClass.getName().contains("SubCommand"))
                 continue;
-            commands.add(theClass.getDeclaredConstructor().newInstance());
-            LoggerFactory.getLogger(theClass).debug("Loaded Successfully!");
+            try {
+                commands.add(theClass.getDeclaredConstructor().newInstance());
+                LoggerFactory.getLogger(theClass).debug("Loaded Command Successfully!");
+            } catch (InstantiationException ignored) {
+                // Tried to load a Slash-only command. Safe to ignore!
+            }
         }
 
         return commands.toArray(new Command[0]);
+    }
+
+    /**
+     * Gathers all SlashCommands from "commands" package.
+     *
+     * @return an array of commands
+     */
+    private static SlashCommand[] getSlashCommands() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        Reflections reflections = new Reflections("pw.chew.chewbotcca.commands");
+        Set<Class<? extends SlashCommand>> subTypes = reflections.getSubTypesOf(SlashCommand.class);
+        List<SlashCommand> commands = new ArrayList<>();
+
+        for (Class<? extends SlashCommand> theClass : subTypes) {
+            // Don't load SubCommands
+            if (theClass.getName().contains("SubCommand"))
+                continue;
+            commands.add(theClass.getDeclaredConstructor().newInstance());
+            LoggerFactory.getLogger(theClass).debug("Loaded SlashCommand Successfully!");
+        }
+
+        return commands.toArray(new SlashCommand[0]);
     }
 }

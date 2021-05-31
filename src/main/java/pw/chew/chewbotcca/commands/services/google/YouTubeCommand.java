@@ -16,16 +16,21 @@
  */
 package pw.chew.chewbotcca.commands.services.google;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.Color;
@@ -37,11 +42,11 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-// %^youtube command
-public class YouTubeCommand extends Command {
+public class YouTubeCommand extends SlashCommand {
 
     public YouTubeCommand() {
         this.name = "youtube";
@@ -50,12 +55,29 @@ public class YouTubeCommand extends Command {
         this.guildOnly = false;
         this.cooldown = 5;
         this.cooldownScope = CooldownScope.USER;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "query", "The query to search for videos with.").setRequired(true)
+        );
     }
 
     @Override
     protected void execute(CommandEvent event) {
+        event.reply(gatherInfo(event.getArgs(), event.getChannel()));
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        event.replyEmbeds(gatherInfo(event.getOption("query").getAsString(), event.getChannel())).queue();
+    }
+
+    /**
+     * Gathers info for our commands to handle
+     *
+     * @param search the query
+     * @return a response
+     */
+    public MessageEmbed gatherInfo(String search, MessageChannel channel) {
         // Get the input and find results
-        String search = event.getArgs();
         String id = null;
         if (search.contains("youtube.com")) {
             id = search.split("=")[1];
@@ -68,18 +90,16 @@ public class YouTubeCommand extends Command {
             try {
                 id = new JSONObject(RestClient.get(findidurl)).getJSONArray("items").getJSONObject(0).getJSONObject("id").getString("videoId");
             } catch (JSONException e) {
-                event.reply("No videos found!");
-                return;
+                return ResponseHelper.generateFailureEmbed(null, "No videos found for query!");
             }
         }
         // Get the video
         JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + id + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics"));
         if (url.getJSONObject("pageInfo").getInt("totalResults") == 0) {
-            event.reply("No results found.");
-            return;
+            return ResponseHelper.generateFailureEmbed(null, "No results found for query!");
         }
 
-        event.reply(response(url, id, event.getChannel()).build());
+        return response(url, id, channel).build();
     }
 
     /**

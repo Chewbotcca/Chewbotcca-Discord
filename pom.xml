@@ -16,14 +16,6 @@
 
     <repositories>
         <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>jcenter</id>
-            <name>jcenter-bintray</name>
-            <url>https://jcenter.bintray.com</url>
-        </repository>
-        <repository>
             <id>dv8tion</id>
             <name>m2-dv8tion</name>
             <url>https://m2.dv8tion.net/releases</url>
@@ -36,22 +28,32 @@
             <id>chew-jenkins</id>
             <url>https://jenkins.chew.pw/plugin/repository/everything/</url>
         </repository>
+        <repository>
+            <id>chew-m2</id>
+            <url>https://m2.chew.pro/snapshots</url>
+        </repository>
     </repositories>
 
     <dependencies>
         <!-- The JDA API... finally putting the "Discord Bot" in "Chewbotcca Discord Bot" -->
         <dependency>
-            <groupId>net.dv8tion</groupId>
-            <artifactId>JDA</artifactId>
-            <version>4.2.1_259</version>
+            <groupId>com.github.dv8fromtheworld</groupId>
+            <artifactId>jda</artifactId>
+            <version>3846f8c</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>opus-java</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- The command wapper, well, my fork of it -->
         <dependency>
             <groupId>pw.chew</groupId>
             <artifactId>jda-chewtils</artifactId>
-            <version>1.18</version>
+            <version>1.DEV</version>
             <scope>compile</scope>
             <type>pom</type>
         </dependency>
@@ -84,7 +86,7 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>4.0.3</version>
+            <version>4.1.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -100,7 +102,7 @@
         <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
-            <version>1.127</version>
+            <version>1.129</version>
             <scope>compile</scope>
         </dependency>
 
@@ -150,7 +152,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.24</version>
+            <version>8.0.25</version>
         </dependency>
     </dependencies>
 
