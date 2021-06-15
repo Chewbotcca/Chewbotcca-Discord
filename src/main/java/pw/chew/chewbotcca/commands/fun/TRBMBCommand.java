@@ -16,16 +16,23 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import pw.chew.chewbotcca.objects.Memory;
 
 // %^trbmb command
-public class TRBMBCommand extends Command {
+public class TRBMBCommand extends SlashCommand {
 
     public TRBMBCommand() {
         this.name = "trbmb";
+        this.help = "Generates a random TRBMB phrase";
         this.guildOnly = false;
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        event.reply(Memory.getChewAPI().getTRBMBPhrase()).queue();
     }
 
     @Override

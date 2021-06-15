@@ -30,16 +30,16 @@
         </repository>
         <repository>
             <id>chew-m2</id>
-            <url>https://m2.chew.pro/snapshots</url>
+            <url>https://m2.chew.pro/releases</url>
         </repository>
     </repositories>
 
     <dependencies>
         <!-- The JDA API... finally putting the "Discord Bot" in "Chewbotcca Discord Bot" -->
         <dependency>
-            <groupId>com.github.dv8fromtheworld</groupId>
-            <artifactId>jda</artifactId>
-            <version>3846f8c</version>
+            <groupId>net.dv8tion</groupId>
+            <artifactId>JDA</artifactId>
+            <version>4.3.0_277</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -49,11 +49,11 @@
             </exclusions>
         </dependency>
 
-        <!-- The command wapper, well, my fork of it -->
+        <!-- The command wrapper, well, my fork of it -->
         <dependency>
             <groupId>pw.chew</groupId>
             <artifactId>jda-chewtils</artifactId>
-            <version>1.DEV</version>
+            <version>1.20.2</version>
             <scope>compile</scope>
             <type>pom</type>
         </dependency>
