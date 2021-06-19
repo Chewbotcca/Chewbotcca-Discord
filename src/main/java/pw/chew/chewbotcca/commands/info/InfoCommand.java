@@ -16,23 +16,37 @@
  */
 package pw.chew.chewbotcca.commands.info;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 // %^info command
-public class InfoCommand extends Command {
+public class InfoCommand extends SlashCommand {
     public InfoCommand() {
         this.name = "info";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "command", "The command to find info for").setRequired(true)
+                .addChoices()
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+
     }
 
     @Override

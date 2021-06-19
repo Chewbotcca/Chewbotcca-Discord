@@ -16,16 +16,21 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.awt.Color;
+import java.util.Collections;
 import java.util.Random;
 
 // %^8ball command
-public class EightBallCommand extends Command {
+public class EightBallCommand extends SlashCommand {
     // The good responses
     final String[] goodResponses = new String[]{
             "As I see it, yes",
@@ -67,14 +72,27 @@ public class EightBallCommand extends Command {
 
     public EightBallCommand() {
         this.name = "8ball";
+        this.help = "Ask the magic 8ball a question!";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "question", "The question to ask the eight ball").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        event.replyEmbeds(generateEmbed(event.getOption("question").getAsString())).queue();
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
         // Get the question, doesn't matter what they said but we'll send it back to them
         String question = commandEvent.getArgs();
+        commandEvent.reply(generateEmbed(question));
+    }
+
+    private MessageEmbed generateEmbed(String question) {
         // Pick a number between 0 and 2 inclusive
         int response = rand.nextInt(3);
         EmbedBuilder e = new EmbedBuilder();
@@ -98,7 +116,7 @@ public class EightBallCommand extends Command {
         }
         // Finish and send embed
         e.addField(":8ball: 8ball says", answer, false);
-        commandEvent.reply(e.build());
+        return e.build();
     }
 
     // Method to get a random string from an array

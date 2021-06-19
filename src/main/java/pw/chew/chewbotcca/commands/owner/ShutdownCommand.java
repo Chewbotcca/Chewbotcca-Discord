@@ -30,6 +30,9 @@ public class ShutdownCommand extends Command {
     @Override
     protected void execute(CommandEvent commandEvent) {
         // whee
-        commandEvent.getChannel().sendMessage("Shutting down....").queue((msg) -> System.exit(0));
+        commandEvent.getChannel().sendMessage("Shutting down....").queue((msg) -> {
+            msg.getGuild().updateCommands().queue();
+            msg.getJDA().shutdown();
+        });
     }
 }

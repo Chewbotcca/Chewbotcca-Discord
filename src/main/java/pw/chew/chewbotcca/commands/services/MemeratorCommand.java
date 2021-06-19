@@ -16,8 +16,8 @@
  */
 package pw.chew.chewbotcca.commands.services;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import me.memerator.api.MemeratorAPI;
 import me.memerator.api.entity.Age;
 import me.memerator.api.entity.UserPerk;
@@ -27,21 +27,32 @@ import me.memerator.api.object.User;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.util.ResponseHelper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class MemeratorCommand extends Command {
+public class MemeratorCommand extends SlashCommand {
     private static final MemeratorAPI api = new MemeratorAPI(PropertiesManager.getMemeratorKey());
 
     public MemeratorCommand() {
         this.name = "memerator";
         this.guildOnly = false;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.children = new Command[]{new MemeratorMemeSubCommand(), new MemeratorUserSubCommand()};
+        this.children = new SlashCommand[]{new MemeratorMemeSubCommand(), new MemeratorUserSubCommand()};
     }
+
+    // Base methods for Slash Commands aren't added
+    @Override
+    protected void execute(SlashCommandEvent event) {}
 
     @Override
     protected void execute(CommandEvent commandEvent) {
@@ -57,24 +68,43 @@ public class MemeratorCommand extends Command {
         return api;
     }
 
-    public static class MemeratorMemeSubCommand extends Command {
+    public static class MemeratorMemeSubCommand extends SlashCommand {
 
         public MemeratorMemeSubCommand() {
             this.name = "meme";
+            this.help = "Gets a meme from Memerator";
             this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
             this.guildOnly = false;
             this.cooldown = 5;
             this.cooldownScope = CooldownScope.USER;
+            this.options = Collections.singletonList(
+                new OptionData(OptionType.STRING, "meme", "The meme to get by ID, search for, or random for random.").setRequired(true)
+            );
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            try {
+                event.replyEmbeds(buildMemeEmbed(event.getOption("meme").getAsString(), event.getChannel())).queue();
+            } catch (IllegalArgumentException e) {
+                event.replyEmbeds(ResponseHelper.generateFailureEmbed("The meme machine ran dry...", e.getMessage()))
+                    .setEphemeral(true)
+                    .queue();
+            }
         }
 
         @Override
         protected void execute(CommandEvent event) {
             event.getChannel().sendTyping().queue();
-            boolean id = false;
-            String args = event.getArgs();
-            if (args.toLowerCase().matches("([a-f]|[0-9]){6,7}")) {
-                id = true;
+            try {
+                event.reply(buildMemeEmbed(event.getArgs(), event.getChannel()));
+            } catch (IllegalArgumentException e) {
+                event.reply(ResponseHelper.generateFailureEmbed("The meme machine ran dry...", e.getMessage()));
             }
+        }
+
+        private MessageEmbed buildMemeEmbed(String args, MessageChannel channel) {
+            boolean id = args.toLowerCase().matches("([a-f]|[0-9]){6,7}");
             Meme meme;
             if (args.equalsIgnoreCase("random")) {
                 meme = api.getRandomMeme();
@@ -82,24 +112,19 @@ public class MemeratorCommand extends Command {
                 meme = getMeme(args, id);
             }
             if (meme == null) {
-                event.reply("No memes found for query.");
-                return;
+                throw new IllegalArgumentException("No memes found for query.");
             }
 
-            if(event.getChannelType() == ChannelType.TEXT) {
-                TextChannel channel = event.getTextChannel();
-                if(!channel.isNSFW() && meme.getAgeRating() == Age.MATURE) {
-                    event.reply(new EmbedBuilder()
-                        .setTitle("Meme Information (" + meme.getMemeId() + ")", meme.getMemeUrl())
-                        .setDescription("This meme is marked as Mature and this channel is not a NSFW channel!").build());
-                    return;
-                }
-            }
             EmbedBuilder eb = generateMemeEmbed(meme);
-            if(event.getChannelType() == ChannelType.TEXT) {
-                eb.setColor(event.getSelfMember().getColor());
+            if(channel.getType() == ChannelType.TEXT) {
+                TextChannel textChannel = (TextChannel) channel;
+                if(!textChannel.isNSFW() && meme.getAgeRating() == Age.MATURE) {
+                    throw new IllegalArgumentException("This meme is marked as Mature and this channel is not a NSFW channel!");
+                }
+
+                // eb.setColor(event.getSelfMember().getColor());
             }
-            event.reply(eb.build());
+           return eb.build();
         }
 
         public static Meme getMeme(String args, boolean id) {
@@ -144,14 +169,29 @@ public class MemeratorCommand extends Command {
         }
     }
 
-    public static class MemeratorUserSubCommand extends Command {
+    public static class MemeratorUserSubCommand extends SlashCommand {
 
         public MemeratorUserSubCommand() {
-            this.name = "user";
+            this.name = "profile";
+            this.aliases = new String[]{"user"};
+            this.help = "Gets a profile from Memerator";
             this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
             this.guildOnly = false;
             this.cooldown = 5;
             this.cooldownScope = CooldownScope.USER;
+            this.options = Collections.singletonList(
+                new OptionData(OptionType.STRING, "user", "The user to lookup by name/id").setRequired(true)
+            );
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            try {
+                User user = api.getUser(event.getOption("user").getAsString());
+                event.replyEmbeds(generateUserEmbed(user).build()).queue();
+            } catch (NotFound notFound) {
+                event.reply("User not found!").setEphemeral(true).queue();
+            }
         }
 
         @Override
