@@ -16,10 +16,14 @@
  */
 package pw.chew.chewbotcca.commands.minecraft;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,26 +32,41 @@ import pw.chew.chewbotcca.util.RestClient;
 import java.awt.Color;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 // %^mcserver command
-public class MCServerCommand extends Command {
+public class MCServerCommand extends SlashCommand {
 
     public MCServerCommand() {
         this.name = "mcserver";
+        this.help = "Find some information about a specified server";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "ip", "The server IP, port optional").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        String ip = event.getOption("ip").getAsString();
+        event.replyEmbeds(gatherServerData(ip)).queue();
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
         // Start typing, this may take a while
         commandEvent.getChannel().sendTyping().queue();
+        commandEvent.reply(gatherServerData(commandEvent.getArgs()));
+    }
+
+    private MessageEmbed gatherServerData(String ip) {
         // Get info from API
-        JSONObject data = new JSONObject(RestClient.get("https://api.mcsrvstat.us/2/" + commandEvent.getArgs()));
+        JSONObject data = new JSONObject(RestClient.get("https://api.mcsrvstat.us/2/" + ip));
         ServerInfo info = new ServerInfo(data);
         EmbedBuilder e = new EmbedBuilder();
-        e.setTitle("**Server Info For** `" + commandEvent.getArgs() + "`");
+        e.setTitle("**Server Info For** `" + ip + "`");
 
         // Set thumbnail to favicon
         // e.setThumbnail(info.getFavicon());
@@ -75,7 +94,7 @@ public class MCServerCommand extends Command {
         e.setFooter("Last fetched");
         e.setTimestamp(info.getCacheTime());
 
-        commandEvent.reply(e.build());
+        return e.build();
     }
 
     /**

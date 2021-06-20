@@ -16,16 +16,37 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.objects.Memory;
 
+import java.util.Collections;
+
 // %^acronym command
-public class AcronymCommand extends Command {
+public class AcronymCommand extends SlashCommand {
 
     public AcronymCommand() {
         this.name = "acronym";
+        this.help = "Fill in an acronym (2% accuracy)";
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "acronym", "The acronym to fill").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        // Get acronym and send if the acronym is valid
+        try {
+            String acronym = event.getOption("acronym").getAsString();
+            String phrase = Memory.getChewAPI().generateAcronym(acronym);
+            event.reply("Acronym for " + acronym + " is " + phrase).queue();
+        } catch (IllegalArgumentException e) {
+            event.reply("Args must only contain letters!").queue();
+        }
     }
 
     @Override

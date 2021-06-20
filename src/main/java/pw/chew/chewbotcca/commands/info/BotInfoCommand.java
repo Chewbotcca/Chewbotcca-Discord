@@ -16,11 +16,16 @@
  */
 package pw.chew.chewbotcca.commands.info;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
@@ -29,15 +34,38 @@ import java.awt.Color;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 // %^binfo command
-public class BotInfoCommand extends Command {
+public class BotInfoCommand extends SlashCommand {
     public BotInfoCommand() {
         this.name = "botinfo";
+        this.help = "Finds info on a specified bot";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.aliases = new String[]{"binfo"};
         this.guildOnly = false;
+        this.options = Arrays.asList(
+            new OptionData(OptionType.USER, "bot", "The bot to look up").setRequired(true),
+            new OptionData(OptionType.STRING, "list", "The list to look for, default: discord.bots.gg")
+                .addChoices(
+                    new Command.Choice("discord.bots.gg", "dbots"),
+                    new Command.Choice("top.gg", "topgg"),
+                    new Command.Choice("discordextremelist.xyz", "del")
+                )
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        String botId = event.getOption("bot").getAsUser().getId();
+
+        // Get it from the specified list if it's valid, and let them know
+        switch (event.getOption("list").getAsString()) {
+            case "topgg" -> event.replyEmbeds(gatherTopggInfo(botId, event.getJDA()).build()).queue();
+            case "del" -> event.replyEmbeds(gatherDELInfo(botId, event.getJDA()).build()).queue();
+            default -> event.replyEmbeds(gatherDBotsInfo(botId, event.getJDA()).build()).queue();
+        }
     }
 
     @Override
@@ -64,9 +92,9 @@ public class BotInfoCommand extends Command {
         }
         // Get it from the specified list if it's valid, and let them know
         switch (list) {
-            case "dbl", "top.gg", "topgg" -> commandEvent.reply(gatherTopggInfo(botId, commandEvent).build());
-            case "dbots" -> commandEvent.reply(gatherDBotsInfo(botId, commandEvent).build());
-            case "del" -> commandEvent.reply(gatherDELInfo(botId, commandEvent).build());
+            case "dbl", "top.gg", "topgg" -> commandEvent.reply(gatherTopggInfo(botId, commandEvent.getJDA()).build());
+            case "dbots" -> commandEvent.reply(gatherDBotsInfo(botId, commandEvent.getJDA()).build());
+            case "del" -> commandEvent.reply(gatherDELInfo(botId, commandEvent.getJDA()).build());
             default -> commandEvent.reply("""
                 Invalid Bot List! Supported lists:
                 `dbots` -> <https://discord.bots.gg>
@@ -80,10 +108,10 @@ public class BotInfoCommand extends Command {
     /**
      * Gather info from top.gg
      * @param id the bot id
-     * @param event the command event
+     * @param jda JDA for user lookup
      * @return an embed ready to be build
      */
-    private EmbedBuilder gatherTopggInfo(String id, CommandEvent event) {
+    private EmbedBuilder gatherTopggInfo(String id, JDA jda) {
         // Get data from top.gg
         JSONObject bot = new JSONObject(RestClient.get("https://top.gg/api/bots/" + id, PropertiesManager.getTopggToken()));
 
@@ -142,7 +170,7 @@ public class BotInfoCommand extends Command {
         // Find and set owners
         List<String> owners = new ArrayList<>();
         for(Object owner : bot.getJSONArray("owners")) {
-            User user = event.getJDA().getUserById((String) owner);
+            User user = jda.getUserById((String) owner);
             if(user == null)
                 owners.add((String) owner);
             else
@@ -181,10 +209,10 @@ public class BotInfoCommand extends Command {
     /**
      * Gather info from (the superior) discord.bots.gg
      * @param id the bot id
-     * @param event the command event
+     * @param jda JDA for user lookup
      * @return an embed ready to be build
      */
-    private EmbedBuilder gatherDBotsInfo(String id, CommandEvent event) {
+    private EmbedBuilder gatherDBotsInfo(String id, JDA jda) {
         // Gather info from the site
         JSONObject bot = new JSONObject(RestClient.get("https://discord.bots.gg/api/v1/bots/" + id, PropertiesManager.getDbotsToken()));
 
@@ -205,7 +233,7 @@ public class BotInfoCommand extends Command {
         e.addField("Library", bot.getString("libraryName"), true);
 
         // Find and set the owner as a Discord User
-        User user = event.getJDA().getUserById(bot.getJSONObject("owner").getString("userId"));
+        User user = jda.getUserById(bot.getJSONObject("owner").getString("userId"));
         if(user == null)
             e.addField("Owner", "Unknown", true);
         else
@@ -236,10 +264,10 @@ public class BotInfoCommand extends Command {
     /**
      * Gathers bot info from DiscordExtremeList
      * @param id bot ID
-     * @param event the command event
+     * @param jda JDA for user lookup
      * @return an embed
      */
-    public EmbedBuilder gatherDELInfo(String id, CommandEvent event) {
+    public EmbedBuilder gatherDELInfo(String id, JDA jda) {
         // Gather info from the site
         JSONObject response = new JSONObject(RestClient.get("https://api.discordextremelist.xyz/v2/bot/" + id, PropertiesManager.getDELToken()));
 
@@ -291,7 +319,7 @@ public class BotInfoCommand extends Command {
         List<String> owners = new ArrayList<>();
         owners.add(bot.getJSONObject("owner").getString("id"));
         for(Object owner : bot.getJSONArray("editors")) {
-            User user = event.getJDA().getUserById((String) owner);
+            User user = jda.getUserById((String) owner);
             if(user == null)
                 owners.add((String) owner);
             else

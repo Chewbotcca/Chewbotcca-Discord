@@ -16,29 +16,41 @@
  */
 package pw.chew.chewbotcca.commands.bot;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 // %^invite command
-public class InviteCommand extends Command {
+public class InviteCommand extends SlashCommand {
     public InviteCommand() {
         this.name = "invite";
+        this.help = "Generate a link to invite me to your serve!";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
     }
 
     @Override
+    protected void execute(SlashCommandEvent event) {
+        event.replyEmbeds(generateInviteEmbed()).queue();
+    }
+
+    @Override
     protected void execute(CommandEvent commandEvent) {
-        commandEvent.reply(new EmbedBuilder()
-                .setTitle("Invite me!")
-                .setDescription("""
+        commandEvent.reply(generateInviteEmbed());
+    }
+
+    private MessageEmbed generateInviteEmbed() {
+        return new EmbedBuilder()
+            .setTitle("Invite me!")
+            .setDescription("""
                     [Click me to invite me to your server (recommended)](https://discord.com/api/oauth2/authorize?client_id=604362556668248095&permissions=939879492&scope=bot%20applications.commands)!
                     [Click me to invite me to your server (admin)](https://discord.com/api/oauth2/authorize?client_id=604362556668248095&permissions=8&scope=bot%20applications.commands)!
                     
                     [Need help? Click me to join my help server](https://discord.gg/UjxQ3Bh)!
                     
-                    [Sponsored: Click me to get a VPS from SkySilk Cloud Services](https://www.skysilk.com/ref/4PRQpuQraD)!""").build());
+                    [Sponsored: Click me to get a VPS from SkySilk Cloud Services](https://www.skysilk.com/ref/4PRQpuQraD)!""").build();
     }
 }
