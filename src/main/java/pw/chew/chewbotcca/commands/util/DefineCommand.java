@@ -30,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.util.Collections;
@@ -50,7 +51,7 @@ public class DefineCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         // Get the word from the command
-        String word = event.getOption("word").getAsString();
+        String word = ResponseHelper.guaranteeStringOption(event, "word", "");
 
         // Send message then edit it
         event.replyEmbeds(new EmbedBuilder().setDescription("Checking the dictionary...").build()).queue(interactionHook -> {

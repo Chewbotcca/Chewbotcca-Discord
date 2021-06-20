@@ -18,9 +18,14 @@ package pw.chew.chewbotcca.util;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 import java.awt.Color;
 
+/**
+ * This class provides some methods to help with responding to commands.
+ */
 public class ResponseHelper {
     /**
      * Generates a "Failure" embed.
@@ -42,5 +47,39 @@ public class ResponseHelper {
             embed.setDescription(description);
 
         return embed.build();
+    }
+
+    /**
+     * Guarantees a String option value. Removes the "can be null" check because we know it isn't.
+     *
+     * @param event the slash command event to get options from
+     * @param option the option we want
+     * @param fallback if the option doesn't exist, what should we use instead?
+     * @return the never-null option
+     */
+    public static String guaranteeStringOption(SlashCommandEvent event, String option, String fallback) {
+        for (OptionMapping optionMapping : event.getOptions()) {
+            if (optionMapping.getName().equals(option)) {
+                return optionMapping.getAsString();
+            }
+        }
+        return fallback;
+    }
+
+    /**
+     * Guarantees a boolean option value. Removes the "can be null" check because we know it isn't.
+     *
+     * @param event the slash command event to get options from
+     * @param option the option we want
+     * @param fallback if the option doesn't exist, what should we use instead?
+     * @return the never-null option
+     */
+    public static boolean guaranteeBooleanOption(SlashCommandEvent event, String option, boolean fallback) {
+        for (OptionMapping optionMapping : event.getOptions()) {
+            if (optionMapping.getName().equals(option)) {
+                return optionMapping.getAsBoolean();
+            }
+        }
+        return fallback;
     }
 }

@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.Color;
@@ -50,7 +51,7 @@ public class MCServerCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        String ip = event.getOption("ip").getAsString();
+        String ip = ResponseHelper.guaranteeStringOption(event, "ip", "");
         event.replyEmbeds(gatherServerData(ip)).queue();
     }
 

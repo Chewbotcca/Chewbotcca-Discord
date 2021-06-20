@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import pw.chew.chewbotcca.util.ResponseHelper;
 
 import java.awt.Color;
 import java.util.Collections;
@@ -82,7 +83,7 @@ public class EightBallCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.replyEmbeds(generateEmbed(event.getOption("question").getAsString())).queue();
+        event.replyEmbeds(generateEmbed(ResponseHelper.guaranteeStringOption(event, "question", ""))).queue();
     }
 
     @Override

@@ -49,7 +49,7 @@ public class FeedbackCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         try {
-            var feedback = event.getOption("feedback").getAsString();
+            var feedback = ResponseHelper.guaranteeStringOption(event, "feedback", "");
             TextChannel feedbackChannel = retrieveFeedbackChannel(event.getJDA());
             feedbackChannel.sendMessage(generateFeedbackEmbed(feedback, event.getUser())).queue(
                 message -> event.reply("I have successfully sent the feedback! Feel free to see it on the help server with `/invite`")

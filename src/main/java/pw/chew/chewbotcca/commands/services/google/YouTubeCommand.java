@@ -67,7 +67,7 @@ public class YouTubeCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.replyEmbeds(gatherInfo(event.getOption("query").getAsString(), event.getChannel())).queue();
+        event.replyEmbeds(gatherInfo(ResponseHelper.guaranteeStringOption(event, "query", ""), event.getChannel())).queue();
     }
 
     /**

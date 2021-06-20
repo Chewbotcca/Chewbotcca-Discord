@@ -28,6 +28,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.Color;
@@ -61,7 +62,7 @@ public class BotInfoCommand extends SlashCommand {
         String botId = event.getOption("bot").getAsUser().getId();
 
         // Get it from the specified list if it's valid, and let them know
-        switch (event.getOption("list").getAsString()) {
+        switch (ResponseHelper.guaranteeStringOption(event, "list", "dbots")) {
             case "topgg" -> event.replyEmbeds(gatherTopggInfo(botId, event.getJDA()).build()).queue();
             case "del" -> event.replyEmbeds(gatherDELInfo(botId, event.getJDA()).build()).queue();
             default -> event.replyEmbeds(gatherDBotsInfo(botId, event.getJDA()).build()).queue();

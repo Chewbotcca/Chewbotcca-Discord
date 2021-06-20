@@ -31,6 +31,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import pw.chew.chewbotcca.util.ResponseHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +65,7 @@ public class ChannelInfoCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         GuildChannel channel = event.getOption("channel").getAsGuildChannel();
-        switch (event.getOption("type").getAsString()) {
+        switch (ResponseHelper.guaranteeStringOption(event, "type", "general")) {
             case "pins" -> getPinsInfo((TextChannel) channel, event.getJDA());
             default -> gatherMainInfo(channel, null);
         }

@@ -56,6 +56,8 @@ public class RollCommand extends SlashCommand {
                     dice = (int) mapping.getAsLong();
                 case "sides":
                     sides = (int) mapping.getAsLong();
+                default:
+                    break;
             }
         }
 

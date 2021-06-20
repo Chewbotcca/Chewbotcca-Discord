@@ -85,7 +85,7 @@ public class MemeratorCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             try {
-                event.replyEmbeds(buildMemeEmbed(event.getOption("meme").getAsString(), event.getChannel())).queue();
+                event.replyEmbeds(buildMemeEmbed(ResponseHelper.guaranteeStringOption(event, "meme", ""), event.getChannel())).queue();
             } catch (IllegalArgumentException e) {
                 event.replyEmbeds(ResponseHelper.generateFailureEmbed("The meme machine ran dry...", e.getMessage()))
                     .setEphemeral(true)
@@ -187,7 +187,7 @@ public class MemeratorCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             try {
-                User user = api.getUser(event.getOption("user").getAsString());
+                User user = api.getUser(ResponseHelper.guaranteeStringOption(event, "user", ""));
                 event.replyEmbeds(generateUserEmbed(user).build()).queue();
             } catch (NotFound notFound) {
                 event.reply("User not found!").setEphemeral(true).queue();
