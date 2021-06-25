@@ -16,28 +16,49 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.WebhookType;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
-import java.util.List;
-import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 
-public class RoryCommand extends Command {
+public class RoryCommand extends SlashCommand {
 
     public RoryCommand() {
         this.name = "rory";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
-        this.children = new Command[]{new FollowRorySubCommand()};
+        this.children = new SlashCommand[]{new FollowRorySubCommand()};
+
+//        List<OptionData> data = new ArrayList<>();
+//        data.add(new OptionData(OptionType.INTEGER, "rory_id", "The ID of a rory! Leave blank for a random Rory"));
+//        this.options = data;
+//        String bob = "".replaceAll("\\(B", "");
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        JSONObject rory = new JSONObject(RestClient.get("https://rory.cat/purr/" /*+ event.getOption("rory_id").getAsLong()*/));
+        if (rory.has("error")) {
+            event.reply(rory.getString("error")).queue();
+            return;
+        }
+
+        EmbedBuilder embed = generateRoryEmbed(rory);
+        if (event.getChannelType() == ChannelType.TEXT && event.getMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
+            embed.setDescription("Stay up to date with new Rory images by running `/rory follow`!");
+        }
+
+        event.replyEmbeds(embed.build()).queue();
     }
 
     @Override
@@ -48,12 +69,8 @@ public class RoryCommand extends Command {
             event.reply(rory.getString("error"));
             return;
         }
-        String permalink = "https://rory.cat/id/" + rory.getInt("id");
 
-        EmbedBuilder embed = new EmbedBuilder()
-            .setTitle("Rory :3", permalink)
-            .setImage(rory.getString("url") + "?nocache" + Instant.now().getEpochSecond())
-            .setFooter("ID: " + rory.getInt("id"));
+        EmbedBuilder embed = generateRoryEmbed(rory);
         if (event.getChannelType() == ChannelType.TEXT && event.getMember().hasPermission(Permission.MANAGE_WEBHOOKS) && event.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
             embed.setDescription("Stay up to date with new Rory images by running `" + event.getPrefix() + "rory follow`!");
         }
@@ -61,7 +78,16 @@ public class RoryCommand extends Command {
         event.reply(embed.build());
     }
 
-    public static class FollowRorySubCommand extends Command {
+    private EmbedBuilder generateRoryEmbed(JSONObject rory) {
+        String permalink = "https://rory.cat/id/" + rory.getInt("id");
+
+        return new EmbedBuilder()
+            .setTitle("Rory :3", permalink)
+            .setImage(rory.getString("url") + "?nocache" + Instant.now().getEpochSecond())
+            .setFooter("ID: " + rory.getInt("id"));
+    }
+
+    public static class FollowRorySubCommand extends SlashCommand {
         public FollowRorySubCommand() {
             this.name = "follow";
             this.botPermissions = new Permission[]{Permission.MANAGE_WEBHOOKS};
@@ -69,6 +95,25 @@ public class RoryCommand extends Command {
             this.guildOnly = true;
             this.cooldown = 30;
             this.cooldownScope = CooldownScope.CHANNEL;
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            TextChannel destination = event.getTextChannel();
+            if (destination.isNews()) {
+                event.reply("News channels cannot be followed to other news channels!").setEphemeral(true).queue();
+                return;
+            }
+            if (alreadyFollowing(destination)) {
+                event.reply("This channel already has a Rory Images feed! (If not, an error occurred, oopsie)").setEphemeral(true).queue();
+                return;
+            }
+            TextChannel rory = event.getJDA().getTextChannelById("752063016425619487");
+            if (rory == null) {
+                event.reply("Rory channel not found! :(").setEphemeral(true).queue();
+                return;
+            }
+            rory.follow(destination).queue(yay -> event.reply("Followed the rory images channel successfully, enjoy the Rory :3").queue());
         }
 
         @Override
@@ -93,7 +138,7 @@ public class RoryCommand extends Command {
                 event.reply("News channels cannot be followed to other news channels!");
                 return;
             }
-            if (alreadyFollowing(destination, event)) {
+            if (alreadyFollowing(destination)) {
                 event.reply("This channel already has a Rory Images feed! (If not, an error occurred, oopsie)");
                 return;
             }
@@ -105,7 +150,7 @@ public class RoryCommand extends Command {
             rory.follow(destination).queue(yay -> event.reply("Followed the rory images channel successfully, enjoy the Rory :3"));
         }
 
-        public boolean alreadyFollowing(TextChannel channel, CommandEvent event) {
+        public boolean alreadyFollowing(TextChannel channel) {
             List<Webhook> webhooks = channel.retrieveWebhooks().complete();
             for (Webhook webhook : webhooks) {
                 if (webhook.getType() != WebhookType.FOLLOWER) {

@@ -16,10 +16,11 @@
  */
 package pw.chew.chewbotcca.commands.info;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.objects.UserProfile;
 import pw.chew.chewbotcca.util.DateTime;
@@ -29,12 +30,17 @@ import pw.chew.chewbotcca.util.RestClient;
 import java.awt.Color;
 
 // %^lastfm command
-public class LastFMCommand extends Command {
+public class LastFMCommand extends SlashCommand {
 
     public LastFMCommand() {
         this.name = "lastfm";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+
     }
 
     @Override

@@ -16,10 +16,11 @@
  */
 package pw.chew.chewbotcca.commands.info;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,13 +30,18 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 // %^rubygem command
-public class RubyGemsCommand extends Command {
+public class RubyGemsCommand extends SlashCommand {
 
     public RubyGemsCommand() {
         this.name = "rubygem";
         this.aliases = new String[]{"gem", "rgem", "rubyg", "gems"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+
     }
 
     @Override
