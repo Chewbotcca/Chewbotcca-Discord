@@ -43,7 +43,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.2.1_259</version>
+            <version>4.3.0_283</version>
             <scope>compile</scope>
         </dependency>
 
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>4.0.3</version>
+            <version>4.1.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -92,7 +92,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-logback</artifactId>
-            <version>4.3.0</version>
+            <version>5.0.1</version>
             <scope>compile</scope>
         </dependency>
 
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
-            <version>1.127</version>
+            <version>1.131</version>
             <scope>compile</scope>
         </dependency>
 
@@ -150,7 +150,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.24</version>
+            <version>8.0.25</version>
         </dependency>
     </dependencies>
 
