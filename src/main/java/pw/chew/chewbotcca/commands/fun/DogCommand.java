@@ -16,20 +16,34 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
 // %^dog command
-public class DogCommand extends Command {
+public class DogCommand extends SlashCommand {
 
     public DogCommand() {
         this.name = "dog";
+        this.help = "Gets a random dog picture! Bark, woof, purr?";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        // Get a dog and bark it, i mean send it, am not furry i swear
+        String dog = new JSONObject(RestClient.get("https://random.dog/woof.json")).getString("url");
+
+        event.replyEmbeds(new EmbedBuilder()
+            .setTitle("Adorable.", dog)
+            .setImage(dog)
+            .build()
+        ).queue();
     }
 
     @Override
@@ -38,9 +52,9 @@ public class DogCommand extends Command {
         String dog = new JSONObject(RestClient.get("https://random.dog/woof.json")).getString("url");
 
         commandEvent.reply(new EmbedBuilder()
-                .setTitle("Adorable.", dog)
-                .setImage(dog)
-                .build()
+            .setTitle("Adorable.", dog)
+            .setImage(dog)
+            .build()
         );
     }
 }

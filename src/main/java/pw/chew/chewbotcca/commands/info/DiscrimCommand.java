@@ -37,6 +37,7 @@ public class DiscrimCommand extends Command {
 
     public DiscrimCommand() {
         this.name = "discrim";
+        this.help = "Find users with the same discriminator as you, or specify one";
         this.botPermissions = new Permission[]{Permission.MESSAGE_ADD_REACTION, Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
     }
