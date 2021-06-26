@@ -16,45 +16,64 @@
  */
 package pw.chew.chewbotcca.commands.minecraft;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 
 // %^mcuser command
-public class MCUserCommand extends Command {
+public class MCUserCommand extends SlashCommand {
 
     public MCUserCommand() {
         this.name = "mcuser";
+        this.help = "Looks up a Minecraft user and returns their profile";
         this.aliases = new String[]{"namemc"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "user", "The user name or UUID to lookup").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        String name = ResponseHelper.guaranteeStringOption(event, "user", "");
+        event.replyEmbeds(gatherData(name)).queue();
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
         // Get username/uuid from args
         String name = commandEvent.getArgs().split(" ")[0].replace("-", "");
+        commandEvent.reply(gatherData(name));
+    }
+
+    private MessageEmbed gatherData(String name) {
         JSONArray history;
         String uuid;
         // Get profile info
-        if(name.length() == 32) {
+        if (name.length() == 32) {
             // If it's a UUID
             try {
                 history = new JSONArray(RestClient.get("https://api.mojang.com/user/profiles/" + name + "/names"));
                 uuid = name;
             } catch (JSONException e) {
-                commandEvent.reply("Not a valid input! Please enter a valid UUID!");
-                return;
+                throw new IllegalArgumentException("Not a valid input! Please enter a valid UUID!");
             }
         } else if (name.length() >= 1 && name.length() <= 16) {
             // If it's a username
@@ -63,12 +82,10 @@ public class MCUserCommand extends Command {
                 history = new JSONArray(RestClient.get("https://api.mojang.com/user/profiles/" + profile.getString("id") + "/names"));
                 uuid = profile.getString("id");
             } catch (JSONException e) {
-                commandEvent.reply("Not a valid input! Please enter a valid UUID!");
-                return;
+                throw new IllegalArgumentException("Not a valid input! Please enter a valid UUID!");
             }
         } else {
-            commandEvent.reply("Not a valid input! Please enter a valid username or a valid UUID!");
-            return;
+            throw new IllegalArgumentException("Not a valid input! Please enter a valid username or a valid UUID!");
         }
         // Find recent names and when they were changed
         StringBuilder names = new StringBuilder();
@@ -86,11 +103,11 @@ public class MCUserCommand extends Command {
             names.append(time).append(" - ").append(username).append("\n");
         }
         // Return info
-        commandEvent.reply(new EmbedBuilder()
-                .setTitle("Minecraft Profile Information for " + history.getJSONObject(history.length() - 1).getString("name"))
-                .setDescription("[NameMC Profile](https://namemc.com/profile/" + uuid + ")")
-                .setThumbnail("https://minotar.net/helm/" + uuid)
-                .addField("Name History", names.toString(), true)
-        .build());
+        return (new EmbedBuilder()
+            .setTitle("Minecraft Profile Information for " + history.getJSONObject(history.length() - 1).getString("name"))
+            .setDescription("[NameMC Profile](https://namemc.com/profile/" + uuid + ")")
+            .setThumbnail("https://minotar.net/helm/" + uuid)
+            .addField("Name History", names.toString(), true)
+            .build());
     }
 }

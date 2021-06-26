@@ -17,8 +17,8 @@
 package pw.chew.chewbotcca.commands.info;
 
 import bio.discord.api.DBioAPI;
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
@@ -26,9 +26,14 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import org.jetbrains.annotations.Nullable;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.Mention;
+import pw.chew.chewbotcca.util.ResponseHelper;
 
 import java.awt.Color;
 import java.text.SimpleDateFormat;
@@ -37,19 +42,48 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static pw.chew.chewbotcca.commands.info.ServerInfoCommand.capitalize;
 
 // %^uinfo command
-public class UserInfoCommand extends Command {
+public class UserInfoCommand extends SlashCommand {
 
     public UserInfoCommand() {
         this.name = "userinfo";
+        this.help = "Returns some useful info about you or another user";
         this.aliases = new String[]{"uinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Arrays.asList(
+            new OptionData(OptionType.USER, "user", "The user to lookup").setRequired(true),
+            new OptionData(OptionType.STRING, "mode", "What kind of data to return")
+                .addChoice("General Information", "general")
+                .addChoice("Member Info (requires them to be on this server", "member")
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        String mode = ResponseHelper.guaranteeStringOption(event, "mode", "general");
+
+        // Attempt to gather Member
+        User user = Objects.requireNonNull(event.getOption("user")).getAsUser();
+        Member member = Objects.requireNonNull(event.getOption("user")).getAsMember();
+
+        // Generate and respond
+        switch (mode) {
+            case "member" -> {
+                if (member == null) {
+                    event.reply("The specified user is not in this server (or this is not a server)").setEphemeral(true).queue();
+                    return;
+                }
+                event.replyEmbeds(gatherMemberInfo(member.getGuild(), member).build()).queue();
+            }
+            default -> event.replyEmbeds(gatherMainInfo(member == null ? null : member.getGuild(), user, event.getUser()).build()).queue();
+        }
     }
 
     @Override
@@ -118,24 +152,26 @@ public class UserInfoCommand extends Command {
         } else if(member == null && mode.equals("member")) {
             commandEvent.reply("This user is not on this server!");
         } else {
-            commandEvent.reply(gatherMainInfo(commandEvent, user).build());
+            commandEvent.reply(gatherMainInfo(commandEvent.getGuild(), user, commandEvent.getAuthor()).build());
         }
     }
 
     /**
      * Gather main info, the main info. main
-     * @param commandEvent the command event
-     * @param user the user
+     *
+     * @param server the server to check for members in
+     * @param user   the user
+     * @param author the author of the message
      * @return an embed
      */
-    public EmbedBuilder gatherMainInfo(CommandEvent commandEvent, User user) {
+    public EmbedBuilder gatherMainInfo(@Nullable Guild server, User user, User author) {
         // Get the member
         Member member = null;
-        if (commandEvent.isFromType(ChannelType.TEXT)) {
-            member = commandEvent.getGuild().getMemberById(user.getId());
+        if (server != null) {
+            member = server.getMember(user);
         }
         boolean onServer = member != null;
-        boolean self = user == commandEvent.getAuthor();
+        boolean self = user == author;
 
         EmbedBuilder e = new EmbedBuilder();
         // If executor == member
