@@ -16,35 +16,71 @@
  */
 package pw.chew.chewbotcca.commands.util;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 // %^paste command
-public class PasteCommand extends Command {
+public class PasteCommand extends SlashCommand {
     Map<String, String> pasted = new HashMap<>();
 
     public PasteCommand() {
         this.name = "paste";
+        this.help = "Pastes a recent message or a provided link to paste.gg";
         this.cooldown = 15;
         this.cooldownScope = CooldownScope.USER;
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "url", "The URL of the file you want to paste (blank to retrieve recent message)").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        // Store message and file URL for later
+        Message message;
+        String file;
+        String args = ResponseHelper.guaranteeStringOption(event, "url", "");
+        boolean fromAttachment = false;
+        // Check if there's no args, and we're in a TEXT channel or DM.
+        if (args.isBlank() && (event.getChannelType() == ChannelType.TEXT || event.getChannelType() == ChannelType.PRIVATE)) {
+            message = getRecentUpload(event.getChannel(), null);
+            if (message == null) {
+                event.reply("No recent messages have a file to paste!").setEphemeral(true).queue();
+                return;
+            }
+            file = message.getAttachments().get(0).getUrl();
+            fromAttachment = true;
+        } else {
+            file = args;
+        }
+
+        try {
+            event.reply(pasteData(file, fromAttachment)).queue();
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage()).setEphemeral(true).queue();
+        }
     }
 
     @Override
     protected void execute(CommandEvent event) {
         // Store message and file URL for later
-        Message message = event.getMessage();
+        Message message;
         String file;
         boolean fromAttachment = false;
         // Check if there's no args, and we're in a TEXT channel or DM.
@@ -60,21 +96,25 @@ public class PasteCommand extends Command {
             file = event.getArgs();
         }
 
+        try {
+            event.reply(pasteData(file, fromAttachment));
+        } catch (IllegalArgumentException e) {
+            event.replyWarning(e.getMessage());
+        }
+    }
+
+    private String pasteData(String file, boolean fromAttachment) {
         // Get file name if URL. If no slashes, the name itself is fine.
         String name = file.split("/")[file.split("/").length - 1];
 
         // We only support discord CDN files for now.
         if (!file.contains("cdn.discordapp.com") && !fromAttachment) {
-            event.reply("Only cdn.discordapp.com urls are supported at this time!");
-            return;
+            throw new IllegalArgumentException("Only cdn.discordapp.com urls are supported at this time!");
         }
         // Check if we've pasted this before
         if (pasted.containsKey(file)) {
-            event.reply("Already pasted " + name + "! Link: https://paste.gg/chewbotcca/" + pasted.get(file));
-            return;
+            throw new IllegalArgumentException("Already pasted " + name + "! Link: https://paste.gg/chewbotcca/" + pasted.get(file));
         }
-
-        event.getChannel().sendTyping().queue();
 
         // Get the contents of the file
         String contents = RestClient.get(file);
@@ -97,8 +137,10 @@ public class PasteCommand extends Command {
         // Return response
         if (response.getString("status").equals("success")) {
             String url = "https://paste.gg/chewbotcca/" + response.getJSONObject("result").getString("id");
-            message.reply("Your paste for " + name + " is available at: " + url).mentionRepliedUser(false).queue();
             pasted.put(file, response.getJSONObject("result").getString("id"));
+            return "Your paste for " + name + " is available at: " + url;
+        } else {
+            throw new IllegalArgumentException("Failed to paste data");
         }
     }
 
@@ -110,7 +152,7 @@ public class PasteCommand extends Command {
      */
     public Message getRecentUpload(MessageChannel channel, Message sentMessage) {
         // First check if current message has an upload (e.g. %^paste [attach])
-        if (!sentMessage.getAttachments().isEmpty()) {
+        if (sentMessage != null && !sentMessage.getAttachments().isEmpty()) {
             Message.Attachment attachment = sentMessage.getAttachments().get(0);
             if (!attachment.isImage() && !attachment.isVideo()) {
                 return sentMessage;

@@ -28,6 +28,7 @@ public class UnsuppressCommand extends Command {
 
     public UnsuppressCommand() {
         this.name = "unsuppress";
+        this.help = "";
         this.botPermissions = new Permission[]{Permission.MESSAGE_MANAGE};
         this.userPermissions = new Permission[]{Permission.MESSAGE_MANAGE};
         this.guildOnly = true;
