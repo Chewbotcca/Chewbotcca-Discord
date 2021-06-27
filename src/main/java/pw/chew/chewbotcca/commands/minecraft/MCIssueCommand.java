@@ -16,42 +16,78 @@
  */
 package pw.chew.chewbotcca.commands.minecraft;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONException;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class MCIssueCommand extends Command {
+public class MCIssueCommand extends SlashCommand {
     private static final HashMap<String, List<String>> projects = new HashMap<>();
 
     public MCIssueCommand() {
         this.name = "mcissue";
+        this.help = "Searches Mojira or Spigot MC Jira for a specified issue. Requires PROJ-NUM or link";
         this.aliases = new String[]{"mojira", "mcbug"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "issue", "The issue to lookup").setRequired(true)
+        );
 
         projects.put(
-                "https://bugs.mojang.com/rest/api/latest/issue/",
-                Arrays.asList("BDS", "MCPE", "MCAPI", "MCCE", "MCD", "MCL", "REALMS", "MCE", "MC", "WEB")
+            "https://bugs.mojang.com/rest/api/latest/issue/",
+            Arrays.asList("BDS", "MCPE", "MCAPI", "MCCE", "MCD", "MCL", "REALMS", "MCE", "MC", "WEB")
         );
         projects.put(
-                "https://hub.spigotmc.org/jira/rest/api/latest/issue/",
-                Arrays.asList("BUILDTOOLS", "SPIGOT", "PLUG")
+            "https://hub.spigotmc.org/jira/rest/api/latest/issue/",
+            Arrays.asList("BUILDTOOLS", "SPIGOT", "PLUG")
         );
     }
 
     @Override
+    protected void execute(SlashCommandEvent event) {
+        String args = ResponseHelper.guaranteeStringOption(event, "issue", "");
+
+        if (args.length() < 4) {
+            event.reply("Please specify a project AND issue, for example, 'WEB-2303'").setEphemeral(true).queue();
+            return;
+        }
+
+        String issue;
+        if (args.contains("http")) {
+            String[] breakdown = args.split("/");
+            issue = breakdown[breakdown.length - 1];
+        } else {
+            issue = args;
+        }
+
+        String apiUrl = getApiUrl(issue.split("-")[0]);
+        if (apiUrl == null) {
+            event.reply("Invalid Project Specified. Supported projects are any from Mojang Studios or SpigotMC Jira").setEphemeral(true).queue();
+            return;
+        }
+
+        JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
+        event.replyEmbeds(generateEmbed(data, issue, apiUrl).build()).queue();
+    }
+
+    @Override
     protected void execute(CommandEvent event) {
-        if(event.getArgs().length() < 4) {
+        if (event.getArgs().length() < 4) {
             event.reply("Please specify a project AND issue, for example, 'WEB-2303'");
             return;
         }
