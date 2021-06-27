@@ -17,6 +17,7 @@
 package pw.chew.chewbotcca;
 
 import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import pro.chew.api.ChewAPI;
 import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ReactListener;
+import pw.chew.chewbotcca.listeners.ReadyListener;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
 import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.objects.ServerSettings;
@@ -113,6 +115,10 @@ public class Main {
 
         // Temporary measure to test Slash Commands
         client.forceGuildOnly("148195924567392257");
+        client.setManualUpsert(true);
+
+        // Finalize the command client
+        CommandClient commandClient = client.build();
 
         // Register JDA
         JDA jda = JDABuilder.createDefault(PropertiesManager.getToken())
@@ -124,17 +130,18 @@ public class Main {
             .enableCache(CacheFlag.ROLE_TAGS)
             .setStatus(OnlineStatus.ONLINE)
             .setActivity(Activity.playing("Booting..."))
-            .addEventListeners(waiter, client.build())
+            .addEventListeners(waiter, commandClient)
             .build();
 
         // Register listeners
         jda.addEventListener(
-                new ReactListener(),
-                new MessageHandler(),
-                new ServerJoinLeaveListener()
+            new ReactListener(),
+            new MessageHandler(),
+            new ServerJoinLeaveListener(),
+            new ReadyListener()
         );
 
-        new Memory(waiter, jda, new ChewAPI(), github);
+        Memory.remember(waiter, jda, new ChewAPI(), github, commandClient);
     }
 
     /**
@@ -167,7 +174,7 @@ public class Main {
      *
      * @return an array of commands
      */
-    private static SlashCommand[] getSlashCommands() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    public static SlashCommand[] getSlashCommands() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Reflections reflections = new Reflections("pw.chew.chewbotcca.commands");
         Set<Class<? extends SlashCommand>> subTypes = reflections.getSubTypesOf(SlashCommand.class);
         List<SlashCommand> commands = new ArrayList<>();
