@@ -20,14 +20,19 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.objects.UserProfile;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.Color;
+import java.util.Collections;
 
 // %^lastfm command
 public class LastFMCommand extends SlashCommand {
@@ -37,11 +42,32 @@ public class LastFMCommand extends SlashCommand {
         this.help = "Returns playing status for a specified user";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "username", "The user to look up (default: yours if set)").setRequired(true)
+        );
     }
 
     @Override
     protected void execute(SlashCommandEvent event) {
+        // Get args, assume it's a username, and find their stats
+        String args = ResponseHelper.guaranteeStringOption(event, "username", "");
+        if (args.isBlank()) {
+            UserProfile profile = UserProfile.getProfile(event.getUser().getId());
+            if (profile.getLastFm() != null) {
+                args = profile.getLastFm();
+            } else {
+                event.reply("You don't have a last.fm username set on your profile. Please specify a user with `/lastfm user` or set your username with `/profile set lastfm yourname`!")
+                    .setEphemeral(true)
+                    .queue();
+                return;
+            }
+        }
 
+        try {
+            event.replyEmbeds(gatherData(args, PropertiesManager.getLastfmToken())).queue();
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage()).setEphemeral(true).queue();
+        }
     }
 
     @Override
@@ -56,7 +82,7 @@ public class LastFMCommand extends SlashCommand {
 
         // Get args, assume it's a username, and find their stats
         String args = event.getArgs();
-        if(args.length() == 0) {
+        if (args.length() == 0) {
             UserProfile profile = UserProfile.getProfile(event.getAuthor().getId());
             if (profile.getLastFm() != null) {
                 args = profile.getLastFm();
@@ -65,11 +91,19 @@ public class LastFMCommand extends SlashCommand {
                 return;
             }
         }
+
+        try {
+            event.reply(gatherData(args, key));
+        } catch (IllegalArgumentException e) {
+            event.replyError(e.getMessage());
+        }
+    }
+
+    private MessageEmbed gatherData(String args, String key) {
         JSONObject parse = new JSONObject(RestClient.get("https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&limit=1&user=" + args + "&api_key=" + key + "&format=json"));
         // But if I got bamboozled
-        if(parse.has("message") && parse.getString("message").equals("User not found")) {
-            event.reply("No user found for the provided input!");
-            return;
+        if (parse.has("message") && parse.getString("message").equals("User not found")) {
+            throw new IllegalArgumentException("No user found for the provided input!");
         }
 
         // Get user recent tracks and its info
@@ -93,10 +127,10 @@ public class LastFMCommand extends SlashCommand {
 
         // Generate and send info
         EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("Last.fm status for " + user)
-                .addField("Track", track, true)
-                .addField("Artist", artist, true)
-                .addField("Album", album, true);
+            .setTitle("Last.fm status for " + user)
+            .addField("Track", track, true)
+            .addField("Artist", artist, true)
+            .addField("Album", album, true);
 
         if (playing) {
             embed.setColor(Color.decode("#00FF00"));
@@ -106,7 +140,7 @@ public class LastFMCommand extends SlashCommand {
             embed.setDescription("Last listened about " + timeago + " ago.");
         }
 
-        event.reply(embed.build());
+        return embed.build();
     }
 }
 

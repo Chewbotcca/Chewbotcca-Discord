@@ -43,9 +43,9 @@ import static pw.chew.chewbotcca.commands.services.github.GHUserCommand.gatherUs
  * This command is exclusively to allow /github [subcommand]
  * Normal command handling is done in the respective GitHub package
  */
-public class GitHubCommand extends SlashCommand {
+public class GitHubSlashCommand extends SlashCommand {
 
-    public GitHubCommand() {
+    public GitHubSlashCommand() {
         this.name = "github";
         this.help = "Gathers some info from GitHub";
         this.children = new SlashCommand[]{

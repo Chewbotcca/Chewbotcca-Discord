@@ -155,8 +155,8 @@ public class Main {
         List<Command> commands = new ArrayList<>();
 
         for (Class<? extends Command> theClass : subTypes) {
-            // Don't load SubCommands
-            if (theClass.getName().contains("SubCommand"))
+            // Don't load SubCommands or SlashCommands
+            if (theClass.getName().contains("SubCommand") || theClass.getName().contains("SlashCommand"))
                 continue;
             try {
                 commands.add(theClass.getDeclaredConstructor().newInstance());

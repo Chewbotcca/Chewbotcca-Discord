@@ -46,7 +46,7 @@ public class InfoCommand extends SlashCommand {
 
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "command", "The command to find info for").setRequired(true)
-                .addChoices(commands())
+                //.addChoices(commands())
         );
     }
 
