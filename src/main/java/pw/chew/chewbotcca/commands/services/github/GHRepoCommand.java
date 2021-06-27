@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.kohsuke.github.GHRepository;
 import pw.chew.chewbotcca.objects.Memory;
 
@@ -40,7 +41,7 @@ public class GHRepoCommand extends Command {
     protected void execute(CommandEvent commandEvent) {
         // Get the repo
         String repoName = commandEvent.getArgs();
-        if(!repoName.contains("/")) {
+        if (!repoName.contains("/")) {
             commandEvent.reply("Make sure your input contains a UserOrOrg/RepositoryName (e.g. Chewbotcca/Discord).");
             return;
         }
@@ -53,15 +54,19 @@ public class GHRepoCommand extends Command {
             commandEvent.reply("Invalid repository name. Please make sure this repository exists!");
             return;
         }
+        commandEvent.reply(gatherRepoData(repo));
+    }
+
+    public static MessageEmbed gatherRepoData(GHRepository repo) {
         // Generate an Embed
         EmbedBuilder e = new EmbedBuilder();
         try {
             // Set data based on repo info
             e.setTitle("GitHub Repository Info for " + repo.getFullName(), "https://github.com/" + repo.getFullName());
             e.setDescription(repo.getDescription());
-            if(repo.getHomepage() != null)
+            if (repo.getHomepage() != null)
                 e.addField("URL", String.valueOf(repo.getHomepage()), true);
-            if(repo.getLicense() != null)
+            if (repo.getLicense() != null)
                 e.addField("License", repo.getLicense().getName(), true);
             e.addField("Open Issues/PRs", String.valueOf(repo.getOpenIssueCount()), true);
             e.addField("Stars", String.valueOf(repo.getStargazersCount()), true);
@@ -83,6 +88,6 @@ public class GHRepoCommand extends Command {
             ioException.printStackTrace();
         }
 
-        commandEvent.reply(e.build());
+        return e.build();
     }
 }

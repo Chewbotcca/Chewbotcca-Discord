@@ -50,6 +50,7 @@ public class YouTubeCommand extends SlashCommand {
 
     public YouTubeCommand() {
         this.name = "youtube";
+        this.help = "Queries YouTube for a video";
         this.aliases = new String[]{"yt"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;

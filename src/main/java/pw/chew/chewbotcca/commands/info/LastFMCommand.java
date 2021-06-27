@@ -34,6 +34,7 @@ public class LastFMCommand extends SlashCommand {
 
     public LastFMCommand() {
         this.name = "lastfm";
+        this.help = "Returns playing status for a specified user";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
     }

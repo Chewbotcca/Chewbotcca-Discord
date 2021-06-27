@@ -35,6 +35,7 @@ import java.util.Collections;
 public class InfoCommand extends SlashCommand {
     public InfoCommand() {
         this.name = "info";
+        this.help = "Returns some detailed information about a specified command";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
 

@@ -34,6 +34,7 @@ public class RubyGemsCommand extends SlashCommand {
 
     public RubyGemsCommand() {
         this.name = "rubygem";
+        this.help = "Searches for and returns some basic info about a specified ruby gem";
         this.aliases = new String[]{"gem", "rgem", "rubyg", "gems"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;

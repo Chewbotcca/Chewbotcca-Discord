@@ -69,14 +69,15 @@ public class GHIssueCommand extends Command {
 
     /**
      * Method to make an issue embed
+     *
      * @param issue the issue to parse
      * @return an EmbedBuilder with all the data
      */
-    public EmbedBuilder issueBuilder(GHIssue issue) {
+    public static EmbedBuilder issueBuilder(GHIssue issue) {
         EmbedBuilder e = new EmbedBuilder();
         // Set the title and body to the issue title and body
         e.setTitle(issue.getTitle(), String.valueOf(issue.getHtmlUrl()));
-        if(issue.getBody() != null) {
+        if (issue.getBody() != null) {
             if (issue.getBody().length() > 400) {
                 e.setDescription(issue.getBody().substring(0, 399) + "...");
             } else {

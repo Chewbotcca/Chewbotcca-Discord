@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHUser;
 import pw.chew.chewbotcca.objects.Memory;
@@ -41,7 +42,7 @@ public class GHUserCommand extends Command {
     protected void execute(CommandEvent commandEvent) {
         // Get the input
         String username = commandEvent.getArgs();
-        if(username.isBlank()) {
+        if (username.isBlank()) {
             UserProfile profile = UserProfile.getProfile(commandEvent.getAuthor().getId());
             if (profile.getGitHub() != null) {
                 username = profile.getGitHub();
@@ -60,6 +61,10 @@ public class GHUserCommand extends Command {
             commandEvent.reply("Invalid username. Please make sure this user exists!");
             return;
         }
+        commandEvent.reply(gatherUser(user));
+    }
+
+    public static MessageEmbed gatherUser(GHUser user) {
         // Generate Embed
         EmbedBuilder e = new EmbedBuilder();
         try {
@@ -68,7 +73,7 @@ public class GHUserCommand extends Command {
             e.addField("Repositories", String.valueOf(user.getPublicRepoCount()), true);
             // If it's actually an org, handle it differently
             boolean isOrg = user.getType().equals("Organization");
-            if(!isOrg) {
+            if (!isOrg) {
                 // If it's not an org, it's a profile!
                 e.setTitle("GitHub profile for " + user.getLogin(), "https://github.com/" + user.getLogin());
                 e.setDescription(user.getBio());
@@ -90,7 +95,7 @@ public class GHUserCommand extends Command {
             ioException.printStackTrace();
         }
 
-        commandEvent.reply(e.build());
+        return e.build();
     }
 
 }
