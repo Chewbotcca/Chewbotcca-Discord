@@ -18,6 +18,7 @@ package pw.chew.chewbotcca.commands.owner;
 
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import pw.chew.chewbotcca.objects.Memory;
 
 // %^shutdown command
 public class ShutdownCommand extends Command {
@@ -31,7 +32,11 @@ public class ShutdownCommand extends Command {
     protected void execute(CommandEvent commandEvent) {
         // whee
         commandEvent.getChannel().sendMessage("Shutting down....").queue((msg) -> {
-            msg.getGuild().updateCommands().queue();
+            if (Memory.getClient().forcedGuildId() == null) {
+                msg.getJDA().updateCommands().queue();
+            } else {
+                msg.getJDA().getGuildById(Memory.getClient().forcedGuildId()).updateCommands().queue();
+            }
             msg.getJDA().shutdown();
         });
     }

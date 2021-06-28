@@ -114,7 +114,7 @@ public class Main {
         client.addSlashCommands(getSlashCommands());
 
         // Temporary measure to test Slash Commands
-        client.forceGuildOnly("148195924567392257");
+        client.forceGuildOnly(PropertiesManager.forceGuildId());
         client.setManualUpsert(true);
 
         // Finalize the command client
