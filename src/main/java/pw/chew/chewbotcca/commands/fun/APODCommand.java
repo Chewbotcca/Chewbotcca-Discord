@@ -77,7 +77,7 @@ public class APODCommand extends SlashCommand {
     }
 
     private MessageEmbed gatherPicture(String date) {
-        if (date.equals("astropix") || date.isBlank()) {
+        if (!date.equals("astropix") || date.isBlank()) {
             String[] input = date.split("/");
             if (input.length < 3) {
                 throw new IllegalArgumentException("Invalid format! Must be MM/DD/YYYY");

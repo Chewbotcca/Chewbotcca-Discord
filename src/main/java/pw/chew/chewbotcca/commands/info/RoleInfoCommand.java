@@ -46,6 +46,7 @@ public class RoleInfoCommand extends SlashCommand {
 
     public RoleInfoCommand() {
         this.name = "roleinfo";
+        this.help = "Find some information about roles";
         this.aliases = new String[]{"rinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION};
         this.guildOnly = true;

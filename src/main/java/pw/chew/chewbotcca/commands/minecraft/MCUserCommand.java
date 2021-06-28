@@ -53,14 +53,22 @@ public class MCUserCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         String name = ResponseHelper.guaranteeStringOption(event, "user", "");
-        event.replyEmbeds(gatherData(name)).queue();
+        try {
+            event.replyEmbeds(gatherData(name)).queue();
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage()).setEphemeral(true).queue();
+        }
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
         // Get username/uuid from args
         String name = commandEvent.getArgs().split(" ")[0].replace("-", "");
-        commandEvent.reply(gatherData(name));
+        try {
+            commandEvent.reply(gatherData(name));
+        } catch (IllegalArgumentException e) {
+            commandEvent.replyWarning(e.getMessage());
+        }
     }
 
     private MessageEmbed gatherData(String name) {

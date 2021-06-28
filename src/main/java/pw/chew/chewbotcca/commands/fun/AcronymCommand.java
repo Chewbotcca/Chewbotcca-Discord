@@ -46,7 +46,7 @@ public class AcronymCommand extends SlashCommand {
             String phrase = Memory.getChewAPI().generateAcronym(acronym);
             event.reply("Acronym for " + acronym + " is " + phrase).queue();
         } catch (IllegalArgumentException e) {
-            event.reply("Args must only contain letters!").queue();
+            event.reply("Args must only contain letters!").setEphemeral(true).queue();
         }
     }
 

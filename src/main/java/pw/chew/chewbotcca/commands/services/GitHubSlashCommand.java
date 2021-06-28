@@ -51,7 +51,7 @@ public class GitHubSlashCommand extends SlashCommand {
         this.children = new SlashCommand[]{
             new GitHubIssueSubCommand(),
             new GitHubRepoSubCommand(),
-            new GitHubUserCommand()
+            new GitHubUserSubCommand()
         };
     }
 
@@ -151,9 +151,9 @@ public class GitHubSlashCommand extends SlashCommand {
         }
     }
 
-    public static class GitHubUserCommand extends SlashCommand {
+    public static class GitHubUserSubCommand extends SlashCommand {
 
-        public GitHubUserCommand() {
+        public GitHubUserSubCommand() {
             this.name = "user";
             this.help = "Gathers a user from GitHub";
             this.options = Collections.singletonList(

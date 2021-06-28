@@ -43,7 +43,7 @@ public class LastFMCommand extends SlashCommand {
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
         this.options = Collections.singletonList(
-            new OptionData(OptionType.STRING, "username", "The user to look up (default: yours if set)").setRequired(true)
+            new OptionData(OptionType.STRING, "username", "The user to look up (default: yours if set)")
         );
     }
 

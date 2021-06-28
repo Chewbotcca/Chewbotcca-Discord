@@ -54,9 +54,17 @@ public class DefineCommand extends SlashCommand {
         String word = ResponseHelper.guaranteeStringOption(event, "word", "");
 
         // Send message then edit it
+        EmbedPaginator paginator;
+        try {
+            paginator = buildPaginator(word, event.getUser());
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage()).setEphemeral(true).queue();
+            return;
+        }
+
         event.replyEmbeds(new EmbedBuilder().setDescription("Checking the dictionary...").build()).queue(interactionHook -> {
             interactionHook.retrieveOriginal().queue(message -> {
-                buildPaginator(word, event.getUser()).paginate(message, 1);
+                paginator.paginate(message, 1);
             });
         });
     }
@@ -67,7 +75,11 @@ public class DefineCommand extends SlashCommand {
         String word = commandEvent.getArgs();
 
         // Send message then edit it
-        buildPaginator(word, commandEvent.getAuthor()).paginate(commandEvent.getChannel(), 1);
+        try {
+            buildPaginator(word, commandEvent.getAuthor()).paginate(commandEvent.getChannel(), 1);
+        } catch (IllegalArgumentException e) {
+            commandEvent.replyWarning(e.getMessage());
+        }
     }
 
     private EmbedPaginator buildPaginator(String word, User author) {

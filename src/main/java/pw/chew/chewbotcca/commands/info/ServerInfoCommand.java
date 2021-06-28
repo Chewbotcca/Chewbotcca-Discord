@@ -326,7 +326,11 @@ public class ServerInfoCommand extends SlashCommand {
             boolean displayMode = ResponseHelper.guaranteeBooleanOption(event, "display_role", false);
             boolean onlineMode = ResponseHelper.guaranteeBooleanOption(event, "online", false);
 
-            run(guaranteeGuild(event), event.getTextChannel(), displayMode, onlineMode);
+            event.replyEmbeds(new EmbedBuilder().setDescription("Gathering the details...").build()).queue(interactionHook -> {
+                interactionHook.retrieveOriginal().queue(message -> {
+                    run(guaranteeGuild(event), event.getTextChannel(), displayMode, onlineMode);
+                });
+            });
         }
 
         @Override
@@ -436,7 +440,11 @@ public class ServerInfoCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            run(guaranteeGuild(event), event.getUser(), event.getTextChannel(), event.getOption("render_mention").getAsBoolean());
+            event.replyEmbeds(new EmbedBuilder().setDescription("Gathering the details...").build()).queue(interactionHook -> {
+                interactionHook.retrieveOriginal().queue(message -> {
+                    run(guaranteeGuild(event), event.getUser(), event.getTextChannel(), ResponseHelper.guaranteeBooleanOption(event, "render_mention", false));
+                });
+            });
         }
 
         @Override
