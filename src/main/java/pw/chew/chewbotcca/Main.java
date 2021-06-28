@@ -17,7 +17,9 @@
 package pw.chew.chewbotcca;
 
 import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import io.sentry.Sentry;
 import net.dv8tion.jda.api.JDA;
@@ -37,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import pro.chew.api.ChewAPI;
 import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ReactListener;
+import pw.chew.chewbotcca.listeners.ReadyListener;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
 import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.objects.ServerSettings;
@@ -108,6 +111,14 @@ public class Main {
         }
 
         client.addCommands(getCommands());
+        client.addSlashCommands(getSlashCommands());
+
+        // Temporary measure to test Slash Commands
+        client.forceGuildOnly(PropertiesManager.forceGuildId());
+        client.setManualUpsert(true);
+
+        // Finalize the command client
+        CommandClient commandClient = client.build();
 
         // Register JDA
         JDA jda = JDABuilder.createDefault(PropertiesManager.getToken())
@@ -119,36 +130,63 @@ public class Main {
             .enableCache(CacheFlag.ROLE_TAGS)
             .setStatus(OnlineStatus.ONLINE)
             .setActivity(Activity.playing("Booting..."))
-            .addEventListeners(waiter, client.build())
+            .addEventListeners(waiter, commandClient)
             .build();
 
         // Register listeners
         jda.addEventListener(
-                new ReactListener(),
-                new MessageHandler(),
-                new ServerJoinLeaveListener()
+            new ReactListener(),
+            new MessageHandler(),
+            new ServerJoinLeaveListener(),
+            new ReadyListener()
         );
 
-        new Memory(waiter, jda, new ChewAPI(), github);
+        Memory.remember(waiter, jda, new ChewAPI(), github, commandClient);
     }
 
     /**
      * Gathers all commands from "commands" package.
+     *
      * @return an array of commands
      */
-    private static Command[] getCommands() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        Reflections reflections =  new Reflections("pw.chew.chewbotcca.commands");
+    private static Command[] getCommands() throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        Reflections reflections = new Reflections("pw.chew.chewbotcca.commands");
         Set<Class<? extends Command>> subTypes = reflections.getSubTypesOf(Command.class);
         List<Command> commands = new ArrayList<>();
 
         for (Class<? extends Command> theClass : subTypes) {
+            // Don't load SubCommands or SlashCommands
+            if (theClass.getName().contains("SubCommand") || theClass.getName().contains("SlashCommand"))
+                continue;
+            try {
+                commands.add(theClass.getDeclaredConstructor().newInstance());
+                LoggerFactory.getLogger(theClass).debug("Loaded Command Successfully!");
+            } catch (InstantiationException ignored) {
+                // Tried to load a Slash-only command. Safe to ignore!
+            }
+        }
+
+        return commands.toArray(new Command[0]);
+    }
+
+    /**
+     * Gathers all SlashCommands from "commands" package.
+     *
+     * @return an array of commands
+     */
+    private static SlashCommand[] getSlashCommands() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        Reflections reflections = new Reflections("pw.chew.chewbotcca.commands");
+        Set<Class<? extends SlashCommand>> subTypes = reflections.getSubTypesOf(SlashCommand.class);
+        List<SlashCommand> commands = new ArrayList<>();
+
+        for (Class<? extends SlashCommand> theClass : subTypes) {
             // Don't load SubCommands
             if (theClass.getName().contains("SubCommand"))
                 continue;
             commands.add(theClass.getDeclaredConstructor().newInstance());
-            LoggerFactory.getLogger(theClass).debug("Loaded Successfully!");
+            LoggerFactory.getLogger(theClass).debug("Loaded SlashCommand Successfully!");
         }
 
-        return commands.toArray(new Command[0]);
+        return commands.toArray(new SlashCommand[0]);
     }
 }

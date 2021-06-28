@@ -16,42 +16,90 @@
  */
 package pw.chew.chewbotcca.commands.services;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Random;
 
 // %^reddit command
-public class RedditCommand extends Command {
+public class RedditCommand extends SlashCommand {
 
     public RedditCommand() {
         this.name = "reddit";
+        this.help = "Searches for and returns a post from reddit";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Arrays.asList(
+            new OptionData(OptionType.INTEGER, "number", "The post number to grab").setRequired(true),
+            new OptionData(OptionType.STRING, "subreddit", "The subreddit to get a post from")
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        int num = (int) event.getOptionsByName("number").get(0).getAsLong();
+        String subreddit = ResponseHelper.guaranteeStringOption(event, "subreddit", "");
+        boolean nsfwAllowed = event.getChannelType() == ChannelType.TEXT && !event.getTextChannel().isNSFW();
+
+        try {
+            event.replyEmbeds(gatherData(num, subreddit, nsfwAllowed)).queue();
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage()).setEphemeral(true).queue();
+        }
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
+        String[] args = commandEvent.getArgs().split(" ");
+        boolean nsfwAllowed = commandEvent.getChannelType() == ChannelType.TEXT && !commandEvent.getTextChannel().isNSFW();
+
+        int num = -1;
+        String subreddit = "";
+        switch (args.length) {
+            case 0:
+                commandEvent.replyWarning("This command requires at least 1 argument! Post number and subreddit (optional)");
+                return;
+            case 1:
+                try {
+                    num = Integer.parseInt(args[0]);
+                } catch (NumberFormatException e) {
+                    commandEvent.replyWarning("First argument must be a number!");
+                    return;
+                }
+            case 2:
+                subreddit = args[1];
+            default:
+        }
+
+        try {
+            commandEvent.reply(gatherData(num, subreddit, nsfwAllowed));
+        } catch (IllegalArgumentException e) {
+            commandEvent.replyWarning(e.getMessage());
+        }
+    }
+
+    private MessageEmbed gatherData(int num, String subreddit, boolean nsfwAllowed) {
         String baseUrl = "https://reddit.com/r/%s/.json";
         String url;
-        int num = -1;
         // If no args, just use the front page json
-        if(commandEvent.getArgs().length() == 0) {
+        if (subreddit.isBlank()) {
             url = "https://reddit.com/.json";
         } else {
             // Otherwise, a subreddit was probably specified, so use that
-            String[] args = commandEvent.getArgs().split(" ");
-            url = String.format(baseUrl, args[0].replace("r/", ""));
-            if(args.length > 1) {
-                num = Integer.parseInt(args[1]);
-            }
+            url = String.format(baseUrl, subreddit.replace("r/", ""));
         }
 
         // Get data from reddit
@@ -59,18 +107,16 @@ public class RedditCommand extends Command {
         JSONArray data = reddit.getJSONObject("data").getJSONArray("children");
 
         if (data.length() == 0) {
-            commandEvent.reply("This sub-reddit does not have any posts!");
-            return;
+            throw new IllegalArgumentException("This sub-reddit does not have any posts!");
         }
 
         JSONObject post;
 
         // If the specified post is greater than the actual amount of posts
-        if(num >= 0 && data.length() >= num) {
+        if (num >= 0 && data.length() >= num) {
             post = data.getJSONObject(num);
-        } else if(num >= 0) {
-            commandEvent.reply("Number too large! Pick a number between 1 and " + data.length());
-            return;
+        } else if (num >= 0) {
+            throw new IllegalArgumentException("Number too large! Pick a number between 1 and " + data.length());
         } else {
             post = getRandom(data);
         }
@@ -79,12 +125,11 @@ public class RedditCommand extends Command {
         JSONObject postData = post.getJSONObject("data");
 
         // If it's over 18 and it's not an NSFW channel, don't show it
-        if(postData.getBoolean("over_18") && commandEvent.getChannelType() == ChannelType.TEXT && !commandEvent.getTextChannel().isNSFW()) {
-            commandEvent.reply("This post is marked as NSFW and must be ran in a NSFW channel!");
-            return;
+        if (postData.getBoolean("over_18") && nsfwAllowed) {
+            throw new IllegalArgumentException("This post is marked as NSFW and must be ran in a NSFW channel!");
         }
 
-        commandEvent.reply(generatePostEmbed(postData).build());
+        return generatePostEmbed(postData).build();
     }
 
     // Code to generate a post embed based off of a post json object

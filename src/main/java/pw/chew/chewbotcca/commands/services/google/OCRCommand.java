@@ -16,26 +16,49 @@
  */
 package pw.chew.chewbotcca.commands.services.google;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 
-public class OCRCommand extends Command {
+public class OCRCommand extends SlashCommand {
 
     public OCRCommand() {
         this.name = "ocr";
+        this.help = "Finds text on images, turns out iOS 15 does this now but whatever";
         this.cooldown = 60;
         this.cooldownScope = CooldownScope.USER;
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "url", "The image URL you want to OCR").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        try {
+            String url = new URL(ResponseHelper.guaranteeStringOption(event, "url", "")).toString();
+            event.replyEmbeds(gatherData(url)).queue();
+        } catch (MalformedURLException e) {
+            event.reply("The provided arguments is not a valid URL!").setEphemeral(true).queue();
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage()).setEphemeral(true).queue();
+        }
     }
 
     @Override
@@ -48,7 +71,7 @@ public class OCRCommand extends Command {
         String url;
         if (event.getMessage().getAttachments().isEmpty()) {
             try {
-              url = new URL(event.getArgs()).toString();
+                url = new URL(event.getArgs()).toString();
             } catch (MalformedURLException e) {
                 event.reply("The provided arguments is not a valid URL!");
                 return;
@@ -58,6 +81,14 @@ public class OCRCommand extends Command {
         }
         event.getChannel().sendTyping().queue();
 
+        try {
+            event.reply(gatherData(url));
+        } catch (IllegalArgumentException e) {
+            event.replyWarning(e.getMessage());
+        }
+    }
+
+    private MessageEmbed gatherData(String url) {
         JSONObject body = new JSONObject("{\"requests\":[{\"image\":{\"source\":{\"imageUri\": \"" + url + "\"}},\"features\":[{\"type\":\"TEXT_DETECTION\"}]}]}");
 
         JSONObject response = new JSONObject(
@@ -67,8 +98,7 @@ public class OCRCommand extends Command {
         try {
             JSONObject data = response.getJSONArray("responses").getJSONObject(0);
             if (data.isEmpty()) {
-                event.reply("No text found, sorry :(");
-                return;
+                throw new IllegalArgumentException("No text found, sorry :(");
             }
             String text = data.getJSONObject("fullTextAnnotation").getString("text")
                 .replaceAll("\r", "")
@@ -76,12 +106,13 @@ public class OCRCommand extends Command {
             if (text.length() > 2048) {
                 text = text.substring(0, 2044) + "...";
             }
-            event.reply(new EmbedBuilder()
+            return new EmbedBuilder()
                 .setTitle("OCR Results")
                 .setDescription(text)
-                .build());
+                .build();
         } catch (JSONException e) {
-            event.reply("JSON Exception Occurred, sorry :(");
+            e.printStackTrace();
+            throw new IllegalArgumentException("JSON Exception Occurred, sorry :(");
         }
     }
 }

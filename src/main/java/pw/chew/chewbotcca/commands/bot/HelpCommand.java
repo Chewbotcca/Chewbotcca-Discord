@@ -16,19 +16,25 @@
  */
 package pw.chew.chewbotcca.commands.bot;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 // %^help command
-public class HelpCommand extends Command {
+public class HelpCommand extends SlashCommand {
     public HelpCommand() {
         this.name = "help";
         this.help = "Get Help with the bot";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        event.replyEmbeds(generateHelpEmbed("/")).queue();
     }
 
     @Override
@@ -38,7 +44,15 @@ public class HelpCommand extends Command {
         if (!commandEvent.getArgs().isEmpty()) {
             notice = "Psst, to view more info about a command, use `" + commandEvent.getPrefix() + "info command`!";
         }
-        MessageEmbed embed = new EmbedBuilder()
+        MessageEmbed embed = generateHelpEmbed(commandEvent.getPrefix());
+        if (notice == null)
+            commandEvent.getChannel().sendMessage(embed).queue();
+        else
+            commandEvent.getChannel().sendMessage(notice).embed(embed).queue();
+    }
+
+    private MessageEmbed generateHelpEmbed(String prefix) {
+        return new EmbedBuilder()
             .setTitle("Welcome to the Chewbotcca Discord Bot")
             .setColor(0xd084)
             .setDescription("""
@@ -48,11 +62,7 @@ public class HelpCommand extends Command {
             .addField("Commands", "You can find all my commands [here](https://chew.pw/chewbotcca/discord/commands)", true)
             .addField("Invite me!", "You can invite me to your server with [this link](https://discord.com/oauth2/authorize?client_id=604362556668248095&scope=bot&permissions=0).", true)
             .addField("Help Server", "Click [me](https://discord.gg/UjxQ3Bh) to join the help server.", true)
-            .addField("More Bot Stats", "Run `" + commandEvent.getPrefix() + "stats` to see more stats!", true)
+            .addField("More Bot Stats", "Run `" + prefix + "stats` to see more stats!", true)
             .build();
-        if (notice == null)
-            commandEvent.getChannel().sendMessage(embed).queue();
-        else
-            commandEvent.getChannel().sendMessage(notice).embed(embed).queue();
     }
 }

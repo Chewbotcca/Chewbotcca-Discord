@@ -16,6 +16,9 @@
  */
 package pw.chew.chewbotcca.util;
 
+import net.dv8tion.jda.api.utils.MiscUtil;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Properties;
 
 // bot.properties manager
@@ -149,5 +152,24 @@ public class PropertiesManager {
      */
     public static String getDatabasePassword() {
         return properties.getProperty("database_pass");
+    }
+
+    /**
+     * This determines whether we should only upsert in a single server, or globally.
+     * In development, this is usually per-server.
+     * In production, this should be null
+     *
+     * @return the forced guild id
+     */
+    @Nullable
+    public static String forceGuildId() {
+        String guildId = properties.getProperty("forced_guild_id");
+        if (guildId.length() < 15) return null;
+        try {
+            MiscUtil.parseSnowflake(guildId);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        return guildId;
     }
 }

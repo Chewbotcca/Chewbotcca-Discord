@@ -16,10 +16,12 @@
  */
 package pw.chew.chewbotcca.commands.minecraft;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.json.JSONArray;
@@ -32,17 +34,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MCStatusCommand extends Command {
+public class MCStatusCommand extends SlashCommand {
 
     public MCStatusCommand() {
         this.name = "mcstatus";
+        this.help = "Gather Mojang/Minecraft server status";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
     }
 
     @Override
+    protected void execute(SlashCommandEvent event) {
+        event.replyEmbeds(gatherStatus()).queue();
+    }
+
+    @Override
     protected void execute(CommandEvent commandEvent) {
         commandEvent.getChannel().sendTyping().queue();
+        commandEvent.reply(gatherStatus());
+    }
+
+    private MessageEmbed gatherStatus() {
         // Get stats
         JSONArray statusurl = new JSONArray(RestClient.get("https://status.mojang.com/check"));
         List<String> forbiddenSites = Collections.singletonList("sessionserver.mojang.com");
@@ -84,7 +96,7 @@ public class MCStatusCommand extends Command {
             e.addField("Down", String.join("\n", red), true);
         }
 
-        commandEvent.reply(e.build());
+        return e.build();
     }
 
     public boolean isUp(String url) {

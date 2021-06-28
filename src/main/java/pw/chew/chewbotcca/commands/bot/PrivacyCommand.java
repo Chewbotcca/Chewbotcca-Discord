@@ -16,14 +16,21 @@
  */
 package pw.chew.chewbotcca.commands.bot;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
-public class PrivacyCommand extends Command {
+public class PrivacyCommand extends SlashCommand {
 
     public PrivacyCommand() {
         this.name = "privacy";
+        this.help = "Find a link to Chewbotcca's privacy policy";
         this.guildOnly = false;
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        event.reply("You can view the Chewbotcca privacy policy here: https://chew.pw/chewbotcca/discord/privacy").setEphemeral(true).queue();
     }
 
     @Override

@@ -16,17 +16,21 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -38,34 +42,52 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
-import java.util.Date;
+import java.util.Collections;
 
-public class APODCommand extends Command {
+public class APODCommand extends SlashCommand {
 
     public APODCommand() {
         this.name = "apod";
+        this.help = "Show NASA's Astronomy Picture of the Day for today, or a specified date";
         this.aliases = new String[]{"dailyspace", "astropix", "apix"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "date", "The date in MM/DD/YYYY format, blank for today")
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        try {
+            event.replyEmbeds(gatherPicture(ResponseHelper.guaranteeStringOption(event, "date", "astropix"))).queue();
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage()).setEphemeral(true).queue();
+        }
     }
 
     @Override
     protected void execute(CommandEvent event) {
-        String date = "astropix";
-        if (!event.getArgs().isBlank()) {
-            String[] input = event.getArgs().split("/");
+        event.getChannel().sendTyping().queue();
+        try {
+            event.reply(gatherPicture(event.getArgs()));
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage());
+        }
+    }
+
+    private MessageEmbed gatherPicture(String date) {
+        if (!date.equals("astropix") || date.isBlank()) {
+            String[] input = date.split("/");
             if (input.length < 3) {
-                event.reply("Invalid format! Must be MM/DD/YYYY");
-                return;
+                throw new IllegalArgumentException("Invalid format! Must be MM/DD/YYYY");
             }
-            date = getDateURL(input);
-            if (date == null) {
-                event.reply("Invalid date! Range is June 16th, 1995 to today!");
-                return;
+            try {
+                date = getDateURL(input);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Error occurred: " + e.getMessage() + " Range is June 16th, 1995 to today!");
             }
         }
-
-        event.getChannel().sendTyping().queue();
 
         String url = String.format("https://apod.nasa.gov/apod/%s.html", date);
 
@@ -77,9 +99,8 @@ public class APODCommand extends Command {
         try {
             doc = new DomSerializer(new CleanerProperties()).createDOM(tagNode);
         } catch (ParserConfigurationException e) {
-            event.reply("Error configuring Parser!");
             e.printStackTrace();
-            return;
+            throw new IllegalArgumentException("Error configuring Parser!");
         }
 
         // Find the image
@@ -92,23 +113,20 @@ public class APODCommand extends Command {
             img += src.getAttributes().getNamedItem("src").toString().replace("src=", "").replace("\"", "");
         } catch (NullPointerException ignored) {
         } catch (XPathExpressionException e) {
-            event.reply("Error in XPath Expression!");
             e.printStackTrace();
-            return;
+            throw new IllegalArgumentException("Error in XPath Expression!");
         }
 
         // If 404 somehow
         if (img.equals("https://apod.nasa.gov/apod/")) {
-            event.reply("Invalid date! Range is June 16th, 1995 to today!");
-            return;
+            throw new IllegalArgumentException("Invalid date! Range is June 16th, 1995 to today!");
         }
 
-        MessageChannel channel = event.getChannel();
         EmbedBuilder embed = new EmbedBuilder();
         embed.setImage(img)
             .setAuthor("NASA Astronomy Picture of the Day")
             .setTitle(title, url);
-        channel.sendMessage(embed.build()).queue();
+        return embed.build();
     }
 
     private String getDateURL(String[] date) {
@@ -121,20 +139,18 @@ public class APODCommand extends Command {
         if (year < 2000)
             year += 2000;
 
-        Date parse = new Date(year - 1900, month, day);
-
         // No APOD prior to 1995
         if (year < 1995)
-            return null;
+            throw new IllegalArgumentException("Year must not be prior to 1995.");
         // No APOD for the future
         if (year > current.getYear())
-            return null;
+            throw new IllegalArgumentException("Year must not be later than current year.");
         if (year == current.getYear()) {
             if (month > current.getMonthValue())
-                return null;
+                throw new IllegalArgumentException("Month must not be later than current month.");
             if (month == current.getMonthValue()) {
                 if (day > current.getDayOfMonth())
-                    return null;
+                    throw new IllegalArgumentException("Day must not be later than current day.");
             }
         }
         String yearString = String.join("", Arrays.asList(String.valueOf(year).split("")).subList(2, 4));

@@ -16,19 +16,26 @@
  */
 package pw.chew.chewbotcca.commands.bot;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 // %^ping command
-public class PingCommand extends Command {
+public class PingCommand extends SlashCommand {
 
     public PingCommand() {
         this.name = "ping";
         this.help = "Ping the bot";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent slashCommandEvent) {
+        // Has to be simpler due to interaction weirdness
+        slashCommandEvent.reply("Pong!").setEphemeral(true).queue();
     }
 
     @Override

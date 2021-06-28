@@ -16,14 +16,6 @@
 
     <repositories>
         <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>jcenter</id>
-            <name>jcenter-bintray</name>
-            <url>https://jcenter.bintray.com</url>
-        </repository>
-        <repository>
             <id>dv8tion</id>
             <name>m2-dv8tion</name>
             <url>https://m2.dv8tion.net/releases</url>
@@ -36,6 +28,10 @@
             <id>chew-jenkins</id>
             <url>https://jenkins.chew.pw/plugin/repository/everything/</url>
         </repository>
+        <repository>
+            <id>chew-m2</id>
+            <url>https://m2.chew.pro/releases</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -45,13 +41,19 @@
             <artifactId>JDA</artifactId>
             <version>4.3.0_283</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>opus-java</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <!-- The command wapper, well, my fork of it -->
+        <!-- The command wrapper, well, my fork of it -->
         <dependency>
             <groupId>pw.chew</groupId>
             <artifactId>jda-chewtils</artifactId>
-            <version>1.18</version>
+            <version>1.20.3</version>
             <scope>compile</scope>
             <type>pom</type>
         </dependency>

@@ -16,25 +16,53 @@
  */
 package pw.chew.chewbotcca.commands.util;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.Mention;
+import pw.chew.chewbotcca.util.ResponseHelper;
+
+import java.util.Collections;
 
 // %^quote
-public class QuoteCommand extends Command {
+public class QuoteCommand extends SlashCommand {
 
     public QuoteCommand() {
         this.name = "quote";
+        this.help = "References a message from a server/channel this bot is in and can view";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "message_link", "The link (Copy URL) of a message to reference").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        Message message;
+        String[] link = ResponseHelper.guaranteeStringOption(event, "message_link", "").split("/");
+        try {
+            message = retrieveMessageFromLink(link, event.getJDA());
+        } catch (IllegalArgumentException e) {
+            event.reply("Could not get message! " + e.getMessage()).setEphemeral(true).queue();
+            return;
+        }
+
+        boolean thisGuild = event.getGuild() != null && event.getGuild().getId().equals(message.getGuild().getId());
+        boolean thisChannel = event.getChannel().getId().equals(message.getChannel().getId());
+        event.replyEmbeds(gatherData(message, thisGuild, thisChannel)).queue();
     }
 
     @Override
@@ -50,6 +78,12 @@ public class QuoteCommand extends Command {
             return;
         }
 
+        boolean thisGuild = event.getMessage().isFromGuild() && event.getGuild().getId().equals(message.getGuild().getId());
+        boolean thisChannel = event.getChannel().getId().equals(message.getChannel().getId());
+        event.reply(gatherData(message, thisGuild, thisChannel));
+    }
+
+    private MessageEmbed gatherData(Message message, boolean thisGuild, boolean thisChannel) {
         // Get message details and send
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Quote");
@@ -57,8 +91,6 @@ public class QuoteCommand extends Command {
         embed.setTimestamp(message.getTimeCreated());
         embed.setAuthor(message.getAuthor().getAsTag(), null, message.getAuthor().getAvatarUrl());
         if (message.isFromGuild()) {
-            boolean thisGuild = event.getMessage().isFromGuild() && event.getGuild().getId().equals(message.getGuild().getId());
-            boolean thisChannel = event.getChannel().getId().equals(message.getChannel().getId());
             if (!thisGuild) {
                 embed.addField("Server", message.getGuild().getName(), true);
             }
@@ -77,7 +109,7 @@ public class QuoteCommand extends Command {
             embed.addField("Channel", "DMs with " + message.getPrivateChannel().getUser().getAsTag(), true);
         }
 
-        event.reply(embed.build());
+        return embed.build();
     }
 
     private Message retrieveMessage(CommandEvent event) {
@@ -95,20 +127,8 @@ public class QuoteCommand extends Command {
             // Check if it's a link
             String[] link = arg.split("/");
             if (link.length == 7) {
-                String serverId = link[4];
-                String channelId = link[5];
-                String messageId = link[6];
-                if (serverId.equals("@me")) {
-                    channel = event.getJDA().getPrivateChannelById(channelId);
-                } else {
-                    channel = event.getJDA().getTextChannelById(channelId);
-                }
-
-                if (channel == null)
-                    throw new IllegalArgumentException("Channel was invalid!");
-
                 try {
-                    return channel.retrieveMessageById(messageId).complete();
+                    return retrieveMessageFromLink(link, event.getJDA());
                 } catch (NullPointerException | IllegalArgumentException e) {
                     throw new IllegalArgumentException("Message ID doesn't exist or is invalid!");
                 }
@@ -131,5 +151,30 @@ public class QuoteCommand extends Command {
         }
 
         throw new IllegalArgumentException("Too many arguments provided!");
+    }
+
+    public static Message retrieveMessageFromLink(String[] link, JDA jda) {
+        if (link.length != 7) {
+            throw new IllegalArgumentException("Invalid link provided!");
+        }
+
+        MessageChannel channel;
+        String serverId = link[4];
+        String channelId = link[5];
+        String messageId = link[6];
+        if (serverId.equals("@me")) {
+            channel = jda.getPrivateChannelById(channelId);
+        } else {
+            channel = jda.getTextChannelById(channelId);
+        }
+
+        if (channel == null)
+            throw new IllegalArgumentException("Channel was invalid!");
+
+        try {
+            return channel.retrieveMessageById(messageId).complete();
+        } catch (NullPointerException | IllegalArgumentException e) {
+            throw new IllegalArgumentException("Message ID doesn't exist or is invalid!");
+        }
     }
 }

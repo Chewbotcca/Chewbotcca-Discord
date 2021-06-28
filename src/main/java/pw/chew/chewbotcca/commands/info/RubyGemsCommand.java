@@ -16,60 +16,88 @@
  */
 package pw.chew.chewbotcca.commands.info;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.text.NumberFormat;
+import java.util.Collections;
 import java.util.Locale;
 
 // %^rubygem command
-public class RubyGemsCommand extends Command {
+public class RubyGemsCommand extends SlashCommand {
 
     public RubyGemsCommand() {
         this.name = "rubygem";
+        this.help = "Searches for and returns some basic info about a specified ruby gem";
         this.aliases = new String[]{"gem", "rgem", "rubyg", "gems"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "gem", "The gem to lookup").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        try {
+            event.replyEmbeds(gatherGemData(ResponseHelper.guaranteeStringOption(event, "gem", ""))).queue();
+        } catch (IllegalArgumentException e) {
+            event.replyEmbeds(ResponseHelper.generateFailureEmbed(null, e.getMessage())).setEphemeral(true).queue();
+        }
     }
 
     @Override
     protected void execute(CommandEvent event) {
         // Start typing
         event.getChannel().sendTyping().queue();
+
+        try {
+            event.reply(gatherGemData(event.getArgs().trim()));
+        } catch (IllegalArgumentException e) {
+            event.replyWarning(e.getMessage());
+        }
+    }
+
+    private MessageEmbed gatherGemData(String name) {
         JSONObject data;
         // Get gem if it exists
         try {
-            data = new JSONObject(RestClient.get("https://rubygems.org/api/v1/gems/" + event.getArgs() + ".json"));
+            data = new JSONObject(RestClient.get("https://rubygems.org/api/v1/gems/" + name + ".json"));
         } catch (JSONException e) {
-            event.reply("Invalid ruby gem!");
-            return;
+            throw new IllegalArgumentException("Invalid ruby gem!");
         }
         // Get ranking from best gems
         int rank = -1;
         try {
-            rank = new JSONArray(RestClient.get("https://bestgems.org/api/v1/gems/" + event.getArgs() + "/total_ranking.json")).getJSONObject(0).getInt("total_ranking");
-        } catch (JSONException ignored) { }
+            rank = new JSONArray(RestClient.get("https://bestgems.org/api/v1/gems/" + name + "/total_ranking.json")).getJSONObject(0).getInt("total_ranking");
+        } catch (JSONException ignored) {
+        }
 
         // Get info
         EmbedBuilder e = new EmbedBuilder();
-                e.setTitle(data.getString("name") + " (" + data.getString("version") + ")", data.getString("project_uri"));
-                e.setAuthor("RubyGem Information", null, "https://cdn.discordapp.com/emojis/232899886419410945.png");
-                e.setDescription(data.getString("info"));
+        e.setTitle(data.getString("name") + " (" + data.getString("version") + ")", data.getString("project_uri"));
+        e.setAuthor("RubyGem Information", null, "https://cdn.discordapp.com/emojis/232899886419410945.png");
+        e.setDescription(data.getString("info"));
 
         e.addField("Authors", data.getString("authors"), true);
 
         e.addField("Downloads", "For Version: " + NumberFormat.getNumberInstance(Locale.US).format(data.getInt("version_downloads")) + "\n" +
-                "Total: " + NumberFormat.getNumberInstance(Locale.US).format(data.getInt("downloads")), true);
+            "Total: " + NumberFormat.getNumberInstance(Locale.US).format(data.getInt("downloads")), true);
 
         if (!data.isNull("licenses"))
             e.addField("License", data.getJSONArray("licenses").getString(0), true);
-        if(rank > -1)
+        if (rank > -1)
             e.addField("Rank", "#" + NumberFormat.getNumberInstance(Locale.US).format(rank), true);
         else
             e.addField("Rank", "Not Ranked Yet", true);
@@ -95,6 +123,6 @@ public class RubyGemsCommand extends Command {
 
         e.addField("Links", links.toString(), true);
 
-        event.reply(e.build());
+        return e.build();
     }
 }

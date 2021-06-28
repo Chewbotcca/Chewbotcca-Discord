@@ -16,42 +16,83 @@
  */
 package pw.chew.chewbotcca.commands.util;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.menu.EmbedPaginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
+import java.util.Collections;
+
 // %^define command
-public class DefineCommand extends Command {
+public class DefineCommand extends SlashCommand {
 
     public DefineCommand() {
         this.name = "define";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.help = "Defines a word.";
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "word", "The word to define").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        // Get the word from the command
+        String word = ResponseHelper.guaranteeStringOption(event, "word", "");
+
+        // Send message then edit it
+        EmbedPaginator paginator;
+        try {
+            paginator = buildPaginator(word, event.getUser());
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage()).setEphemeral(true).queue();
+            return;
+        }
+
+        event.replyEmbeds(new EmbedBuilder().setDescription("Checking the dictionary...").build()).queue(interactionHook -> {
+            interactionHook.retrieveOriginal().queue(message -> {
+                paginator.paginate(message, 1);
+            });
+        });
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
         // Get the word from the command
         String word = commandEvent.getArgs();
+
+        // Send message then edit it
+        try {
+            buildPaginator(word, commandEvent.getAuthor()).paginate(commandEvent.getChannel(), 1);
+        } catch (IllegalArgumentException e) {
+            commandEvent.replyWarning(e.getMessage());
+        }
+    }
+
+    private EmbedPaginator buildPaginator(String word, User author) {
         // Attempt to grab the word, if it doesn't exist let them know
         JSONArray grabbedword;
         try {
             grabbedword = new JSONArray(RestClient.get("https://api.wordnik.com/v4/word.json/" + word + "/definitions?includeRelated=true&useCanonical=false&includeTags=false&api_key=" + PropertiesManager.getWordnikToken()));
         } catch(JSONException e) {
-            commandEvent.reply("Word not found! Check your local spell-checker!");
-            return;
+            throw new IllegalArgumentException("Word not found! Check your local spell-checker!");
         }
 
         EmbedPaginator.Builder paginator = JDAUtilUtil.makeEmbedPaginator();
-        paginator.setUsers(commandEvent.getAuthor());
+        paginator.setUsers(author);
 
         int definitions = grabbedword.length();
 
@@ -94,6 +135,6 @@ public class DefineCommand extends Command {
         }
         // Send it off!
         paginator.setText("");
-        paginator.build().paginate(commandEvent.getChannel(), 1);
+        return paginator.build();
     }
 }
