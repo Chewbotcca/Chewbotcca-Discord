@@ -174,7 +174,7 @@ public class Main {
      *
      * @return an array of commands
      */
-    public static SlashCommand[] getSlashCommands() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    private static SlashCommand[] getSlashCommands() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Reflections reflections = new Reflections("pw.chew.chewbotcca.commands");
         Set<Class<? extends SlashCommand>> subTypes = reflections.getSubTypesOf(SlashCommand.class);
         List<SlashCommand> commands = new ArrayList<>();
