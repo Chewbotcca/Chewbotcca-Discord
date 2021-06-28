@@ -65,10 +65,10 @@ public class ChannelInfoCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         GuildChannel channel = event.getOption("channel").getAsGuildChannel();
-        switch (ResponseHelper.guaranteeStringOption(event, "type", "general")) {
-            case "pins" -> getPinsInfo((TextChannel) channel, event.getJDA());
-            default -> gatherMainInfo(channel, null);
-        }
+        event.replyEmbeds(switch (ResponseHelper.guaranteeStringOption(event, "type", "general")) {
+            case "pins" -> getPinsInfo((TextChannel) channel, event.getJDA()).build();
+            default -> gatherMainInfo(channel, null).build();
+        }).queue();
     }
 
     @Override
@@ -149,7 +149,9 @@ public class ChannelInfoCommand extends SlashCommand {
                 List<Webhook> hooks = textChannel.retrieveWebhooks().complete();
                 e.addField("Webhooks", String.valueOf(hooks.size()), true);
             }
-            e.addField("Pins", textChannel.retrievePinnedMessages().complete().size() + " / 50", true);
+            if (commandEvent != null && commandEvent.getSelfMember().hasPermission(Permission.VIEW_CHANNEL)) {
+                e.addField("Pins", textChannel.retrievePinnedMessages().complete().size() + " / 50", true);
+            }
             List<String> info = new ArrayList<>();
             if (textChannel.isNews())
                 info.add("<:news:725504846937063595> News");

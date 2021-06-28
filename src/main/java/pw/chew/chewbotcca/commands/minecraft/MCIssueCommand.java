@@ -82,7 +82,11 @@ public class MCIssueCommand extends SlashCommand {
         }
 
         JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
-        event.replyEmbeds(generateEmbed(data, issue, apiUrl).build()).queue();
+        try {
+            event.replyEmbeds(generateEmbed(data, issue, apiUrl).build()).queue();
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage()).setEphemeral(true).queue();
+        }
     }
 
     @Override
@@ -102,7 +106,7 @@ public class MCIssueCommand extends SlashCommand {
         }
 
         String apiUrl = getApiUrl(issue.split("-")[0]);
-        if(apiUrl == null) {
+        if (apiUrl == null) {
             event.reply("Invalid Project Specified. Supported projects are any from Mojang Studios or SpigotMC Jira");
             return;
         }
@@ -111,15 +115,17 @@ public class MCIssueCommand extends SlashCommand {
 
         JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
 
-        event.reply(generateEmbed(data, issue, apiUrl).build());
+        try {
+            event.reply(generateEmbed(data, issue, apiUrl).build());
+        } catch (IllegalArgumentException e) {
+            event.replyWarning(e.getMessage());
+        }
     }
 
     public static EmbedBuilder generateEmbed(JSONObject data, String issue, String apiUrl) {
         EmbedBuilder embed = new EmbedBuilder();
         if(data.has("errorMessages")) {
-            embed.setTitle("Error!");
-            embed.setDescription(data.getJSONArray("errorMessages").getString(0));
-            return embed;
+            throw new IllegalArgumentException(data.getJSONArray("errorMessages").getString(0));
         }
 
         data = data.getJSONObject("fields");

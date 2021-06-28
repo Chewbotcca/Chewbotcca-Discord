@@ -131,6 +131,10 @@ public class DiscrimCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             String discrim = ResponseHelper.guaranteeStringOption(event, "discriminator", event.getUser().getDiscriminator());
+            if (!(discrim.length() == 4 && discrim.matches("[0-9]{4}"))) {
+                event.reply("Invalid discriminator provided!").setEphemeral(true).queue();
+                return;
+            }
             // Send message then edit it
             event.replyEmbeds(new EmbedBuilder().setDescription("Checking...").build()).queue(interactionHook -> {
                 interactionHook.retrieveOriginal().queue(message -> {

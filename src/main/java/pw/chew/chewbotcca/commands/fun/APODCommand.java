@@ -82,9 +82,10 @@ public class APODCommand extends SlashCommand {
             if (input.length < 3) {
                 throw new IllegalArgumentException("Invalid format! Must be MM/DD/YYYY");
             }
-            date = getDateURL(input);
-            if (date == null) {
-                throw new IllegalArgumentException("Invalid date! Range is June 16th, 1995 to today!");
+            try {
+                date = getDateURL(input);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Error occurred: " + e.getMessage() + " Range is June 16th, 1995 to today!");
             }
         }
 
@@ -140,16 +141,16 @@ public class APODCommand extends SlashCommand {
 
         // No APOD prior to 1995
         if (year < 1995)
-            return null;
+            throw new IllegalArgumentException("Year must not be prior to 1995.");
         // No APOD for the future
         if (year > current.getYear())
-            return null;
+            throw new IllegalArgumentException("Year must not be later than current year.");
         if (year == current.getYear()) {
             if (month > current.getMonthValue())
-                return null;
+                throw new IllegalArgumentException("Month must not be later than current month.");
             if (month == current.getMonthValue()) {
                 if (day > current.getDayOfMonth())
-                    return null;
+                    throw new IllegalArgumentException("Day must not be later than current day.");
             }
         }
         String yearString = String.join("", Arrays.asList(String.valueOf(year).split("")).subList(2, 4));

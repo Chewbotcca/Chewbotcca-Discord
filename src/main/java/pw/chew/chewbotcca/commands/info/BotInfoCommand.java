@@ -62,10 +62,14 @@ public class BotInfoCommand extends SlashCommand {
         String botId = event.getOption("bot").getAsUser().getId();
 
         // Get it from the specified list if it's valid, and let them know
-        switch (ResponseHelper.guaranteeStringOption(event, "list", "dbots")) {
-            case "topgg" -> event.replyEmbeds(gatherTopggInfo(botId, event.getJDA()).build()).queue();
-            case "del" -> event.replyEmbeds(gatherDELInfo(botId, event.getJDA()).build()).queue();
-            default -> event.replyEmbeds(gatherDBotsInfo(botId, event.getJDA()).build()).queue();
+        try {
+            switch (ResponseHelper.guaranteeStringOption(event, "list", "dbots")) {
+                case "topgg" -> event.replyEmbeds(gatherTopggInfo(botId, event.getJDA()).build()).queue();
+                case "del" -> event.replyEmbeds(gatherDELInfo(botId, event.getJDA()).build()).queue();
+                default -> event.replyEmbeds(gatherDBotsInfo(botId, event.getJDA()).build()).queue();
+            }
+        } catch (IllegalArgumentException e) {
+            event.replyEmbeds(ResponseHelper.generateFailureEmbed("Error occurred!", e.getMessage())).setEphemeral(true).queue();
         }
     }
 
@@ -88,21 +92,25 @@ public class BotInfoCommand extends SlashCommand {
         }
         // Default list: dbl, otherwise use what they specify
         String list = "dbl";
-        if(args.length > 1) {
+        if (args.length > 1) {
             list = args[1].toLowerCase();
         }
         // Get it from the specified list if it's valid, and let them know
-        switch (list) {
-            case "dbl", "top.gg", "topgg" -> commandEvent.reply(gatherTopggInfo(botId, commandEvent.getJDA()).build());
-            case "dbots" -> commandEvent.reply(gatherDBotsInfo(botId, commandEvent.getJDA()).build());
-            case "del" -> commandEvent.reply(gatherDELInfo(botId, commandEvent.getJDA()).build());
-            default -> commandEvent.reply("""
-                Invalid Bot List! Supported lists:
-                `dbots` -> <https://discord.bots.gg>
-                `topgg` -> <https://top.gg>
-                `del` -> <https://discordextremelist.xyz>
-                
-                Got one to suggest? Open an issue on GitHub or suggest one with `%^feedback`!""".replace("%^", commandEvent.getPrefix()));
+        try {
+            switch (list) {
+                case "dbl", "top.gg", "topgg" -> commandEvent.reply(gatherTopggInfo(botId, commandEvent.getJDA()).build());
+                case "dbots" -> commandEvent.reply(gatherDBotsInfo(botId, commandEvent.getJDA()).build());
+                case "del" -> commandEvent.reply(gatherDELInfo(botId, commandEvent.getJDA()).build());
+                default -> commandEvent.reply("""
+                    Invalid Bot List! Supported lists:
+                    `dbots` -> <https://discord.bots.gg>
+                    `topgg` -> <https://top.gg>
+                    `del` -> <https://discordextremelist.xyz>
+                                    
+                    Got one to suggest? Open an issue on GitHub or suggest one with `%^feedback`!""".replace("%^", commandEvent.getPrefix()));
+            }
+        } catch (IllegalArgumentException e) {
+            commandEvent.reply(ResponseHelper.generateFailureEmbed("Error occurred!", e.getMessage()));
         }
     }
 
@@ -118,7 +126,7 @@ public class BotInfoCommand extends SlashCommand {
 
         // If there's an error let them know
         if(bot.has("error")) {
-            return new EmbedBuilder().setTitle("Error!").setDescription(bot.getString("error"));
+            throw new IllegalArgumentException(bot.getString("error"));
         }
 
         // Start generating the embed
@@ -219,7 +227,7 @@ public class BotInfoCommand extends SlashCommand {
 
         // If there's a message
         if(bot.has("message")) {
-            return new EmbedBuilder().setTitle("Error!").setDescription("This bot does not exist on this list!");
+            throw new IllegalArgumentException("This bot does not exist on this list!");
         }
 
         // Start setting embed
@@ -274,7 +282,7 @@ public class BotInfoCommand extends SlashCommand {
 
         // If there's an error let them know
         if(response.getBoolean("error")) {
-            return new EmbedBuilder().setTitle("Error!").setDescription("An error occurred getting that bot, does it exist");
+            throw new IllegalArgumentException("An error occurred getting that bot, does it exist");
         }
 
         JSONObject bot = response.getJSONObject("bot");

@@ -81,6 +81,7 @@ public class RedditCommand extends SlashCommand {
                 }
             case 2:
                 subreddit = args[1];
+            default:
         }
 
         try {
