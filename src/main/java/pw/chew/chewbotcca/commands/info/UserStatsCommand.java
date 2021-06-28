@@ -16,13 +16,15 @@
  */
 package pw.chew.chewbotcca.commands.info;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 
 import java.util.ArrayList;
@@ -32,27 +34,28 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UserStatsCommand extends Command {
+public class UserStatsCommand extends SlashCommand {
+    private final Map<User.UserFlag, Integer> stats = new HashMap<>();
+    private final Map<User.UserFlag, List<User>> userFlagUserList = new HashMap<>();
 
     public UserStatsCommand() {
         this.name = "userstats";
+        this.help = "Finds amount of users with user flags";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
     }
 
     @Override
+    protected void execute(SlashCommandEvent event) {
+        gatherData(event.getJDA());
+
+        event.replyEmbeds(buildEmbed(event.getJDA())).queue();
+    }
+
+    @Override
     protected void execute(CommandEvent event) {
-        Map<User.UserFlag, Integer> stats = new HashMap<>();
-        Map<User.UserFlag, List<User>> userFlagUserList = new HashMap<>();
-        for (User user : event.getJDA().getUserCache()) {
-            for (User.UserFlag flag : user.getFlags()) {
-                int num = stats.getOrDefault(flag, 0);
-                stats.put(flag, num + 1);
-                List<User> list = userFlagUserList.getOrDefault(flag, new ArrayList<>());
-                list.add(user);
-                userFlagUserList.put(flag, list);
-            }
-        }
+        gatherData(event.getJDA());
+
         if (event.getArgs().contains("--users")) {
             try {
                 User.UserFlag flag = User.UserFlag.valueOf(event.getArgs().replace("--users", "").trim());
@@ -63,18 +66,37 @@ public class UserStatsCommand extends Command {
                 return;
             }
         }
+
+        event.reply(buildEmbed(event.getJDA()));
+    }
+
+    public void gatherData(JDA jda) {
+        stats.clear();
+        userFlagUserList.clear();
+        for (User user : jda.getUserCache()) {
+            for (User.UserFlag flag : user.getFlags()) {
+                int num = stats.getOrDefault(flag, 0);
+                stats.put(flag, num + 1);
+                List<User> list = userFlagUserList.getOrDefault(flag, new ArrayList<>());
+                list.add(user);
+                userFlagUserList.put(flag, list);
+            }
+        }
+    }
+
+    public MessageEmbed buildEmbed(JDA jda) {
         Map<User.UserFlag, Integer> ranked = sortByValue(stats);
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("User Flags Ranking");
         List<String> rankings = new ArrayList<>();
-        embed.setFooter("Cached users: " + event.getJDA().getUserCache().size());
+        embed.setFooter("Cached users: " + jda.getUserCache().size());
         int i = 1;
         for (User.UserFlag flag : ranked.keySet()) {
             rankings.add("#" + i + ": " + flag.getName() + " - " + ranked.get(flag) + " users");
             i++;
         }
         embed.setDescription(String.join("\n", rankings));
-        event.reply(embed.build());
+        return embed.build();
     }
 
     public Paginator buildUserPaginator(List<User> list, User.UserFlag flag, JDA jda) {

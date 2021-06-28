@@ -153,7 +153,7 @@ public class QuoteCommand extends SlashCommand {
         throw new IllegalArgumentException("Too many arguments provided!");
     }
 
-    private Message retrieveMessageFromLink(String[] link, JDA jda) {
+    public static Message retrieveMessageFromLink(String[] link, JDA jda) {
         if (link.length != 7) {
             throw new IllegalArgumentException("Invalid link provided!");
         }

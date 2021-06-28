@@ -16,22 +16,50 @@
  */
 package pw.chew.chewbotcca.commands.moderation;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.MissingAccessException;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import pw.chew.chewbotcca.util.ResponseHelper;
 
-public class UnsuppressCommand extends Command {
+import java.util.Collections;
+
+import static pw.chew.chewbotcca.commands.util.QuoteCommand.retrieveMessageFromLink;
+
+public class UnsuppressCommand extends SlashCommand {
 
     public UnsuppressCommand() {
         this.name = "unsuppress";
-        this.help = "";
+        this.help = "Unsuppresses an embed given a message URL";
         this.botPermissions = new Permission[]{Permission.MESSAGE_MANAGE};
         this.userPermissions = new Permission[]{Permission.MESSAGE_MANAGE};
         this.guildOnly = true;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "message_link", "The message to unsuppress").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        String args = ResponseHelper.guaranteeStringOption(event, "message_link", "");
+        Message message;
+        try {
+            message = retrieveMessageFromLink(args.split("/"), event.getJDA());
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage()).setEphemeral(true).queue();
+            return;
+        }
+
+        message.suppressEmbeds(false).queue(
+            unused -> event.reply("Successfully unsuppressed the embed!").queue(),
+            throwable -> event.reply("Could not unsuppress the embed!").queue()
+        );
     }
 
     @Override
