@@ -69,7 +69,12 @@ public class RoleInfoCommand extends SlashCommand {
 
         // Make a response depending on the mode
         if (mode.equals("members")) {
-            gatherMembersInfo(event.getGuild(), role, false, event.getUser());
+            // Send message then edit it
+            event.replyEmbeds(new EmbedBuilder().setDescription("Gathering members...").build()).queue(interactionHook -> {
+                interactionHook.retrieveOriginal().queue(message -> {
+                    gatherMembersInfo(event.getGuild(), role, false, event.getUser()).paginate(message, 1);
+                });
+            });
         } else {
             event.replyEmbeds(gatherMainInfo(event.getGuild(), role, event.getMember()).build()).queue();
         }
@@ -124,7 +129,7 @@ public class RoleInfoCommand extends SlashCommand {
 
         // Make a response depending on the mode
         if(mode.equals("members")) {
-            gatherMembersInfo(event.getGuild(), role, mention, event.getAuthor());
+            gatherMembersInfo(event.getGuild(), role, mention, event.getAuthor()).paginate(event.getChannel(), 1);
         } else {
             event.reply(gatherMainInfo(event.getGuild(), role, event.getMember()).build());
         }
