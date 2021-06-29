@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.utils.TimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,7 +34,6 @@ import pw.chew.chewbotcca.util.RestClient;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 // %^mcuser command
@@ -102,13 +102,12 @@ public class MCUserCommand extends SlashCommand {
             String time;
             if(data.has("changedToAt")) {
                 OffsetDateTime at = Instant.ofEpochMilli(data.getLong("changedToAt")).atOffset(ZoneOffset.UTC);
-                DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/uuuu' @ 'HH:mm' UTC'");
-                time = at.format(DATE_TIME_FORMATTER);
+                time = TimeFormat.DATE_TIME_SHORT.format(at);
             } else {
                 time = "Original";
             }
             String username = data.getString("name");
-            names.append(time).append(" - ").append(username).append("\n");
+            names.append(time).append(" - `").append(username).append("`\n");
         }
         // Return info
         return (new EmbedBuilder()

@@ -31,6 +31,7 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.utils.TimeFormat;
 import pw.chew.chewbotcca.objects.IKnowWhatIAmDoingISwearException;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
@@ -288,12 +289,11 @@ public class ServerInfoCommand extends SlashCommand {
             embed.setTitle("Boosters for " + server.getName());
             List<CharSequence> boostString = new ArrayList<>();
             // Get a now time for a basis of comparison
-            Instant now = Instant.now();
             for (Member booster : boosters) {
                 OffsetDateTime timeBoosted = booster.getTimeBoosted();
                 // If they're still boosting (in case they stop boosting between gathering boosters and finding how long they're boosting
                 if (timeBoosted != null)
-                    boostString.add(booster.getAsMention() + " for " + DateTime.timeAgo(now.toEpochMilli() - timeBoosted.toInstant().toEpochMilli()));
+                    boostString.add(booster.getAsMention() + " for " + TimeFormat.DATE_SHORT.format(timeBoosted.toInstant()) + " (" + DateTime.timeAgoShort(timeBoosted.toInstant(), true) + ")");
             }
             embed.setDescription(String.join("\n", boostString));
             if (boostString.isEmpty()) {
@@ -470,9 +470,9 @@ public class ServerInfoCommand extends SlashCommand {
             for (Member member : members) {
                 if (member.getUser().isBot()) {
                     if (renderMention) {
-                        pbuilder.addItems(member.getAsMention() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
+                        pbuilder.addItems(member.getAsMention() + " added " + TimeFormat.DATE_SHORT.format(member.getTimeJoined()) + " (" + DateTime.timeAgoShort(member.getTimeJoined().toInstant(), false) + " ago)");
                     } else {
-                        pbuilder.addItems(member.getUser().getAsTag() + " added " + DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli(), false) + " ago");
+                        pbuilder.addItems(member.getUser().getAsTag() + " added " + TimeFormat.DATE_SHORT.format(member.getTimeJoined()) + " (" + DateTime.timeAgoShort(member.getTimeJoined().toInstant(), false) + " ago)");
                     }
                 }
             }
@@ -702,12 +702,11 @@ public class ServerInfoCommand extends SlashCommand {
                 float daysNeeded = ((float) milestone / membersPerDay);
                 Instant timeAtMilestone = server.getTimeCreated().toInstant().plusMillis((long) (daysNeeded * 24 * 60 * 60 * 1000));
                 OffsetDateTime date = timeAtMilestone.atOffset(server.getTimeCreated().getOffset());
-                String day = date.format(format);
                 int year = date.getYear();
                 if (year - 100 > OffsetDateTime.now().getYear())
                     continue;
 
-                daysToMilestone.add(NumberFormat.getNumberInstance(Locale.US).format(milestone) + " Members - " + day);
+                daysToMilestone.add(NumberFormat.getNumberInstance(Locale.US).format(milestone) + " Members - " + TimeFormat.DATE_TIME_SHORT.format(date));
             }
 
             embed.setDescription(String.join("\n", daysToMilestone));
