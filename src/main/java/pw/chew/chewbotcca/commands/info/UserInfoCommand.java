@@ -30,22 +30,19 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 import pw.chew.chewbotcca.util.DateTime;
-import pw.chew.chewbotcca.util.Mention;
-import pw.chew.chewbotcca.util.ResponseHelper;
+import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.Color;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
-import static org.awaitility.Awaitility.await;
 import static pw.chew.chewbotcca.commands.info.ServerInfoCommand.capitalize;
 
 // %^uinfo command
@@ -57,33 +54,19 @@ public class UserInfoCommand extends SlashCommand {
         this.aliases = new String[]{"uinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
-        this.options = Arrays.asList(
-            new OptionData(OptionType.USER, "user", "The user to lookup").setRequired(true),
-            new OptionData(OptionType.STRING, "mode", "What kind of data to return")
-                .addChoice("General Information", "general")
-                .addChoice("Member Info (requires them to be on this server", "member")
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.USER, "user", "The user to lookup").setRequired(true)
         );
     }
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        String mode = ResponseHelper.guaranteeStringOption(event, "mode", "general");
-
         // Attempt to gather Member
         User user = Objects.requireNonNull(event.getOption("user")).getAsUser();
         Member member = Objects.requireNonNull(event.getOption("user")).getAsMember();
 
         // Generate and respond
-        switch (mode) {
-            case "member" -> {
-                if (member == null) {
-                    event.reply("The specified user is not in this server (or this is not a server)").setEphemeral(true).queue();
-                    return;
-                }
-                event.replyEmbeds(gatherMemberInfo(member.getGuild(), member).build()).queue();
-            }
-            default -> event.replyEmbeds(gatherMainInfo(member == null ? null : member.getGuild(), user, event.getUser()).build()).queue();
-        }
+        event.replyEmbeds(gatherMainInfo(member == null ? null : member.getGuild(), user, event.getUser()).build()).queue();
     }
 
     @Override
@@ -93,25 +76,13 @@ public class UserInfoCommand extends SlashCommand {
         String args = commandEvent.getArgs();
         User user = null;
 
-        String mode = "";
-
-        // If they want member info
-        if(args.contains("--member") && commandEvent.isFromType(ChannelType.TEXT)) {
-            mode = "member";
-            args = args.replace("--member", "").trim();
-
-            // Get server members (in sync) for join position
-            new Thread(() -> commandEvent.getGuild().loadMembers().get());
-            await().atMost(30, TimeUnit.SECONDS).until(() -> commandEvent.getGuild().getMemberCache().size() == commandEvent.getGuild().getMemberCount());
-        }
-
         // Attempt to find the author if they exist
-        if(args.length() == 0) {
+        if (args.isBlank()) {
             user = commandEvent.getAuthor();
         } else {
-            User mention = Mention.parseUserMention(args, commandEvent.getJDA());
-            if(mention != null) {
-                user = mention;
+            List<User> mentions = commandEvent.getMessage().getMentionedUsers();
+            if (!mentions.isEmpty()) {
+                user = mentions.get(0);
             } else {
                 try {
                     user = commandEvent.getJDA().getUserById(args);
@@ -125,7 +96,7 @@ public class UserInfoCommand extends SlashCommand {
                     if (commandEvent.isFromType(ChannelType.TEXT)) {
                         List<Member> users = commandEvent.getGuild().getMembersByName(args, true);
                         List<Member> byNick = commandEvent.getGuild().getMembersByEffectiveName(args, true);
-                        if (users.size() == 0 && byNick.size() == 0) {
+                        if (users.isEmpty() && byNick.isEmpty()) {
                             commandEvent.reply("No members found for the given input");
                             return;
                         } else if (users.size() > 0 && byNick.size() == 0) {
@@ -143,17 +114,7 @@ public class UserInfoCommand extends SlashCommand {
         }
 
         // Generate and respond
-        Member member = null;
-        if (commandEvent.isFromType(ChannelType.TEXT)) {
-            member = commandEvent.getGuild().getMemberById(user.getId());
-        }
-        if(member != null && mode.equals("member")) {
-            commandEvent.reply(gatherMemberInfo(commandEvent.getGuild(), member).build());
-        } else if(member == null && mode.equals("member")) {
-            commandEvent.reply("This user is not on this server!");
-        } else {
-            commandEvent.reply(gatherMainInfo(commandEvent.getGuild(), user, commandEvent.getAuthor()).build());
-        }
+        commandEvent.reply(gatherMainInfo(commandEvent.getGuild(), user, commandEvent.getAuthor()).build());
     }
 
     /**
@@ -164,7 +125,7 @@ public class UserInfoCommand extends SlashCommand {
      * @param author the author of the message
      * @return an embed
      */
-    public EmbedBuilder gatherMainInfo(@Nullable Guild server, User user, User author) {
+    public static EmbedBuilder gatherMainInfo(@Nullable Guild server, User user, User author) {
         // Get the member
         Member member = null;
         if (server != null) {
@@ -175,17 +136,21 @@ public class UserInfoCommand extends SlashCommand {
 
         EmbedBuilder e = new EmbedBuilder();
         // If executor == member
-        if (self)
-            e.setTitle("User info for you!");
-        else
-            e.setTitle("User info for " + user.getAsTag());
-        if(user.getAvatarUrl() != null)
-            e.setThumbnail(user.getAvatarUrl() + "?size=2048");
-        e.addField("Name#Discrim", user.getAsTag(), true);
-        e.addField("User ID", user.getId(), true);
+        e.setTitle(self ? "User info for you!" : "User info for " + user.getAsTag());
+        if (user.getAvatarUrl() != null) e.setThumbnail(user.getAvatarUrl() + "?size=2048");
+        List<String> nameInfo = new ArrayList<>(Arrays.asList(
+            "Tag: " + user.getAsTag(),
+            "ID: " + user.getId(),
+            "Mention: " + user.getAsMention()
+        ));
+        if (onServer && !member.getEffectiveName().equals(user.getName())) {
+            nameInfo.add("Nickname: " + member.getEffectiveName());
+        }
+
+        e.addField("Names", String.join("\n", nameInfo), true);
 
         // If they're on the server, we can get their presence
-        if(onServer) {
+        if (onServer) {
             String status;
             switch (member.getOnlineStatus()) {
                 case ONLINE -> {
@@ -201,10 +166,7 @@ public class UserInfoCommand extends SlashCommand {
                     e.setColor(Color.decode("#F04747"));
                 }
                 case OFFLINE -> {
-                    if (self)
-                        status = "Invisible";
-                    else
-                        status = "Offline";
+                    status = self ? "Invisible" : "Offline";
                     e.setColor(Color.decode("#747F8D"));
                 }
                 default -> {
@@ -213,10 +175,9 @@ public class UserInfoCommand extends SlashCommand {
                 }
             }
             e.addField("Status", status, true);
-            // And their nick
-            if (member.getNickname() != null) {
-                e.addField("Nickname", member.getNickname(), true);
-            }
+
+            // Join position
+            e.addField("Join Position", getJoinPosition(server, member) + "", true);
 
             // And their activities
             List<CharSequence> activities = new ArrayList<>();
@@ -224,49 +185,61 @@ public class UserInfoCommand extends SlashCommand {
                 Activity activity = member.getActivities().get(i);
                 if (activity.getType() == Activity.ActivityType.CUSTOM_STATUS) {
                     Activity.Emoji emoji = activity.getEmoji();
-                    if(emoji == null)
-                        activities.add(activity.getName());
-                    else
-                        activities.add(activity.getEmoji().getAsMention() + " " + activity.getName());
+                    activities.add((emoji == null ? "" : emoji.getAsMention() + " ") + activity.getName());
                 } else
                     activities.add(activity.getName());
             }
 
             if (activities.size() > 0)
-                e.addField("Activities - " + activities.size(), String.join("\n", activities), true);
+                e.addField("Activities - " + activities.size(), String.join("\n", activities), false);
+        }
+
+        // Get pronoun if they have it
+        JSONObject pronounData = new JSONObject(RestClient.get("https://pronoundb.org/api/v1/lookup?platform=discord&id=" + user.getId()));
+        String pronouns = null;
+        if (pronounData.has("pronouns")) {
+            pronouns = PRONOUN.valueOf(pronounData.getString("pronouns")).detailed;
         }
 
         // Get their bio from discord.bio, if they have one.
         var dbio = new DBioAPI().getUser(user.getId());
-        if(dbio != null) {
+        if (dbio != null) {
             e.setDescription(dbio.getDescription());
-            if(dbio.getBirthday() != null)
-                e.addField("Birthday", dateParser(dbio.getBirthday()), true);
-            e.addField("Gender", capitalize(dbio.getGender().name()), true);
-            if(dbio.getLocation() != null)
-                e.addField("Location", dbio.getLocation(), true);
-            if(dbio.getOccupation() != null)
-                e.addField("Occupation", dbio.getOccupation(), true);
-            e.setFooter("Profile info provided by discord.bio");
+            if (dbio.getBirthday() != null)
+                e.addField("Birthday", TimeFormat.DATE_LONG.format(dbio.getBirthday().getTime()), true);
+            String gender = capitalize(dbio.getGender().name());
+            if (pronouns != null) gender += String.format("\n(%s)", pronouns);
+            e.addField("Gender", gender, true);
+            if (dbio.getLocation() != null) e.addField("Location", dbio.getLocation(), true);
+            if (dbio.getOccupation() != null) e.addField("Occupation", dbio.getOccupation(), true);
+
+        } else if (pronouns != null) {
+            e.addField("Pronouns", pronouns, true);
         }
 
-        if(onServer)
-            e.addField("More Information", "Add `--member` to see more about this Member.", true);
+        // Give credit
+        List<String> credits = new ArrayList<>();
+        if (dbio != null) credits.add("Profile info provided by discord.bio");
+        if (pronouns != null) credits.add("Pronoun data from pronoundb.org");
+        if (!credits.isEmpty()) e.setFooter(String.join(" - ", credits));
+
+        if (onServer) {
+            e.addField("Joined", TimeFormat.DATE_TIME_SHORT.format(member.getTimeJoined()) + "\n" + DateTime.timeAgoShort(member.getTimeJoined().toInstant(), true) + " ago", true);
+        }
+        e.addField("Created", TimeFormat.DATE_TIME_SHORT.format(user.getTimeCreated()) + "\n" + DateTime.timeAgoShort(user.getTimeCreated().toInstant(), true), true);
 
         return e;
     }
 
     /**
      * Gather server specific info
+     *
      * @param server the server
      * @param member the member
      * @return an embed
      */
-    public EmbedBuilder gatherMemberInfo(Guild server, Member member) {
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Member info for " + member.getEffectiveName());
+    public static int getJoinPosition(Guild server, Member member) {
         // Find their join position
-        int position = 0;
         List<Member> members = server.getMemberCache().asList();
         Member[] bruh = members.toArray(new Member[0]);
         Arrays.sort(bruh, (o1, o2) -> {
@@ -277,27 +250,41 @@ public class UserInfoCommand extends SlashCommand {
             else
                 return -1;
         });
-        boolean found = false;
-        for(int i = 0; i < bruh.length || !found; i++) {
-            if(member.getId().equals(bruh[i].getId())) {
-                found = true;
-                position = i + 1;
+        for (int i = 0; i < bruh.length; i++) {
+            if (member.getId().equals(bruh[i].getId())) {
+                return i + 1;
             }
         }
-        embed.addField("Display Name", member.getEffectiveName() + "\n" + member.getAsMention(), true);
-        embed.addField("Join Position", String.valueOf(position), true);
-        embed.addField("Joined", DateTime.timeAgo(Instant.now().toEpochMilli() - member.getTimeJoined().toInstant().toEpochMilli()) + " ago", false);
-
-        return embed;
+        return -1;
     }
 
-    /**
-     * Date parser because java is weird
-     * @param date the date
-     * @return a parsed date
-     */
-    public String dateParser(Date date) {
-        SimpleDateFormat outputFormat = new SimpleDateFormat("EEEE, MMM dd, yyyy");
-        return outputFormat.format(date);
+    private enum PRONOUN {
+        unspecified("Unspecified"),
+        hh("he/him"),
+        hi("he/it"),
+        hs("he/she"),
+        ht("he/they"),
+        ih("it/him"),
+        ii("it/its"),
+        is("it/she"),
+        it("it/they"),
+        shh("she/he"),
+        sh("she/her"),
+        si("she/it"),
+        st("she/they"),
+        th("they/he"),
+        ti("they/it"),
+        ts("they/she"),
+        tt("they/them"),
+        any("Any pronouns"),
+        other("Other pronouns"),
+        ask("Ask me my pronouns"),
+        avoid("Avoid pronouns, use my name");
+
+        public String detailed;
+
+        PRONOUN(String detail) {
+            this.detailed = detail;
+        }
     }
 }

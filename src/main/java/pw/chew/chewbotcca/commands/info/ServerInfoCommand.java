@@ -502,7 +502,7 @@ public class ServerInfoCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             try {
-                event.replyEmbeds(new UserInfoCommand().gatherMemberInfo(guaranteeGuild(event), gatherMember(guaranteeGuild(event), (int) event.getOption("position").getAsLong())).build()).queue();
+                event.replyEmbeds(UserInfoCommand.gatherMainInfo(guaranteeGuild(event), gatherMember(guaranteeGuild(event), (int) event.getOption("position").getAsLong()).getUser(), event.getUser()).build()).queue();
             } catch (IllegalArgumentException e) {
                 event.replyEmbeds(new EmbedBuilder()
                     .setTitle("Error occurred!")
@@ -522,7 +522,7 @@ public class ServerInfoCommand extends SlashCommand {
             }
 
             try {
-                event.reply(new UserInfoCommand().gatherMemberInfo(event.getGuild(), gatherMember(event.getGuild(), position)).build());
+                event.reply(UserInfoCommand.gatherMainInfo(event.getGuild(), gatherMember(event.getGuild(), position).getUser(), event.getAuthor()).build());
             } catch (IllegalArgumentException e) {
                 event.reply(new EmbedBuilder()
                     .setTitle("Error occurred!")
