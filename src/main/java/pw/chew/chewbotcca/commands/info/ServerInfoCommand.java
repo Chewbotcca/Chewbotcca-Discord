@@ -111,8 +111,8 @@ public class ServerInfoCommand extends SlashCommand {
         int humans = membercount - bots;
 
         e.addField("Member Count", "Total: " + membercount + "\n" +
-            "Bots: " + bots + " - (" + generatePercent(bots, membercount) + "%)\n" +
-            "Users: " + humans + " - (" + generatePercent(humans, membercount) + "%)", true);
+            "Bots: " + bots + " - (" + generatePercent(bots, membercount) + ")\n" +
+            "Users: " + humans + " - (" + generatePercent(humans, membercount) + ")", true);
 
         // Channel counts
         int textchans = server.getTextChannels().size();
