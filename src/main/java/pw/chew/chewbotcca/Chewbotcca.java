@@ -56,9 +56,9 @@ import java.util.Properties;
 import java.util.Set;
 
 // The Main Bot class. Where all the magic happens!
-public class Main {
+public class Chewbotcca {
     // Instance variables
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final Logger logger = LoggerFactory.getLogger(Chewbotcca.class);
 
     public static void main(String[] args) throws LoginException, IOException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         // Load properties into the PropertiesManager
