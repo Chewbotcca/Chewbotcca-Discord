@@ -83,7 +83,7 @@ public class DateTime {
         List<String> response = new ArrayList<>();
         for (String part : parts) {
             String[] values = part.split(" ");
-            response.add(values[0].charAt(0) + "" + values[1].charAt(0));
+            response.add(values[0] + "" + values[1].charAt(0));
         }
         return String.join(" ", response);
     }
