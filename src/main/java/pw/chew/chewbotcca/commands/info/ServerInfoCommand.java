@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.StageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -42,14 +43,13 @@ import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -76,26 +76,27 @@ public class ServerInfoCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.replyEmbeds(gatherGeneralInfo(Objects.requireNonNull(event.getGuild())).build()).queue();
+        // SlashCommands with children don't have root command
     }
 
     @Override
     protected void execute(CommandEvent event) {
-        event.reply(gatherGeneralInfo(event.getGuild()).build());
+        event.reply(gatherGeneralInfo(event.getGuild(), event.getPrefix() + "sinfo").build());
     }
 
-    private EmbedBuilder gatherGeneralInfo(Guild server) {
+    private EmbedBuilder gatherGeneralInfo(Guild server, String prefix) {
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Server Information");
-        if(server.getDescription() != null)
+        if (server.getDescription() != null)
             e.setDescription(server.getDescription());
         e.setAuthor(server.getName(), null, server.getIconUrl());
 
-        e.setThumbnail(server.getIconUrl() + "?size=2048");
+        if (server.getIconUrl() != null)
+            e.setThumbnail(server.getIconUrl() + "?size=2048");
 
         // Retrieve server info
         e.addField("Server Owner", server.retrieveOwner(true).complete().getAsMention(), true);
-        e.addField("Server ID", server.getId(), true);
+        e.addField("Created", TimeFormat.DATE_TIME_SHORT.format(server.getTimeCreated()), true);
         e.addField("Locale", server.getLocale().getDisplayName(), true);
 
         // Get bot / member count
@@ -109,37 +110,29 @@ public class ServerInfoCommand extends SlashCommand {
         int membercount = server.getMemberCount();
         int humans = membercount - bots;
 
-        DecimalFormat df = new DecimalFormat("#.##");
-
-        String botpercent = df.format((float)bots / (float)membercount * 100);
-        String humanpercent = df.format((float)humans / (float)membercount * 100);
-
         e.addField("Member Count", "Total: " + membercount + "\n" +
-                "Bots: " + bots + " - (" + botpercent + "%)\n" +
-                "Users: " + humans + " - (" + humanpercent + "%)", true);
+            "Bots: " + bots + " - (" + generatePercent(bots, membercount) + "%)\n" +
+            "Users: " + humans + " - (" + generatePercent(humans, membercount) + "%)", true);
 
         // Channel counts
-        int totalchans = server.getChannels().size();
         int textchans = server.getTextChannels().size();
-        int voicechans = server.getVoiceChannels().size();
-        int categories = server.getCategories().size();
-        int storechans = server.getStoreChannels().size();
         int newschans = 0;
 
-        for(TextChannel channel : server.getTextChannels()) {
-            if(channel.isNews()) {
+        for (TextChannel channel : server.getTextChannels()) {
+            if (channel.isNews()) {
                 newschans++;
                 textchans--;
             }
         }
 
         List<CharSequence> counts = new ArrayList<>();
-        counts.add("Total: " + totalchans);
+        counts.add("Total: " + server.getTextChannels().size());
         counts.add("Text: " + textchans);
-        counts.add("Voice: " + voicechans);
-        counts.add("Categories: " + categories);
+        counts.add("Voice: " + server.getVoiceChannels().size());
+        counts.add("Stages: " + server.getStageChannels().size());
+        counts.add("Categories: " + server.getCategories().size());
         if (server.getFeatures().contains("COMMERCE"))
-            counts.add("Store Pages: " + storechans);
+            counts.add("Store Pages: " + server.getStoreChannels().size());
         if (server.getFeatures().contains("NEWS"))
             counts.add("News: " + newschans);
 
@@ -156,13 +149,26 @@ public class ServerInfoCommand extends SlashCommand {
 
         // Gather perk info
         List<String> perks = new ArrayList<>();
+        List<String> feats = new ArrayList<>();
         String[] features = server.getFeatures().toArray(new String[0]);
         Arrays.sort(features);
         for (String perk : features) {
-            perks.add(perkParser(perk, server));
+            if (ignorePerk(perk)) continue;
+
+            if (isFeature(perk)) {
+                feats.add(perkParser(perk, server));
+            } else {
+                perks.add(perkParser(perk, server));
+            }
+        }
+        if (e.getFields().size() == 5) {
+            e.addBlankField(true);
         }
         if (perks.size() > 0) {
-            e.addField("Features", String.join("\n", perks), true);
+            e.addField("Perks", String.join("\n", perks), true);
+        }
+        if (feats.size() > 0) {
+            e.addField("Features", String.join("\n", feats), true);
         }
 
         e.addField("View More Info", """
@@ -172,10 +178,9 @@ public class ServerInfoCommand extends SlashCommand {
             Channels - `%^sinfo channels`
             Member Milestones - `%^sinfo milestones`
             Member Stats - `%^sinfo memberstats`
-            """/*.replaceAll("%\\^", event.getPrefix())*/, false);
+            """.replaceAll("%\\^sinfo", prefix), false);
 
-        e.setFooter("Server Created on");
-        e.setTimestamp(server.getTimeCreated());
+        e.setFooter("Server ID: " + server.getId());
 
         return e;
     }
@@ -197,9 +202,54 @@ public class ServerInfoCommand extends SlashCommand {
             case "PARTNERED" -> "<:partner:753433398005071872> Partnered Server";
             case "VANITY_URL" -> parseVanityUrl(server.getVanityCode());
             case "VERIFIED" -> "<:verifiedserver:753433397933899826> Verified";
+            case "COMMUNITY" -> ":white_check_mark: Community";
+            case "MEMBER_VERIFICATION_GATE_ENABLED" -> ":white_check_mark: Membership Screening";
+            case "WELCOME_SCREEN_ENABLED" -> ":white_check_mark: Welcome Screen";
+            case "THREADS_ENABLED_TESTING" -> ":white_check_mark: Threads (Beta)";
         };
     }
 
+    /**
+     * We split perks and features so this determines which column they should go into.
+     * Generally, these features can be enabled by anyone.
+     *
+     * @param perk the perk to handle
+     * @return whether this is an enabled feature, not a perk
+     */
+    private boolean isFeature(String perk) {
+        return switch (perk) {
+            // All enabled in server settings, by anyone, if they want
+            case "COMMUNITY", "MEMBER_VERIFICATION_GATE_ENABLED", "WELCOME_SCREEN_ENABLED" -> true;
+            // Threads, currently in beta. Has some dumb requirements, but you can indeed meet them
+            case "THREADS_ENABLED_TESTING" -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * A simple function to filter out the noise among the many perks servers can have.
+     * Generally, anything here is so widespread or so useless they don't need to show up.
+     *
+     * @param perk the perk to parse
+     * @return true if it should be ignored
+     */
+    private boolean ignorePerk(String perk) {
+        return switch (perk) {
+            // Useless information
+            case "ENABLED_DISCOVERABLE_BEFORE" -> true;
+            // Thread info. Temporary because every server has it.
+            case "PRIVATE_THREADS", "SEVEN_DAY_THREAD_ARCHIVE", "THREE_DAY_THREAD_ARCHIVE" -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * Parses the vanity URL to determine what should be shown back to the user.
+     * If there is a vanity URL (why wouldn't you set one?) it will notify. Otherwise, render it inline.
+     *
+     * @param vanity the vanity code
+     * @return the friendly string
+     */
     private String parseVanityUrl(String vanity) {
         if (vanity == null) {
             return "Vanity URL: None Set!";
@@ -209,8 +259,12 @@ public class ServerInfoCommand extends SlashCommand {
     }
 
     /**
-     * Source: https://github.com/ChewMC/TransmuteIt/blob/2b86/src/pw/chew/transmuteit/DiscoveriesCommand.java#L174-L186
+     * <a href="https://github.com/ChewMC/TransmuteIt/blob/2b86/src/pw/chew/transmuteit/DiscoveriesCommand.java#L174-L186">Source</a><br>
      * Capitalizes a String, e.g. "BRUH_MOMENT" -> "Bruh Moment"
+     *
+     * @param to the unformatted string
+     * @return a formatting string
+     * @author Chew
      */
     public static String capitalize(String to) {
         if (to.equals("")) {
@@ -241,6 +295,19 @@ public class ServerInfoCommand extends SlashCommand {
     }
 
     /**
+     * Generates a percentage based on given values.
+     * 5, 20 => "25%"
+     *
+     * @param value the numerator
+     * @param total the denominator
+     * @return a friendly percentage
+     */
+    private String generatePercent(int value, int total) {
+        DecimalFormat df = new DecimalFormat("#.##");
+        return df.format((float) value / (float) total * 100) + "%";
+    }
+
+    /**
      * Gathers general info about the server.
      * Only required for slash command
      */
@@ -254,7 +321,7 @@ public class ServerInfoCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            event.replyEmbeds(gatherGeneralInfo(guaranteeGuild(event)).build()).queue();
+            event.replyEmbeds(gatherGeneralInfo(guaranteeGuild(event), "/serverinfo").build()).queue();
         }
     }
 
@@ -314,10 +381,10 @@ public class ServerInfoCommand extends SlashCommand {
             this.guildOnly = true;
             this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION};
 
-            List<OptionData> data = new ArrayList<>();
-            data.add(new OptionData(OptionType.BOOLEAN, "display_role", "Show amount of members whose display role is this.").setRequired(false));
-            data.add(new OptionData(OptionType.BOOLEAN, "online", "Shows amount of members with this role currently online").setRequired(false));
-            this.options = data;
+            this.options = Arrays.asList(
+                new OptionData(OptionType.BOOLEAN, "display_role", "Show amount of members whose display role is this."),
+                new OptionData(OptionType.BOOLEAN, "online", "Shows amount of members with this role currently online")
+            );
         }
 
         @Override
@@ -432,26 +499,27 @@ public class ServerInfoCommand extends SlashCommand {
             this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION};
             this.guildOnly = true;
 
-            List<OptionData> data = new ArrayList<>();
-            data.add(new OptionData(OptionType.BOOLEAN, "render_mention", "Whether or not to render as a mention.").setRequired(true));
-            this.options = data;
+            this.options = Collections.singletonList(
+                new OptionData(OptionType.BOOLEAN, "render_mention", "Whether or not to render as a mention.").setRequired(true)
+            );
         }
 
         @Override
         protected void execute(SlashCommandEvent event) {
             event.replyEmbeds(new EmbedBuilder().setDescription("Gathering the details...").build()).queue(interactionHook -> {
                 interactionHook.retrieveOriginal().queue(message -> {
-                    run(guaranteeGuild(event), event.getUser(), event.getTextChannel(), ResponseHelper.guaranteeBooleanOption(event, "render_mention", false));
+                    gatherData(guaranteeGuild(event), event.getUser(), event.getTextChannel(), ResponseHelper.guaranteeBooleanOption(event, "render_mention", false))
+                        .paginate(message, 1);
                 });
             });
         }
 
         @Override
         protected void execute(CommandEvent event) {
-            run(event.getGuild(), event.getAuthor(), event.getTextChannel(), event.getArgs().contains("--mention"));
+            gatherData(event.getGuild(), event.getAuthor(), event.getTextChannel(), event.getArgs().contains("--mention")).paginate(event.getChannel(), 1);
         }
 
-        private void run(Guild server, User author, TextChannel channel, boolean renderMention) {
+        private Paginator gatherData(Guild server, User author, TextChannel channel, boolean renderMention) {
             Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
 
             pbuilder.setText("Bots on " + server.getName() + "\n" + "Newest bots on the bottom");
@@ -476,9 +544,7 @@ public class ServerInfoCommand extends SlashCommand {
                 }
             }
 
-            pbuilder.setUsers(author)
-                .build()
-                .paginate(channel, 1);
+            return pbuilder.setUsers(author).build();
         }
     }
 
@@ -493,9 +559,9 @@ public class ServerInfoCommand extends SlashCommand {
             this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
             this.guildOnly = true;
 
-            List<OptionData> data = new ArrayList<>();
-            data.add(new OptionData(OptionType.INTEGER, "position", "The join position to reverse-search the Member..").setRequired(true));
-            this.options = data;
+            this.options = Collections.singletonList(
+                new OptionData(OptionType.INTEGER, "position", "The join position to reverse-search the Member.").setRequired(true)
+            );
         }
 
         @Override
@@ -503,10 +569,7 @@ public class ServerInfoCommand extends SlashCommand {
             try {
                 event.replyEmbeds(UserInfoCommand.gatherMainInfo(guaranteeGuild(event), gatherMember(guaranteeGuild(event), (int) event.getOption("position").getAsLong()).getUser(), event.getUser()).build()).queue();
             } catch (IllegalArgumentException e) {
-                event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("Error occurred!")
-                    .setDescription(e.getMessage())
-                    .build()).queue();
+                event.replyEmbeds(ResponseHelper.generateFailureEmbed(null, e.getMessage())).queue();
             }
         }
 
@@ -516,17 +579,14 @@ public class ServerInfoCommand extends SlashCommand {
             try {
                 position = Integer.parseInt(event.getArgs());
             } catch (NumberFormatException e) {
-                event.reply(new EmbedBuilder().setTitle("Error occurred!").setDescription("Invalid input! Must be an integer!").build());
+                event.reply(ResponseHelper.generateFailureEmbed("Error occurred!", "Invalid input! Must be an integer!"));
                 return;
             }
 
             try {
                 event.reply(UserInfoCommand.gatherMainInfo(event.getGuild(), gatherMember(event.getGuild(), position).getUser(), event.getAuthor()).build());
             } catch (IllegalArgumentException e) {
-                event.reply(new EmbedBuilder()
-                    .setTitle("Error occurred!")
-                    .setDescription(e.getMessage())
-                    .build());
+                event.reply(ResponseHelper.generateFailureEmbed("Error occurred!", e.getMessage()));
             }
         }
 
@@ -552,7 +612,7 @@ public class ServerInfoCommand extends SlashCommand {
     /**
      * Get channel info, like count and other info
      */
-    private static class ServerChannelsInfoSubCommand extends SlashCommand {
+    private class ServerChannelsInfoSubCommand extends SlashCommand {
 
         public ServerChannelsInfoSubCommand() {
             this.name = "channels";
@@ -573,8 +633,6 @@ public class ServerInfoCommand extends SlashCommand {
         }
 
         private EmbedBuilder gatherChannelInfo(Guild server) {
-            DecimalFormat df = new DecimalFormat("#.##");
-
             EmbedBuilder embed = new EmbedBuilder();
             embed.setTitle("Channel Info and Stats for " + server.getName());
             embed.setDescription("Total Channels: " + server.getChannels().size());
@@ -583,11 +641,13 @@ public class ServerInfoCommand extends SlashCommand {
             int totalChannels = server.getChannels().size();
             int textChannels = server.getTextChannels().size();
             int voiceChannels = server.getVoiceChannels().size();
+            int stageChannels = server.getStageChannels().size();
             int categories = server.getCategories().size();
             int storeChannels = server.getStoreChannels().size();
             int newsChannels = 0;
             int nsfw = 0;
             int inVoice = 0;
+            int inStage = 0;
 
             for (TextChannel channel : server.getTextChannels()) {
                 if (channel.isNews()) {
@@ -603,47 +663,21 @@ public class ServerInfoCommand extends SlashCommand {
                 inVoice += vc.getMembers().size();
             }
 
-            String percentText = df.format((float) textChannels / (float) totalChannels * 100);
-            String percentVoice = df.format((float) voiceChannels / (float) totalChannels * 100);
-            String percentCategory = df.format((float) categories / (float) totalChannels * 100);
-            String percentStore = df.format((float) storeChannels / (float) totalChannels * 100);
-            String percentNews = df.format((float) newsChannels / (float) totalChannels * 100);
-            String percentNSFW = df.format((float) nsfw / (float) textChannels * 100);
+            for (StageChannel sc : server.getStageChannels()) {
+                inStage += sc.getMembers().size();
+            }
 
-            embed.addField(
-                "Text Channels",
-                "Total: " + textChannels + " (" + percentText + "%)" + "\n" +
-                    "NSFW: " + nsfw,
-                true
-            );
-
-            embed.addField(
-                "Voice Channels",
-                "Total: " + voiceChannels + " (" + percentVoice + "%)" + "\n" +
-                    "Members in Voice: " + inVoice,
-                true
-            );
-
-            embed.addField(
-                "Categories",
-                "Total: " + categories + " (" + percentCategory + "%)",
-                true
-            );
+            embed.addField("Text Channels", String.format("Total: %s (%s)\nNSFW: %s", textChannels, generatePercent(textChannels, totalChannels), nsfw), true);
+            embed.addField("Voice Channels", String.format("Total: %s (%s)\nMembers in Voice: %s", voiceChannels, generatePercent(voiceChannels, totalChannels), inVoice), true);
+            embed.addField("Stage Channels", String.format("Total: %s (%s)\nMembers in Stages: %s", stageChannels, generatePercent(stageChannels, totalChannels), inStage), true);
+            embed.addField("Categories", String.format("Total: %s (%s)", categories, generatePercent(categories, totalChannels)), true);
 
             if (server.getFeatures().contains("COMMERCE")) {
-                embed.addField(
-                    "Store",
-                    "Total: " + storeChannels + " (" + percentStore + "%)",
-                    true
-                );
+                embed.addField("Store", String.format("Total: %s (%s)", storeChannels, generatePercent(storeChannels, totalChannels)), true);
             }
 
             if (server.getFeatures().contains("NEWS")) {
-                embed.addField(
-                    "Announcement Channels",
-                    "Total: " + newsChannels + " (" + percentNews + "%)",
-                    true
-                );
+                embed.addField("News Channels", String.format("Total: %s (%s)", newsChannels, generatePercent(newsChannels, totalChannels)), true);
             }
 
             return embed;
@@ -690,9 +724,6 @@ public class ServerInfoCommand extends SlashCommand {
             daysToMilestone.add("Dates are based on average members per day. Dates may vary based on any number of circumstances.");
             daysToMilestone.add("If year is >100 years in the future, it will not be included.");
             daysToMilestone.add("");
-
-            DateTimeFormatter format = DateTimeFormatter.ofPattern("MMM d, uuuu");
-            DecimalFormat df = new DecimalFormat("#.##");
 
             for (int milestone : milestones) {
                 if (milestone < members)
