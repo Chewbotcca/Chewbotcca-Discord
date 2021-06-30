@@ -26,6 +26,7 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -140,10 +141,15 @@ public class ChannelInfoCommand extends SlashCommand {
         if (channel.getType() == ChannelType.TEXT || channel.getType() == ChannelType.VOICE)
             e.addField("Users in Channel", String.valueOf(channel.getMembers().size()), true);
 
+        if (channel.getType() == ChannelType.VOICE) {
+            VoiceChannel vc = ((VoiceChannel) channel);
+            e.addField("Voice Region", vc.getRegion().getEmoji() + " " + vc.getRegion().getName(), true);
+        }
+
         e.addField("Type", channel.getType().toString(), true);
 
         // If it's a text channel and we can access the webhooks, add the count.
-        if(channel.getType() == ChannelType.TEXT) {
+        if (channel.getType() == ChannelType.TEXT) {
             TextChannel textChannel = ((TextChannel) channel);
             if (commandEvent != null && commandEvent.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
                 List<Webhook> hooks = textChannel.retrieveWebhooks().complete();

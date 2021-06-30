@@ -96,7 +96,6 @@ public class ServerInfoCommand extends SlashCommand {
         // Retrieve server info
         e.addField("Server Owner", server.retrieveOwner(true).complete().getAsMention(), true);
         e.addField("Server ID", server.getId(), true);
-        e.addField("Voice Region", server.getRegion().getEmoji() + " " + server.getRegion().getName(), true);
         e.addField("Locale", server.getLocale().getDisplayName(), true);
 
         // Get bot / member count
