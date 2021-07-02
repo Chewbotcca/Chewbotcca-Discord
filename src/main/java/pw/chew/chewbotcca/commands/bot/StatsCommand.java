@@ -28,6 +28,8 @@ import pw.chew.chewbotcca.util.DateTime;
 
 import java.time.Instant;
 
+import static pw.chew.chewbotcca.commands.services.github.GHRepoCommand.bytesToFriendly;
+
 // %^stats command
 public class StatsCommand extends SlashCommand {
     private final static Instant startTime = Instant.now();
@@ -50,6 +52,13 @@ public class StatsCommand extends SlashCommand {
     }
 
     private MessageEmbed generateStatsEmbed(JDA jda) {
+        Runtime runtime = Runtime.getRuntime();
+        long memoryUsed = runtime.totalMemory() - runtime.freeMemory();
+        String memoryUsage = bytesToFriendly(memoryUsed / 1024) + "/" + bytesToFriendly(runtime.totalMemory() / 1024);
+
+        // TODO: Cpu stats?
+        // OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+
         return new EmbedBuilder()
             .setTitle("Chewbotcca - A basic, yet functioning, discord bot")
             .addField("Author", "<@!476488167042580481>", true)
@@ -59,6 +68,8 @@ public class StatsCommand extends SlashCommand {
             .addField("Uptime", DateTime.timeAgo(Instant.now().toEpochMilli() - startTime.toEpochMilli()), true)
             // Get the server count. NOT GUILD NOT GUILD NOT GUILD
             .addField("Servers", String.valueOf(jda.getGuildCache().size()), true)
+            // Memory usage
+            .addField("Memory", memoryUsage, true)
             .setColor(0xd084)
             .build();
     }

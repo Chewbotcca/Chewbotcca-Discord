@@ -71,23 +71,25 @@ public class GHRepoCommand extends Command {
             e.addField("Open Issues/PRs", String.valueOf(repo.getOpenIssueCount()), true);
             e.addField("Stars", String.valueOf(repo.getStargazersCount()), true);
 
-            // Find size of repo and list it
-            int k = 1024;
-            String[] measure = new String[]{"B", "KB", "MB", "GB", "TB"};
-            int bytes = repo.getSize();
-            double i;
-            if(bytes == 0) {
-                i = 0;
-            } else {
-                i = Math.floor(Math.log(bytes) / Math.log(k));
-            }
-            DecimalFormat df = new DecimalFormat("#.##");
-
-            e.addField("Size", df.format(bytes / Math.pow(k, i)) + " " + measure[(int) i + 1], true);
+            e.addField("Size", bytesToFriendly(repo.getSize()), true);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
 
         return e.build();
+    }
+
+    public static String bytesToFriendly(long bytes) {
+        // Find size of repo and list it
+        int k = 1024;
+        String[] measure = new String[]{"B", "KB", "MB", "GB", "TB"};
+        double i;
+        if (bytes == 0) {
+            i = 0;
+        } else {
+            i = Math.floor(Math.log(bytes) / Math.log(k));
+        }
+        DecimalFormat df = new DecimalFormat("#.##");
+        return df.format(bytes / Math.pow(k, i)) + " " + measure[(int) i + 1];
     }
 }
