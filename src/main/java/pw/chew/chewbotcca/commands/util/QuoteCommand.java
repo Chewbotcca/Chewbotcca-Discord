@@ -62,7 +62,7 @@ public class QuoteCommand extends SlashCommand {
 
         boolean thisGuild = event.getGuild() != null && event.getGuild().getId().equals(message.getGuild().getId());
         boolean thisChannel = event.getChannel().getId().equals(message.getChannel().getId());
-        event.replyEmbeds(gatherData(message, thisGuild, thisChannel)).queue();
+        event.replyEmbeds(gatherData(message, thisGuild, thisChannel, true)).addEmbeds(message.getEmbeds()).queue();
     }
 
     @Override
@@ -80,14 +80,27 @@ public class QuoteCommand extends SlashCommand {
 
         boolean thisGuild = event.getMessage().isFromGuild() && event.getGuild().getId().equals(message.getGuild().getId());
         boolean thisChannel = event.getChannel().getId().equals(message.getChannel().getId());
-        event.reply(gatherData(message, thisGuild, thisChannel));
+        event.reply(gatherData(message, thisGuild, thisChannel, false));
     }
 
-    private MessageEmbed gatherData(Message message, boolean thisGuild, boolean thisChannel) {
+    private MessageEmbed gatherData(Message message, boolean thisGuild, boolean thisChannel, boolean isFromSlash) {
         // Get message details and send
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Quote");
-        embed.setDescription(message.getContentRaw());
+        String content = message.getContentRaw();
+        if (isFromSlash) {
+            if (content.isBlank() && !message.getEmbeds().isEmpty()) {
+                embed.setDescription("*This message contained only embed(s), see them below*");
+            } else {
+                embed.setDescription(content);
+            }
+        } else {
+            if (content.isBlank() && !message.getEmbeds().isEmpty()) {
+                embed.setDescription("*This message contained only embed(s), and they cannot be displayed. Please use /quote if possible*");
+            } else {
+                embed.setDescription(content);
+            }
+        }
         embed.setTimestamp(message.getTimeCreated());
         embed.setAuthor(message.getAuthor().getAsTag(), null, message.getAuthor().getAvatarUrl());
         if (message.isFromGuild()) {
