@@ -117,7 +117,7 @@ public class ReactListener extends ListenerAdapter {
         // Get the video
         JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + video + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics"));
         // make a YouTube video embed response
-        msg.reply(new YouTubeCommand().response(url, video, event.getChannel()).build()).mentionRepliedUser(false).queue();
+        msg.replyEmbeds(new YouTubeCommand().response(url, video, event.getChannel()).build()).mentionRepliedUser(false).queue();
     }
 
     /**
@@ -142,7 +142,7 @@ public class ReactListener extends ListenerAdapter {
         } catch (IOException e) {
             return;
         }
-        msg.reply(new GHIssueCommand().issueBuilder(ghIssue).build()).mentionRepliedUser(false).queue();
+        msg.replyEmbeds(GHIssueCommand.issueBuilder(ghIssue).build()).mentionRepliedUser(false).queue();
     }
 
     /**
@@ -163,7 +163,7 @@ public class ReactListener extends ListenerAdapter {
         // Get response
         JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
         // Initialize GitHub and the response
-        msg.reply(MCIssueCommand.generateEmbed(data, issue, apiUrl).build()).mentionRepliedUser(false).queue();
+        msg.replyEmbeds(MCIssueCommand.generateEmbed(data, issue, apiUrl).build()).mentionRepliedUser(false).queue();
     }
 
     /**
@@ -183,7 +183,7 @@ public class ReactListener extends ListenerAdapter {
         if (meme == null) {
             return;
         }
-        msg.reply(generateMemeEmbed(meme).build()).mentionRepliedUser(false).queue();
+        msg.replyEmbeds(generateMemeEmbed(meme).build()).mentionRepliedUser(false).queue();
         msg.suppressEmbeds(true).queue();
     }
 
@@ -198,7 +198,7 @@ public class ReactListener extends ListenerAdapter {
         } catch (NotFound notFound) {
             return;
         }
-        msg.reply(generateUserEmbed(user).build()).mentionRepliedUser(false).queue();
+        msg.replyEmbeds(generateUserEmbed(user).build()).mentionRepliedUser(false).queue();
         msg.suppressEmbeds(true).queue();
     }
 

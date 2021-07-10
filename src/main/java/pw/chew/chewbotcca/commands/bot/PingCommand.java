@@ -43,12 +43,12 @@ public class PingCommand extends SlashCommand {
         // Get the timestamp of the ping message
         long time = commandEvent.getMessage().getTimeCreated().toInstant().toEpochMilli();
         // Send a "Checking ping" message and calculate the difference between this message and the %^ping message
-        commandEvent.getChannel().sendMessage(new EmbedBuilder().setDescription("Checking ping..").build()).queue((msg) -> {
+        commandEvent.getChannel().sendMessageEmbeds(new EmbedBuilder().setDescription("Checking ping..").build()).queue((msg) -> {
             EmbedBuilder eb = new EmbedBuilder().setDescription(
                 "Ping is " + (msg.getTimeCreated().toInstant().toEpochMilli() - time) + "ms\n" +
                 "Gateway Ping is " + commandEvent.getJDA().getGatewayPing() + "ms\n"
             );
-            msg.editMessage(eb.build()).queue();
+            msg.editMessageEmbeds(eb.build()).queue();
         });
     }
 }

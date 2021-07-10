@@ -46,9 +46,9 @@ public class HelpCommand extends SlashCommand {
         }
         MessageEmbed embed = generateHelpEmbed(commandEvent.getPrefix());
         if (notice == null)
-            commandEvent.getChannel().sendMessage(embed).queue();
+            commandEvent.getChannel().sendMessageEmbeds(embed).queue();
         else
-            commandEvent.getChannel().sendMessage(notice).embed(embed).queue();
+            commandEvent.getChannel().sendMessage(notice).setEmbeds(embed).queue();
     }
 
     private MessageEmbed generateHelpEmbed(String prefix) {
