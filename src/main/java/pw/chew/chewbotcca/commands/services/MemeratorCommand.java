@@ -116,15 +116,18 @@ public class MemeratorCommand extends SlashCommand {
             }
 
             EmbedBuilder eb = generateMemeEmbed(meme);
-            if(channel.getType() == ChannelType.TEXT) {
+            if (channel.getType() == ChannelType.TEXT) {
                 TextChannel textChannel = (TextChannel) channel;
-                if(!textChannel.isNSFW() && meme.getAgeRating() == Age.MATURE) {
+                if (!textChannel.isNSFW() && meme.getAgeRating() == Age.MATURE) {
                     throw new IllegalArgumentException("This meme is marked as Mature and this channel is not a NSFW channel!");
                 }
-
-                // eb.setColor(event.getSelfMember().getColor());
             }
-           return eb.build();
+
+            if (meme.getAuthor().isProActive()) {
+                eb.setColor(meme.getAuthor().getNameColor());
+            }
+
+            return eb.build();
         }
 
         public static Meme getMeme(String args, boolean id) {
