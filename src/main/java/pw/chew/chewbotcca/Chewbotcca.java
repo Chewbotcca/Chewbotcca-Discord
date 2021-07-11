@@ -37,6 +37,7 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.chew.api.ChewAPI;
+import pw.chew.chewbotcca.listeners.BotCommandListener;
 import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ReactListener;
 import pw.chew.chewbotcca.listeners.ReadyListener;
@@ -116,6 +117,9 @@ public class Chewbotcca {
         // Temporary measure to test Slash Commands
         client.forceGuildOnly(PropertiesManager.forceGuildId());
         client.setManualUpsert(true);
+
+        // Listen for commands, errors, and more
+        client.setListener(new BotCommandListener());
 
         // Finalize the command client
         CommandClient commandClient = client.build();

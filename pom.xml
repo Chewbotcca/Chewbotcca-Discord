@@ -39,7 +39,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.3.0_287</version>
+            <version>4.3.0_296</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -93,7 +93,7 @@
         <!-- Error catcher, not very good with our current logger -->
         <dependency>
             <groupId>io.sentry</groupId>
-            <artifactId>sentry-logback</artifactId>
+            <artifactId>sentry</artifactId>
             <version>5.0.1</version>
             <scope>compile</scope>
         </dependency>
