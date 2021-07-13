@@ -21,12 +21,12 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.objects.Bot;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
@@ -34,9 +34,7 @@ import pw.chew.chewbotcca.util.RestClient;
 import java.awt.Color;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 // %^binfo command
 public class BotInfoCommand extends SlashCommand {
@@ -59,7 +57,7 @@ public class BotInfoCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        String botId = event.getOption("bot").getAsUser().getId();
+        String botId = ResponseHelper.guaranteeStringOption(event, "bot", "");
 
         // Get it from the specified list if it's valid, and let them know
         try {
@@ -79,14 +77,14 @@ public class BotInfoCommand extends SlashCommand {
         commandEvent.getChannel().sendTyping().queue();
         String[] args = commandEvent.getArgs().split(" ");
         // If there's no args
-        if(args.length == 0) {
+        if (args.length == 0) {
             commandEvent.reply("Please specify a bot with either a mention or its ID");
             return;
         }
         // Parse the bot mention or just use the ID they provided an ID
         String botId;
-        if(args[0].contains("<@")) {
-            botId = args[0].replace("<@!", "").replace(">", "");
+        if (!commandEvent.getMessage().getMentionedUsers().isEmpty()) {
+            botId = commandEvent.getMessage().getMentionedUsers().get(0).getId();
         } else {
             botId = args[0];
         }
@@ -122,93 +120,42 @@ public class BotInfoCommand extends SlashCommand {
      */
     private EmbedBuilder gatherTopggInfo(String id, JDA jda) {
         // Get data from top.gg
-        JSONObject bot = new JSONObject(RestClient.get("https://top.gg/api/bots/" + id, PropertiesManager.getTopggToken()));
+        JSONObject botData = new JSONObject(RestClient.get("https://top.gg/api/bots/" + id, PropertiesManager.getTopggToken()));
 
         // If there's an error let them know
-        if(bot.has("error")) {
-            throw new IllegalArgumentException(bot.getString("error"));
+        if (botData.has("error")) {
+            throw new IllegalArgumentException(botData.getString("error"));
         }
 
         // Start generating the embed
-        EmbedBuilder e = new EmbedBuilder();
-        e.setTitle("Bot Information");
+        Bot bot = new Bot(jda);
 
-        // If certified set the image to the certification badge, otherwise use the bot avatar
-        String certified;
-        if(bot.getBoolean("certifiedBot")) {
-            certified = "https://cdn.discordapp.com/emojis/392249976639455232.png";
-        } else {
-            certified = String.format("https://cdn.discordapp.com/avatars/%s/%s.%s", id, bot.getString("avatar"), "png");
-        }
-
-        // Set the author to the bot name
-        e.setAuthor(bot.getString("username") + "#" + bot.getString("discriminator"), "https://top.gg/bot/" + id, certified);
-
-        // Set the thumbnail to the bot avatar
-        e.setThumbnail(String.format("https://cdn.discordapp.com/avatars/%s/%s.%s", id, bot.getString("avatar"), "png"));
-
-        // Set the description to the short description
-        e.setDescription(bot.getString("shortdesc"));
-
-        e.addField("Bot ID", bot.getString("id"), true);
-
-        // Set server count if there is one
-        if(bot.has("server_count"))
-            e.addField("Server Count", String.valueOf(bot.getInt("server_count")), true);
-        else
-            e.addField("Server Count", "Unknown", true);
-
-        // Set other details
-        e.addField("Prefix", "`" + bot.getString("prefix") + "`", true);
-        e.addField("Library", bot.getString("lib"), true);
-        e.addField("Points", "This Month: " + bot.getInt("monthlyPoints") + "\n" +
-                "All Time: " + bot.getInt("points"), true);
-
-        // Find and set tags
-        List<String> tags = new ArrayList<>();
-        for(Object tag : bot.getJSONArray("tags")) {
-            tags.add((String) tag);
-        }
-
-        if(tags.isEmpty()) {
-            e.addField("Tags", "None", true);
-        } else {
-            e.addField("Tags", String.join(", ", tags), true);
-        }
-
-        // Find and set owners
-        List<String> owners = new ArrayList<>();
-        for(Object owner : bot.getJSONArray("owners")) {
-            User user = jda.getUserById((String) owner);
-            if(user == null)
-                owners.add((String) owner);
-            else
-                owners.add(user.getAsTag());
-        }
-
-        if(owners.isEmpty()) {
-            e.addField("Owners", "None", true);
-        } else {
-            e.addField("Owners", String.join(", ", owners), true);
-        }
+        // Set Basic info
+        bot.setName(botData.getString("username") + "#" + botData.getString("discriminator"));
+        bot.setDescription(botData.getString("shortdesc"));
+        bot.setAvatar(String.format("https://cdn.discordapp.com/avatars/%s/%s.%s", id, botData.getString("avatar"), "png"));
+        bot.setId(id);
+        bot.setLibrary(botData.getString("lib"));
+        bot.setPrefix(botData.getString("prefix"));
+        bot.setServers(botData.optInt("server_count", 0));
+        bot.setAddedTime(dateParser(botData.getString("date")));
+        bot.setUrl("https://top.gg/bot/" + id);
+        bot.addTags(botData.getJSONArray("tags"));
+        bot.addOwners(botData.getJSONArray("owners"));
 
         // Find and set links
-        List<CharSequence> links = new ArrayList<>();
-        links.add("[Bot Page](https://top.gg/bot/" + id + ")");
-        links.add("[Vote](https://top.gg/bot/" + id + "/vote)");
-        if(!bot.getString("invite").equals(""))
-            links.add("[Invite](" + bot.getString("invite") + ")");
-        if(!bot.getString("website").equals(""))
-            links.add("[Website](" + bot.getString("website") + ")");
-        if(!bot.getString("support").equals(""))
-            links.add("[Support Server](https://discord.gg/" + bot.getString("support") + ")");
-        if(!bot.getString("github").equals(""))
-            links.add("[GitHub](" + bot.getString("github") + ")");
+        bot.addLink("Bot Page", "https://top.gg/bot/" + id);
+        bot.addLink("Vote", "https://top.gg/bot/" + id + "/vote");
+        bot.addLink("Invite", botData.getString("invite"));
+        bot.addLink("Website", botData.getString("website"));
+        bot.addLink("Support Server", "https://discord.gg/" + botData.getString("support"));
+        bot.addLink("GitHub", botData.getString("github"));
 
-        e.addField("Links", String.join("\n", links), true);
+        EmbedBuilder e = bot.buildEmbed();
 
-        e.setFooter("Bot added");
-        e.setTimestamp(dateParser(bot.getString("date")));
+        // Set point details
+        e.addField("Points", "This Month: " + botData.getInt("monthlyPoints") + "\n" +
+            "All Time: " + botData.getInt("points"), true);
 
         e.setColor(Color.decode("#43B581"));
 
@@ -223,47 +170,36 @@ public class BotInfoCommand extends SlashCommand {
      */
     private EmbedBuilder gatherDBotsInfo(String id, JDA jda) {
         // Gather info from the site
-        JSONObject bot = new JSONObject(RestClient.get("https://discord.bots.gg/api/v1/bots/" + id, PropertiesManager.getDbotsToken()));
+        JSONObject botData = new JSONObject(RestClient.get("https://discord.bots.gg/api/v1/bots/" + id, PropertiesManager.getDbotsToken()));
 
         // If there's a message
-        if(bot.has("message")) {
-            throw new IllegalArgumentException("This bot does not exist on this list!");
+        if (botData.has("message")) {
+            throw new IllegalArgumentException("Error response from the API! " + botData.getString("message"));
         }
 
         // Start setting embed
-        EmbedBuilder e = new EmbedBuilder();
-        e.setTitle("Bot Information");
-        e.setAuthor(bot.getString("username") + "#" + bot.getString("discriminator"), "https://discord.bots.gg/bots/" + bot.getString("userId"));
-        e.setThumbnail(bot.getString("avatarURL"));
-        e.setDescription(bot.getString("shortDescription"));
-        e.addField("Bot ID", bot.getString("userId"), true);
-        e.addField("Server Count", String.valueOf(bot.getInt("guildCount")), true);
-        e.addField("Prefix", "`" + bot.getString("prefix") + "`", true);
-        e.addField("Library", bot.getString("libraryName"), true);
+        Bot bot = new Bot(jda);
 
-        // Find and set the owner as a Discord User
-        User user = jda.getUserById(bot.getJSONObject("owner").getString("userId"));
-        if(user == null)
-            e.addField("Owner", "Unknown", true);
-        else
-            e.addField("Owner", user.getAsTag(), true);
+        // Set basic information
+        bot.setName(botData.getString("username") + "#" + botData.getString("discriminator"));
+        bot.setDescription(botData.getString("shortDescription"));
+        bot.setAvatar(botData.getString("avatarURL"));
+        bot.setUrl("https://discord.bots.gg/bots/" + id);
+        bot.setId(id);
+        bot.setServers(botData.getInt("guildCount"));
+        bot.setPrefix(botData.getString("prefix"));
+        bot.setLibrary(botData.getString("libraryName"));
+        bot.setAddedTime(dateParser(botData.getString("addedDate")));
+        bot.addOwner(botData.getJSONObject("owner").getString("userId"));
 
         // Set links
-        List<CharSequence> links = new ArrayList<>();
-        links.add("[Bot Page](https://discord.bots.gg/bots/" + id + ")");
-        if(!bot.getString("botInvite").equals(""))
-            links.add("[Invite](" + bot.getString("botInvite") + ")");
-        if(!bot.isNull("website"))
-            links.add("[Website](" + bot.getString("website") + ")");
-        if(!bot.isNull("supportInvite"))
-            links.add("[Support Server](" + bot.getString("supportInvite") + ")");
-        if(!bot.isNull("openSource"))
-            links.add("[Source Code](" + bot.getString("openSource") + ")");
+        bot.addLink("Bot Page", "https://discord.bots.gg/bots/" + id);
+        bot.addLink("Invite", botData.getString("botInvite"));
+        bot.addLink("Website", botData.optString("website", null));
+        bot.addLink("Support Server", botData.optString("supportInvite", null));
+        bot.addLink("Source Code", botData.optString("openSource", null));
 
-        e.addField("Links", String.join("\n", links), true);
-
-        e.setFooter("Bot added");
-        e.setTimestamp(dateParser(bot.getString("addedDate")));
+        EmbedBuilder e = bot.buildEmbed();
 
         e.setColor(Color.decode("#43B581"));
 
@@ -281,78 +217,39 @@ public class BotInfoCommand extends SlashCommand {
         JSONObject response = new JSONObject(RestClient.get("https://api.discordextremelist.xyz/v2/bot/" + id, PropertiesManager.getDELToken()));
 
         // If there's an error let them know
-        if(response.getBoolean("error")) {
-            throw new IllegalArgumentException("An error occurred getting that bot, does it exist");
+        if (response.getBoolean("error")) {
+            throw new IllegalArgumentException("An error occurred getting that bot, does it exist?");
         }
 
-        JSONObject bot = response.getJSONObject("bot");
+        JSONObject botData = response.getJSONObject("bot");
 
         // Start generating the embed
-        EmbedBuilder e = new EmbedBuilder();
-        e.setTitle("Bot Information");
+        Bot bot = new Bot(jda);
 
-        // Set the author to the bot name
-        e.setAuthor(bot.getString("name"), "https://discordextremelist.xyz/en-US/bots/" + id, bot.getJSONObject("avatar").getString("url"));
+        // Add basic info
+        bot.setName(botData.getString("name"));
+        bot.setDescription(botData.getString("shortDesc"));
+        bot.setAvatar(botData.getJSONObject("avatar").getString("url"));
+        bot.setId(botData.getString("id"));
+        bot.setServers(botData.getInt("serverCount"));
+        bot.setUrl("https://discordextremelist.xyz/en-US/bots/" + id);
+        bot.setPrefix(botData.getString("prefix"));
+        bot.setLibrary(botData.getString("library"));
+        bot.addTags(botData.getJSONArray("tags"));
+        bot.addOwner(botData.getJSONObject("owner").getString("id"));
+        bot.addOwners(botData.getJSONArray("editors"));
 
-        // Set the thumbnail to the bot avatar
-        e.setThumbnail(bot.getJSONObject("avatar").getString("url"));
+        // Add links
+        JSONObject urls = botData.getJSONObject("links");
+        bot.addLink("Bot Page", "https://discordextremelist.xyz/en-US/bots/" + id);
+        bot.addLink("Invite", urls.getString("invite"));
+        bot.addLink("Support Server", urls.getString("support"));
+        bot.addLink("Website", urls.getString("website"));
+        bot.addLink("Donate", urls.getString("donation"));
+        bot.addLink("Source Code", urls.getString("repo"));
 
-        // Set the description to the short description
-        e.setDescription(bot.getString("shortDesc"));
-
-        e.addField("Bot ID", bot.getString("id"), true);
-
-        // Set server count if there is one
-        if(bot.getInt("serverCount") > 0)
-            e.addField("Server Count", String.valueOf(bot.getInt("serverCount")), true);
-        else
-            e.addField("Server Count", "Unknown", true);
-
-        // Set other details
-        e.addField("Prefix", "`" + bot.getString("prefix") + "`", true);
-        e.addField("Library", bot.getString("library"), true);
-
-        // Find and set tags
-        List<String> tags = new ArrayList<>();
-        for(Object tag : bot.getJSONArray("tags")) {
-            tags.add((String) tag);
-        }
-
-        if(tags.isEmpty()) {
-            e.addField("Tags", "None", true);
-        } else {
-            e.addField("Tags", String.join(", ", tags), true);
-        }
-
-        // Find and set owners
-        List<String> owners = new ArrayList<>();
-        owners.add(bot.getJSONObject("owner").getString("id"));
-        for(Object owner : bot.getJSONArray("editors")) {
-            User user = jda.getUserById((String) owner);
-            if(user == null)
-                owners.add((String) owner);
-            else
-                owners.add(user.getAsTag());
-        }
-
-        e.addField("Owners", String.join(", ", owners), true);
-
-        // Find and set links
-        List<CharSequence> links = new ArrayList<>();
-        links.add("[Bot Page](https://discordextremelist.xyz/en-US/bots/" + id + ")");
-        JSONObject urls = bot.getJSONObject("links");
-        if(!urls.getString("invite").equals(""))
-            links.add("[Invite](" + urls.getString("invite") + ")");
-        if(!urls.getString("support").equals(""))
-            links.add("[Support Server](" + urls.getString("support") + ")");
-        if(!urls.getString("website").equals(""))
-            links.add("[Website](" + urls.getString("website") + ")");
-        if(!urls.getString("donation").equals(""))
-            links.add("[Donate](" + urls.getString("donation") + ")");
-        if(!urls.getString("repo").equals(""))
-            links.add("[Source](" + urls.getString("repo") + ")");
-
-        e.addField("Links", String.join("\n", links), true);
+        // Build Embed
+        EmbedBuilder e = bot.buildEmbed();
 
         e.setColor(Color.decode("#43B581"));
 
@@ -361,6 +258,7 @@ public class BotInfoCommand extends SlashCommand {
 
     /**
      * Date parser because java is weird
+     *
      * @param date the date
      * @return the parsed date
      */
