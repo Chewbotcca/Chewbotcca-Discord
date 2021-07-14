@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.chew.api.ChewAPI;
 import pw.chew.chewbotcca.listeners.BotCommandListener;
+import pw.chew.chewbotcca.listeners.InteractionHandler;
 import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ReactListener;
 import pw.chew.chewbotcca.listeners.ReadyListener;
@@ -128,22 +129,18 @@ public class Chewbotcca {
         JDA jda = JDABuilder.createDefault(PropertiesManager.getToken())
             .setChunkingFilter(ChunkingFilter.ALL)
             .setMemberCachePolicy(MemberCachePolicy.ALL)
-            .enableIntents(GatewayIntent.GUILD_MEMBERS)
-            .enableIntents(GatewayIntent.GUILD_PRESENCES)
-            .enableCache(CacheFlag.ACTIVITY)
-            .enableCache(CacheFlag.ROLE_TAGS)
+            .enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
+            .enableCache(CacheFlag.ACTIVITY, CacheFlag.ROLE_TAGS)
             .setStatus(OnlineStatus.ONLINE)
             .setActivity(Activity.playing("Booting..."))
-            .addEventListeners(waiter, commandClient)
-            .build();
-
-        // Register listeners
-        jda.addEventListener(
-            new ReactListener(),
-            new MessageHandler(),
-            new ServerJoinLeaveListener(),
-            new ReadyListener()
-        );
+            .addEventListeners(
+                waiter, commandClient, // JDA-Chewtils stuff
+                new InteractionHandler(), // Handle interactions
+                new MessageHandler(), // Handle messages
+                new ReactListener(), // Handle reactions
+                new ReadyListener(), // Ran on boot
+                new ServerJoinLeaveListener() // Listen for server count changes for stats
+            ).build();
 
         Memory.remember(waiter, jda, new ChewAPI(), github, commandClient);
     }

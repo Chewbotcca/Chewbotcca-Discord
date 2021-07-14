@@ -21,10 +21,13 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.objects.Memory;
@@ -55,7 +58,15 @@ public class InfoCommand extends SlashCommand {
         try {
             event.replyEmbeds(gatherData(ResponseHelper.guaranteeStringOption(event, "command", ""))).queue();
         } catch (IllegalArgumentException e) {
-            event.replyEmbeds(ResponseHelper.generateFailureEmbed(null, e.getMessage())).setEphemeral(true).queue();
+            if (e.getMessage().contains("Did you mean? ")) {
+                SelectionMenu menu = buildSuggestionMenu(e.getMessage());
+
+                event.reply("Invalid command! See <https://chew.pw/chewbotcca/discord/commands> for a list of commands.")
+                    .addActionRow(menu)
+                    .queue();
+            } else {
+                event.replyEmbeds(ResponseHelper.generateFailureEmbed(null, e.getMessage())).setEphemeral(true).queue();
+            }
         }
     }
 
@@ -63,7 +74,7 @@ public class InfoCommand extends SlashCommand {
     protected void execute(CommandEvent event) {
         // Make sure there's an arg
         String command = event.getArgs();
-        if (command.isEmpty()) {
+        if (command.isBlank()) {
             event.reply("Please specify a command to find info for!");
             return;
         }
@@ -71,11 +82,65 @@ public class InfoCommand extends SlashCommand {
         try {
             event.reply(gatherData(command));
         } catch (IllegalArgumentException e) {
+            if (e.getMessage().contains("Did you mean? ")) {
+                SelectionMenu menu = buildSuggestionMenu(e.getMessage());
+
+                event.getChannel().sendMessage("Invalid command! See <https://chew.pw/chewbotcca/discord/commands> for a list of commands.")
+                    .setActionRow(menu)
+                    .queue();
+
+                return;
+            }
+
             event.replyWarning(e.getMessage());
         }
     }
 
-    private MessageEmbed gatherData(String command) {
+    /**
+     * Update the "Did you mean?" embed with their selection
+     *
+     * @param event the selection menu event
+     */
+    public static void updateInfo(SelectionMenuEvent event) {
+        String selected = event.getSelectedOptions().get(0).getValue();
+        if (selected.equals("NONE")) {
+            event.editComponents(new ArrayList<>()).queue();
+            return;
+        }
+
+        event.editMessageEmbeds(gatherData(event.getSelectedOptions().get(0).getValue()))
+            .setContent(null)
+            .setActionRows(new ArrayList<>())
+            .queue();
+    }
+
+    /**
+     * Builds a selection menu based on the predictions for the /info response
+     *
+     * @param message the original message
+     * @return a selection menu
+     */
+    private SelectionMenu buildSuggestionMenu(String message) {
+        String[] options = message.split("Did you mean\\? ")[1].split(", ");
+        List<SelectOption> data = new ArrayList<>();
+        for (String option : options) {
+            data.add(SelectOption.of(option, option));
+        }
+        data.add(SelectOption.of("None of these", "NONE").withDescription("Can't find the command? Select to cancel."));
+        return SelectionMenu.create("info:didyoumean")
+            .setPlaceholder("Did you mean?")
+            .addOptions(data)
+            .build();
+    }
+
+    /**
+     * Gather the data from the internal Chewbotcca commands API
+     *
+     * @param command the command to look up
+     * @return a completed embed filled with command info
+     * @throws IllegalArgumentException if the command does not exist
+     */
+    private static MessageEmbed gatherData(String command) {
         // Get the command from the chew api
         JSONObject data = new JSONObject(RestClient.get("https://chew.pw/chewbotcca/discord/api/command/" + command));
         // If there's an error
@@ -97,11 +162,11 @@ public class InfoCommand extends SlashCommand {
             .setTitle("**Info For**: `" + PropertiesManager.getPrefix() + data.getString("command") + "`")
             .setDescription(data.getString("description"));
 
-        e.addField("Arguments", data.isNull("args") ? "No Arguments" : data.getString("args"), true);
-        e.addField("Flags", data.isNull("flags") ? "No Flags" : data.getString("flags"), true);
-        e.addField("Aliases", data.isNull("aliases") ? "No Aliases" : data.getString("aliases"), true);
-        e.addField("Bot Permissions", data.isNull("bot_permissions") ? "*No special perms needed*" : data.getString("bot_permissions"), true);
-        e.addField("User Permissions", data.isNull("user_permissions") ? "*No special perms needed*" : data.getString("user_permissions"), true);
+        e.addField("Arguments", data.optString("args", "No Arguments"), true);
+        e.addField("Flags", data.optString("flags", "No Flags"), true);
+        e.addField("Aliases", data.optString("aliases", "No Aliases"), true);
+        e.addField("Bot Permissions", data.optString("bot_permissions", "*No special perms needed*"), true);
+        e.addField("User Permissions", data.optString("user_permissions", "*No special perms needed*"), true);
 
         return e.build();
     }
