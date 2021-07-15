@@ -35,7 +35,8 @@ I'm always open to suggestions on what to add. Please let me know what you would
 
 You can view commands [here](https://chew.pw/chewbotcca/discord/commands).
 
-You can add the bot [with this link](https://discord.com/oauth2/authorize?client_id=604362556668248095&scope=bot&permissions=0)
+You can add the
+bot [with this link](https://discord.com/api/oauth2/authorize?client_id=604362556668248095&permissions=939879492&scope=bot%20applications.commands)
 
 You can join the Discord server with [this link](https://discord.gg/UjxQ3Bh).
 
