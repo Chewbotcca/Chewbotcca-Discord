@@ -28,13 +28,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
+import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.ResponseHelper;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 // %^discrim command
@@ -85,7 +83,7 @@ public class DiscrimCommand extends SlashCommand {
 
     public Paginator buildRankPaginator(JDA jda) {
         Map<String, Integer> ranking = getDiscrimRanking(jda.getUserCache());
-        Map<String, Integer> ranked = sortByValue(ranking);
+        Map<String, Integer> ranked = MiscUtil.sortByValue(ranking);
         Paginator.Builder pbuilder = JDAUtilUtil.makePaginator();
         pbuilder.setText("Users discriminator ranking"
             + "\nCached users: " + jda.getUserCache().size());
@@ -101,19 +99,6 @@ public class DiscrimCommand extends SlashCommand {
             mapping.put(user.getDiscriminator(), mapping.getOrDefault(user.getDiscriminator(), 0) + 1);
         }
         return mapping;
-    }
-
-    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
-        List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
-        list.sort(Map.Entry.comparingByValue());
-        Collections.reverse(list);
-
-        Map<K, V> result = new LinkedHashMap<>();
-        for (Map.Entry<K, V> entry : list) {
-            result.put(entry.getKey(), entry.getValue());
-        }
-
-        return result;
     }
 
     public class DiscrimListSubCommand extends SlashCommand {

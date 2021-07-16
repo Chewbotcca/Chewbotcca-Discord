@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.ResponseHelper;
 
 import java.awt.Color;
@@ -103,26 +104,20 @@ public class EightBallCommand extends SlashCommand {
         // Set the answer based on the random response
         switch (response) {
             case 0 -> {
-                answer = getRandom(goodResponses);
+                answer = MiscUtil.getRandom(goodResponses);
                 e.setColor(Color.decode("#00FF00"));
             }
             case 1 -> {
-                answer = getRandom(neutralResponses);
+                answer = MiscUtil.getRandom(neutralResponses);
                 e.setColor(Color.decode("#FFFF00"));
             }
             case 2 -> {
-                answer = getRandom(badResponses);
+                answer = MiscUtil.getRandom(badResponses);
                 e.setColor(Color.decode("#FF0000"));
             }
         }
         // Finish and send embed
         e.addField(":8ball: 8ball says", answer, false);
         return e.build();
-    }
-
-    // Method to get a random string from an array
-    public static String getRandom(String[] array) {
-        int rnd = new Random().nextInt(array.length);
-        return array[rnd];
     }
 }

@@ -23,9 +23,9 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.kohsuke.github.GHRepository;
 import pw.chew.chewbotcca.objects.Memory;
+import pw.chew.chewbotcca.util.MiscUtil;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 
 // %^ghrepo command
 public class GHRepoCommand extends Command {
@@ -71,25 +71,11 @@ public class GHRepoCommand extends Command {
             e.addField("Open Issues/PRs", String.valueOf(repo.getOpenIssueCount()), true);
             e.addField("Stars", String.valueOf(repo.getStargazersCount()), true);
 
-            e.addField("Size", bytesToFriendly(repo.getSize()), true);
+            e.addField("Size", MiscUtil.bytesToFriendly(repo.getSize()), true);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
 
         return e.build();
-    }
-
-    public static String bytesToFriendly(long bytes) {
-        // Find size of repo and list it
-        int k = 1024;
-        String[] measure = new String[]{"B", "KB", "MB", "GB", "TB"};
-        double i;
-        if (bytes == 0) {
-            i = 0;
-        } else {
-            i = Math.floor(Math.log(bytes) / Math.log(k));
-        }
-        DecimalFormat df = new DecimalFormat("#.##");
-        return df.format(bytes / Math.pow(k, i)) + " " + measure[(int) i + 1];
     }
 }

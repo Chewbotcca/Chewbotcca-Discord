@@ -43,7 +43,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static pw.chew.chewbotcca.commands.info.ServerInfoCommand.capitalize;
+import static pw.chew.chewbotcca.util.MiscUtil.capitalize;
 
 // %^uinfo command
 public class UserInfoCommand extends SlashCommand {

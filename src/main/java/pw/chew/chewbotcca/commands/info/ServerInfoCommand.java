@@ -36,6 +36,7 @@ import net.dv8tion.jda.api.utils.TimeFormat;
 import pw.chew.chewbotcca.objects.IKnowWhatIAmDoingISwearException;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
+import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.ResponseHelper;
 
 import java.text.DecimalFormat;
@@ -194,7 +195,7 @@ public class ServerInfoCommand extends SlashCommand {
      */
     public String perkParser(String feature, Guild server) {
         return switch (feature) {
-            default -> capitalize(feature);
+            default -> MiscUtil.capitalize(feature);
             case "BANNER" -> "[Banner](" + server.getBannerUrl() + "?size=2048)";
             case "COMMERCE" -> "<:store_tag:725504846924611584> Store Channels";
             case "NEWS" -> "<:news:725504846937063595> News Channels";
@@ -256,28 +257,6 @@ public class ServerInfoCommand extends SlashCommand {
         } else {
             return "Vanity URL: " + "[" + vanity + "](https://discord.gg/" + vanity + ")";
         }
-    }
-
-    /**
-     * <a href="https://github.com/ChewMC/TransmuteIt/blob/2b86/src/pw/chew/transmuteit/DiscoveriesCommand.java#L174-L186">Source</a><br>
-     * Capitalizes a String, e.g. "BRUH_MOMENT" -> "Bruh Moment"
-     *
-     * @param to the unformatted string
-     * @return a formatting string
-     * @author Chew
-     */
-    public static String capitalize(String to) {
-        if (to.equals("")) {
-            return "";
-        }
-        String[] words = to.split("_");
-        StringBuilder newword = new StringBuilder();
-        for (String word : words) {
-            String rest = word.substring(1).toLowerCase();
-            String first = word.substring(0, 1).toUpperCase();
-            newword.append(first).append(rest).append(" ");
-        }
-        return newword.toString();
     }
 
     /**

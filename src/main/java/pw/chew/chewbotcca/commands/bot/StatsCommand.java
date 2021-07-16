@@ -28,7 +28,7 @@ import pw.chew.chewbotcca.util.DateTime;
 
 import java.time.Instant;
 
-import static pw.chew.chewbotcca.commands.services.github.GHRepoCommand.bytesToFriendly;
+import static pw.chew.chewbotcca.util.MiscUtil.bytesToFriendly;
 
 // %^stats command
 public class StatsCommand extends SlashCommand {

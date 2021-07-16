@@ -23,7 +23,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
-import static pw.chew.chewbotcca.commands.fun.EightBallCommand.getRandom;
+import static pw.chew.chewbotcca.util.MiscUtil.getRandom;
 
 public class CoinFlipCommand extends SlashCommand {
 

@@ -26,11 +26,10 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
+import pw.chew.chewbotcca.util.MiscUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,7 +84,7 @@ public class UserStatsCommand extends SlashCommand {
     }
 
     public MessageEmbed buildEmbed(JDA jda) {
-        Map<User.UserFlag, Integer> ranked = sortByValue(stats);
+        Map<User.UserFlag, Integer> ranked = MiscUtil.sortByValue(stats);
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("User Flags Ranking");
         List<String> rankings = new ArrayList<>();
@@ -110,16 +109,4 @@ public class UserStatsCommand extends SlashCommand {
         return pbuilder.build();
     }
 
-    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
-        List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
-        list.sort(Map.Entry.comparingByValue());
-        Collections.reverse(list);
-
-        Map<K, V> result = new LinkedHashMap<>();
-        for (Map.Entry<K, V> entry : list) {
-            result.put(entry.getKey(), entry.getValue());
-        }
-
-        return result;
-    }
 }
