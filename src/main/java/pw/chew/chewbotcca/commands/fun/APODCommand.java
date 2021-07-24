@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.htmlcleaner.CleanerProperties;
@@ -38,11 +39,13 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.text.DateFormatSymbols;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 public class APODCommand extends SlashCommand {
 
@@ -52,15 +55,25 @@ public class APODCommand extends SlashCommand {
         this.aliases = new String[]{"dailyspace", "astropix", "apix"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
-        this.options = Collections.singletonList(
-            new OptionData(OptionType.STRING, "date", "The date in MM/DD/YYYY format, blank for today")
+        this.options = List.of(
+            new OptionData(OptionType.INTEGER, "year", "The year for the pic, blank for this year. Range: (1995-)"),
+            new OptionData(OptionType.INTEGER, "month", "The month for the pic, blank for this month.")
+                .addChoices(buildMonthChoices()),
+            new OptionData(OptionType.INTEGER, "day", "The day for the pic, blank for this day.")
         );
     }
 
     @Override
     protected void execute(SlashCommandEvent event) {
         try {
-            event.replyEmbeds(gatherPicture(ResponseHelper.guaranteeStringOption(event, "date", "astropix"))).queue();
+            // Check for no input
+            OffsetDateTime today = OffsetDateTime.now();
+            String month = ResponseHelper.guaranteeStringOption(event, "month", String.valueOf(today.getMonthValue()));
+            String day = ResponseHelper.guaranteeStringOption(event, "day", String.valueOf(today.getDayOfMonth()));
+            String year = ResponseHelper.guaranteeStringOption(event, "year", String.valueOf(today.getYear()));
+            String date = month + "/" + day + "/" + year;
+
+            event.replyEmbeds(gatherPicture(date)).queue();
         } catch (IllegalArgumentException e) {
             event.reply(e.getMessage()).setEphemeral(true).queue();
         }
@@ -119,7 +132,7 @@ public class APODCommand extends SlashCommand {
 
         // If 404 somehow
         if (img.equals("https://apod.nasa.gov/apod/")) {
-            throw new IllegalArgumentException("Invalid date! Range is June 16th, 1995 to today!");
+            throw new IllegalArgumentException("No image found for this date! Ensure your date range is June 16th, 1995 to today! Link: " + url);
         }
 
         EmbedBuilder embed = new EmbedBuilder();
@@ -136,8 +149,15 @@ public class APODCommand extends SlashCommand {
         int month = Integer.parseInt(date[0]);
         int day = Integer.parseInt(date[1]);
         int year = Integer.parseInt(date[2]);
-        if (year < 2000)
-            year += 2000;
+
+        // Sanity check the year, ensure it's 4 digits
+        if (year < 100) {
+            if (year >= 95) {
+                year += 1900;
+            } else {
+                year += 2000;
+            }
+        }
 
         // No APOD prior to 1995
         if (year < 1995)
@@ -163,5 +183,14 @@ public class APODCommand extends SlashCommand {
             dayString = "0" + dayString;
         }
         return "ap" + yearString + monthString + dayString;
+    }
+
+    private List<Command.Choice> buildMonthChoices() {
+        List<Command.Choice> responses = new ArrayList<>();
+        for (int i = 1; i <= 12; i++) {
+            String month = new DateFormatSymbols().getMonths()[i - 1];
+            responses.add(new Command.Choice(month, i));
+        }
+        return responses;
     }
 }
