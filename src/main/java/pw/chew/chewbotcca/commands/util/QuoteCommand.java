@@ -29,6 +29,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.MissingAccessException;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.Mention;
@@ -54,7 +55,7 @@ public class QuoteCommand extends SlashCommand {
         Message message;
         String[] link = ResponseHelper.guaranteeStringOption(event, "message_link", "").split("/");
         try {
-            message = retrieveMessageFromLink(link, event.getJDA());
+            message = retrieveMessageFromLink(link, event.getJDA(), event.getChannelType() == ChannelType.TEXT ? event.getTextChannel() : null);
         } catch (IllegalArgumentException e) {
             event.reply("Could not get message! " + e.getMessage()).setEphemeral(true).queue();
             return;
@@ -141,7 +142,7 @@ public class QuoteCommand extends SlashCommand {
             String[] link = arg.split("/");
             if (link.length == 7) {
                 try {
-                    return retrieveMessageFromLink(link, event.getJDA());
+                    return retrieveMessageFromLink(link, event.getJDA(), event.getTextChannel());
                 } catch (NullPointerException | IllegalArgumentException e) {
                     throw new IllegalArgumentException("Message ID doesn't exist or is invalid!");
                 }
@@ -166,7 +167,16 @@ public class QuoteCommand extends SlashCommand {
         throw new IllegalArgumentException("Too many arguments provided!");
     }
 
-    public static Message retrieveMessageFromLink(String[] link, JDA jda) {
+    /**
+     * Retrieves a message based on jump URL. Also has some sanity checks.
+     *
+     * @param link   The split, delimited by slashes
+     * @param jda    The JDA instance
+     * @param source The source of the interaction, null if it doesn't matter
+     * @return A retrieved message
+     * @throws IllegalArgumentException If an error occurred retrieving the message, or a check failed
+     */
+    public static Message retrieveMessageFromLink(String[] link, JDA jda, TextChannel source) {
         if (link.length != 7) {
             throw new IllegalArgumentException("Invalid link provided!");
         }
@@ -185,9 +195,17 @@ public class QuoteCommand extends SlashCommand {
             throw new IllegalArgumentException("Channel was invalid!");
 
         try {
-            return channel.retrieveMessageById(messageId).complete();
-        } catch (NullPointerException | IllegalArgumentException e) {
-            throw new IllegalArgumentException("Message ID doesn't exist or is invalid!");
+            Message message = channel.retrieveMessageById(messageId).complete();
+            // NSFW check
+            if (source != null && message.isFromType(ChannelType.TEXT)) {
+                if (!source.isNSFW() && message.getTextChannel().isNSFW()) {
+                    throw new IllegalArgumentException("Messages from NSFW channels cannot be quoted in non-NSFW channels!");
+                }
+            }
+            return message;
+        } catch (NullPointerException | MissingAccessException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Message ID doesn't exist, is invalid, or inaccessible!");
         }
     }
 }

@@ -50,7 +50,7 @@ public class UnsuppressCommand extends SlashCommand {
         String args = ResponseHelper.guaranteeStringOption(event, "message_link", "");
         Message message;
         try {
-            message = retrieveMessageFromLink(args.split("/"), event.getJDA());
+            message = retrieveMessageFromLink(args.split("/"), event.getJDA(), null);
         } catch (IllegalArgumentException e) {
             event.reply(e.getMessage()).setEphemeral(true).queue();
             return;
