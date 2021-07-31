@@ -40,9 +40,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.text.DateFormatSymbols;
-import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -144,7 +142,7 @@ public class APODCommand extends SlashCommand {
 
     private String getDateURL(String[] date) {
         // Get current time in CST
-        OffsetDateTime current = Instant.now().atOffset(ZoneOffset.of("-06:00"));
+        OffsetDateTime current = OffsetDateTime.now();
         // Parse int from date input
         int month = Integer.parseInt(date[0]);
         int day = Integer.parseInt(date[1]);
