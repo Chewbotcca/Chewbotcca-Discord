@@ -87,19 +87,26 @@ public class DefineCommand extends SlashCommand {
         JSONArray grabbedword;
         try {
             grabbedword = new JSONArray(RestClient.get("https://api.wordnik.com/v4/word.json/" + word + "/definitions?includeRelated=true&useCanonical=false&includeTags=false&api_key=" + PropertiesManager.getWordnikToken()));
-        } catch(JSONException e) {
+        } catch (JSONException e) {
             throw new IllegalArgumentException("Word not found! Check your local spell-checker!");
         }
 
         EmbedPaginator.Builder paginator = JDAUtilUtil.makeEmbedPaginator();
         paginator.setUsers(author);
 
-        int definitions = grabbedword.length();
+        int definitions = 0;
 
-        for(int i = 0; i < definitions; i++) {
-            JSONObject definition = grabbedword.getJSONObject(i);
+        for (Object defined : grabbedword) {
+            if (((JSONObject) defined).has("text")) {
+                definitions++;
+            }
+        }
 
-            String defined = "*No definition available, try navigating with the reactions below.*";
+        int last = 1;
+        for (Object definitionObj : grabbedword) {
+            JSONObject definition = (JSONObject) definitionObj;
+
+            String defined;
 
             if (definition.has("text")) {
                 defined = definition.getString("text")
@@ -115,6 +122,8 @@ public class DefineCommand extends SlashCommand {
                     .replaceAll("<i>(.*?)</i>", "*$1*")
                     // Bold
                     .replaceAll("<strong>(.*?)</strong>", "**$1**");
+            } else {
+                continue;
             }
 
             // Build the definition embed
@@ -129,10 +138,12 @@ public class DefineCommand extends SlashCommand {
                 e.addField("Part of Speech", definition.getString("partOfSpeech"), true);
             }
 
-            e.setFooter("Definition " + (i+1) + "/" + definitions);
-
+            e.setFooter("Definition " + (last) + "/" + definitions);
             paginator.addItems(e.build());
+
+            last++;
         }
+
         // Send it off!
         paginator.setText("");
         return paginator.build();
