@@ -44,7 +44,7 @@ public class NewIssueCommand extends Command {
             repo = Memory.getGithub().getRepository("Chewbotcca/Discord");
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Error occurred getting repo!");
+            commandEvent.reply("Error occurred getting repo!");
             return;
         }
 
