@@ -206,7 +206,6 @@ public class ServerInfoCommand extends SlashCommand {
             case "COMMUNITY" -> ":white_check_mark: Community";
             case "MEMBER_VERIFICATION_GATE_ENABLED" -> ":white_check_mark: Membership Screening";
             case "WELCOME_SCREEN_ENABLED" -> ":white_check_mark: Welcome Screen";
-            case "THREADS_ENABLED_TESTING" -> ":white_check_mark: Threads (Beta)";
         };
     }
 
@@ -221,8 +220,7 @@ public class ServerInfoCommand extends SlashCommand {
         return switch (perk) {
             // All enabled in server settings, by anyone, if they want
             case "COMMUNITY", "MEMBER_VERIFICATION_GATE_ENABLED", "WELCOME_SCREEN_ENABLED" -> true;
-            // Threads, currently in beta. Has some dumb requirements, but you can indeed meet them
-            case "THREADS_ENABLED_TESTING" -> true;
+            // Not a feature
             default -> false;
         };
     }
@@ -240,6 +238,9 @@ public class ServerInfoCommand extends SlashCommand {
             case "ENABLED_DISCOVERABLE_BEFORE" -> true;
             // Thread info. Temporary because every server has it.
             case "PRIVATE_THREADS", "SEVEN_DAY_THREAD_ARCHIVE", "THREE_DAY_THREAD_ARCHIVE" -> true;
+            // Every server has threads
+            case "THREADS_ENABLED" -> true;
+            // Continue as normal
             default -> false;
         };
     }
@@ -338,7 +339,7 @@ public class ServerInfoCommand extends SlashCommand {
                 OffsetDateTime timeBoosted = booster.getTimeBoosted();
                 // If they're still boosting (in case they stop boosting between gathering boosters and finding how long they're boosting
                 if (timeBoosted != null)
-                    boostString.add(booster.getAsMention() + " for " + TimeFormat.DATE_SHORT.format(timeBoosted.toInstant()) + " (" + DateTime.timeAgoShort(timeBoosted.toInstant(), true) + ")");
+                    boostString.add(booster.getAsMention() + " since " + TimeFormat.DATE_SHORT.format(timeBoosted.toInstant()) + " (" + DateTime.timeAgoShort(timeBoosted.toInstant(), true) + ")");
             }
             embed.setDescription(String.join("\n", boostString));
             if (boostString.isEmpty()) {
@@ -667,11 +668,11 @@ public class ServerInfoCommand extends SlashCommand {
      * Get member milestone (estimated)
      */
     private static class ServerMemberMilestoneSubCommand extends SlashCommand {
-        final static int[] milestones = new int[]{10, 25, 50, 100, 500, 1000, 5000, 7000, 10000, 20000, 50000, 100000, 200000, 300000, 400000, 500000, 1000000};
+        final static int[] milestones = new int[]{10, 25, 50, 100, 500, 1000, 5000, 10000, 20000, 50000, 100000, 200000, 300000, 400000, 500000, 1000000};
 
         public ServerMemberMilestoneSubCommand() {
             this.name = "milestones";
-            this.help = "Gathers information about this server's member milestones.";
+            this.help = "Gathers information about this server's upcoming member milestones.";
             this.aliases = new String[]{"milestone"};
             this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
             this.guildOnly = true;
