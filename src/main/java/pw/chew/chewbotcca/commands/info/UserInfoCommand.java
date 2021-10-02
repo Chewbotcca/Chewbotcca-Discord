@@ -16,7 +16,6 @@
  */
 package pw.chew.chewbotcca.commands.info;
 
-import bio.discord.api.DBioAPI;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -33,6 +32,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.objects.services.DBioUser;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.RestClient;
 
@@ -198,21 +198,22 @@ public class UserInfoCommand extends SlashCommand {
         JSONObject pronounData = new JSONObject(RestClient.get("https://pronoundb.org/api/v1/lookup?platform=discord&id=" + user.getId()));
         String pronouns = null;
         if (pronounData.has("pronouns")) {
-            pronouns = PRONOUN.valueOf(pronounData.getString("pronouns")).detailed;
+            pronouns = Pronoun.valueOf(pronounData.getString("pronouns")).detailed;
         }
 
         // Get their bio from discord.bio, if they have one.
-        var dbio = new DBioAPI().getUser(user.getId());
+        DBioUser dbio = DBioUser.getUser(user.getId());
         if (dbio != null) {
-            e.setDescription(dbio.getDescription());
-            if (dbio.getBirthday() != null)
-                e.addField("Birthday", TimeFormat.DATE_LONG.format(dbio.getBirthday().getTime()), true);
-            String gender = capitalize(dbio.getGender().name());
+            e.setDescription(dbio.get("description"));
+
+            if (dbio.getBirthday() != null) e.addField("Birthday", dbio.getBirthday(), true);
+
+            String gender = capitalize(dbio.getGender());
             if (pronouns != null) gender += String.format("\n(%s)", pronouns);
             e.addField("Gender", gender, true);
-            if (dbio.getLocation() != null) e.addField("Location", dbio.getLocation(), true);
-            if (dbio.getOccupation() != null) e.addField("Occupation", dbio.getOccupation(), true);
 
+            if (dbio.get("location") != null) e.addField("Location", dbio.get("location"), true);
+            if (dbio.get("occupation") != null) e.addField("Occupation", dbio.get("occupation"), true);
         } else if (pronouns != null) {
             e.addField("Pronouns", pronouns, true);
         }
@@ -258,7 +259,7 @@ public class UserInfoCommand extends SlashCommand {
         return -1;
     }
 
-    private enum PRONOUN {
+    private enum Pronoun {
         unspecified("Unspecified"),
         hh("he/him"),
         hi("he/it"),
@@ -281,9 +282,9 @@ public class UserInfoCommand extends SlashCommand {
         ask("Ask me my pronouns"),
         avoid("Avoid pronouns, use my name");
 
-        public String detailed;
+        public final String detailed;
 
-        PRONOUN(String detail) {
+        Pronoun(String detail) {
             this.detailed = detail;
         }
     }

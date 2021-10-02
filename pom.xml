@@ -120,13 +120,6 @@
             <version>1.0-b5</version>
         </dependency>
 
-        <!-- The Discord.bio API for discord.bio related things, like come on it's obvious at this point -->
-        <dependency>
-            <groupId>bio.discord.api</groupId>
-            <artifactId>dbio4j</artifactId>
-            <version>0.1.0_5</version>
-        </dependency>
-
         <!-- Lazy command loading -->
         <dependency>
             <groupId>org.reflections</groupId>
