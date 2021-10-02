@@ -27,11 +27,14 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 // %^rubygem command
@@ -69,6 +72,12 @@ public class RubyGemsCommand extends SlashCommand {
         }
     }
 
+    /**
+     * Gathers info about a gem from rubygems.org and returns it as an embed
+     *
+     * @param name The Gem name
+     * @return The information
+     */
     private MessageEmbed gatherGemData(String name) {
         JSONObject data;
         // Get gem if it exists
@@ -95,33 +104,32 @@ public class RubyGemsCommand extends SlashCommand {
         e.addField("Downloads", "For Version: " + NumberFormat.getNumberInstance(Locale.US).format(data.getInt("version_downloads")) + "\n" +
             "Total: " + NumberFormat.getNumberInstance(Locale.US).format(data.getInt("downloads")), true);
 
-        if (!data.isNull("licenses"))
+        // Add licenses
+        if (!data.isNull("licenses")) {
             e.addField("License", data.getJSONArray("licenses").getString(0), true);
-        if (rank > -1)
+        }
+
+        // Add the rank if there is one
+        if (rank > -1) {
             e.addField("Rank", "#" + NumberFormat.getNumberInstance(Locale.US).format(rank), true);
-        else
-            e.addField("Rank", "Not Ranked Yet", true);
+        }
 
         // Get links
-        StringBuilder links = new StringBuilder();
-        links.append("[Project](").append(data.getString("project_uri")).append(")\n");
-        links.append("[Gem](").append(data.getString("gem_uri")).append(")\n");
-        if(!data.isNull("documentation_uri"))
-            links.append("[Documentation](").append(data.getString("documentation_uri")).append(")\n");
-        if(!data.isNull("homepage_uri"))
-            links.append("[Homepage](").append(data.getString("homepage_uri")).append(")\n");
-        if(!data.isNull("wiki_uri"))
-            links.append("[Wiki](").append(data.getString("wiki_uri")).append(")\n");
-        if(!data.isNull("mailing_list_uri"))
-            links.append("[Mailing List](").append(data.getString("mailing_list_uri")).append(")\n");
-        if(!data.isNull("source_code_uri"))
-            links.append("[Source Code](").append(data.getString("source_code_uri")).append(")\n");
-        if(!data.isNull("bug_tracker_uri"))
-            links.append("[Bug Tracker](").append(data.getString("bug_tracker_uri")).append(")\n");
-        if(!data.isNull("changelog_uri"))
-            links.append("[Changelog](").append(data.getString("changelog_uri")).append(")");
+        List<String> links = new ArrayList<>();
 
-        e.addField("Links", links.toString(), true);
+        // These are the URLs we want
+        String[] uris = new String[]{"documentation", "homepage", "wiki", "mailing_list", "source_code", "bug_tracker", "changelog"};
+
+        // Go through and add them to our link list
+        for (String uri : uris) {
+            String path = uri + "_uri";
+            if (data.isNull(path)) continue;
+
+            links.add(String.format("[%s](%s)", MiscUtil.capitalize(uri), data.getString(path)));
+        }
+
+        // Spit em out!
+        e.addField("Links", String.join(", ", links), true);
 
         return e.build();
     }
