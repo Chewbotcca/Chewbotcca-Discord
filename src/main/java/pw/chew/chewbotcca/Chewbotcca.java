@@ -112,6 +112,7 @@ public class Chewbotcca {
             logger.error("Error occurred initializing GitHub. How did this happen?");
         }
 
+        // Add commands to bot
         client.addCommands(getCommands());
         client.addSlashCommands(getSlashCommands());
 
@@ -153,12 +154,16 @@ public class Chewbotcca {
     private static Command[] getCommands() throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Reflections reflections = new Reflections("pw.chew.chewbotcca.commands");
         Set<Class<? extends Command>> subTypes = reflections.getSubTypesOf(Command.class);
+        // We have to add all SlashCommands as a fallback
+        subTypes.addAll(reflections.getSubTypesOf(SlashCommand.class));
         List<Command> commands = new ArrayList<>();
 
         for (Class<? extends Command> theClass : subTypes) {
             // Don't load SubCommands or SlashCommands
             if (theClass.getName().contains("SubCommand") || theClass.getName().contains("SlashCommand"))
                 continue;
+
+            // Attempt to add commands by instantiating the declared constructor
             try {
                 commands.add(theClass.getDeclaredConstructor().newInstance());
                 LoggerFactory.getLogger(theClass).debug("Loaded Command Successfully!");
