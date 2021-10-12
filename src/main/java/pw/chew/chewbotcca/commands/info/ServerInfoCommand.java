@@ -694,13 +694,15 @@ public class ServerInfoCommand extends SlashCommand {
             embed.setTitle("Upcoming Member Milestones for " + server.getName());
 
             int members = server.getMemberCount();
-            int days = Math.round((float) (Instant.now().toEpochMilli() - server.getTimeCreated().toInstant().toEpochMilli()) / 1000 / 60 / 60 / 24);
+            long serverAgeInMilli = Instant.now().toEpochMilli() - server.getTimeCreated().toInstant().toEpochMilli();
+            int days = Math.round((float) (serverAgeInMilli) / 1000 / 60 / 60 / 24);
 
             float membersPerDay = (float) members / (float) days;
 
             List<String> daysToMilestone = new ArrayList<>();
 
             daysToMilestone.add("Members per day (linear): " + membersPerDay);
+            daysToMilestone.add("Time between member joins: " + DateTime.timeAgoShort(serverAgeInMilli / members, false));
             daysToMilestone.add("Dates are based on average members per day. Dates may vary based on any number of circumstances.");
             daysToMilestone.add("If year is >100 years in the future, it will not be included.");
             daysToMilestone.add("");
