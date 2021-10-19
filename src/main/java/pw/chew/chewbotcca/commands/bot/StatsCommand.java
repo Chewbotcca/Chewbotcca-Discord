@@ -34,6 +34,9 @@ import static pw.chew.chewbotcca.util.MiscUtil.bytesToFriendly;
 public class StatsCommand extends SlashCommand {
     private final static Instant startTime = Instant.now();
 
+    private static int sentMessages = 0;
+    private static int executedCommands = 0;
+
     public StatsCommand() {
         this.name = "stats";
         this.help = "Cool stats about the bot!";
@@ -51,7 +54,14 @@ public class StatsCommand extends SlashCommand {
         commandEvent.reply(generateStatsEmbed(commandEvent.getJDA()));
     }
 
+    /**
+     * Generates an embed consisting of the bot's stats
+     *
+     * @param jda JDA to retrieve data
+     * @return An embed
+     */
     private MessageEmbed generateStatsEmbed(JDA jda) {
+        // Gather memory data
         Runtime runtime = Runtime.getRuntime();
         long memoryUsed = runtime.totalMemory() - runtime.freeMemory();
         String memoryUsage = bytesToFriendly(memoryUsed / 1024) + "/" + bytesToFriendly(runtime.totalMemory() / 1024);
@@ -59,18 +69,53 @@ public class StatsCommand extends SlashCommand {
         // TODO: Cpu stats?
         // OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
 
+        // Gather other data. All must be strings
+        String author = jda.retrieveUserById("476488167042580481").complete().getAsMention();
+        long uptimeInSeconds = Instant.now().toEpochMilli() - startTime.toEpochMilli() / 1000;
+        String uptime = DateTime.timeAgoFromNow(startTime).replaceAll(", ", ",\n");
+        String servers = String.valueOf(jda.getGuildCache().size());
+        // TODO: Round commands/messages per x to 4 decimal
+        // DecimalFormat df = new DecimalFormat("#.####");
+        // df.setRoundingMode(RoundingMode.CEILING);
+        // float commandsPerMinute = (float)getExecutedCommandsCount() / (float)(uptimeInSeconds / 60);
+        // float messagesPerSecond = (float)getMessageCount() / (float)uptimeInSeconds;
+        // String commands = getExecutedCommandsCount() + String.format(" [%s/m]", df.format(commandsPerMinute));
+        // String messages = getMessageCount() + String.format(" [%s/s]", df.format(messagesPerSecond));
+        String commands = String.valueOf(getExecutedCommandsCount());
+        String messages = String.valueOf(getMessageCount());
+
         return new EmbedBuilder()
-            .setTitle("Chewbotcca - A basic, yet functioning, discord bot")
-            .addField("Author", "<@!476488167042580481>", true)
+            .setTitle("Chewbotcca - A basic, yet functioning, Discord bot")
+            .addField("Author", author, true)
             .addField("Code", "[View code on GitHub](https://github.com/Chewbotcca/Discord)", true)
             .addField("Library", "[JDA " + JDAInfo.VERSION + "](" + JDAInfo.GITHUB + ")", true)
             // Convert the time difference into a time ago
-            .addField("Uptime", DateTime.timeAgo(Instant.now().toEpochMilli() - startTime.toEpochMilli()), true)
+            .addField("Uptime", uptime, true)
             // Get the server count. NOT GUILD NOT GUILD NOT GUILD
-            .addField("Servers", String.valueOf(jda.getGuildCache().size()), true)
+            .addField("Servers", servers, true)
             // Memory usage
             .addField("Memory", memoryUsage, true)
+            // Sent commands
+            .addField("Commands Ran", commands, true)
+            // Sent messages
+            .addField("Messages", messages, true)
             .setColor(0xd084)
             .build();
+    }
+
+    public static void incrementMessageCount() {
+        sentMessages++;
+    }
+
+    public static void incrementCommandCount() {
+        executedCommands++;
+    }
+
+    public static int getMessageCount() {
+        return sentMessages;
+    }
+
+    public static int getExecutedCommandsCount() {
+        return executedCommands;
     }
 }

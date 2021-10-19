@@ -28,14 +28,22 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import pw.chew.chewbotcca.commands.bot.StatsCommand;
 
 public class BotCommandListener implements CommandListener {
     // Methods to detect command usage. Currently unused
 
     public void onCommand(CommandEvent event, Command command) {
+        StatsCommand.incrementCommandCount();
     }
 
     public void onSlashCommand(SlashCommandEvent event, SlashCommand command) {
+        StatsCommand.incrementCommandCount();
+    }
+
+    public void onNonCommandMessage(MessageReceivedEvent event) {
+        StatsCommand.incrementMessageCount();
     }
 
     // Methods to capture errors and send them to sentry
