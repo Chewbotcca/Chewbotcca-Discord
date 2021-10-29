@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
@@ -137,7 +138,16 @@ public class UserInfoCommand extends SlashCommand {
         EmbedBuilder e = new EmbedBuilder();
         // If executor == member
         e.setTitle(self ? "User info for you!" : "User info for " + user.getAsTag());
-        if (user.getAvatarUrl() != null) e.setThumbnail(user.getAvatarUrl() + "?size=2048");
+
+        // Set server/user avatar
+        if (user.getAvatarUrl() != null) {
+            e.setThumbnail(user.getAvatarUrl() + "?size=2048");
+            e.setAuthor(user.getAsTag(), null, user.getAvatarUrl());
+        }
+        if (onServer && member.getAvatarUrl() != null) {
+            e.setThumbnail(member.getAvatarUrl() + "?size=2048");
+        }
+
         List<String> nameInfo = new ArrayList<>(Arrays.asList(
             "Tag: " + user.getAsTag(),
             "ID: " + user.getId(),
@@ -176,8 +186,8 @@ public class UserInfoCommand extends SlashCommand {
             }
             e.addField("Status", status, true);
 
-            // Join position
-            e.addField("Join Position", getJoinPosition(server, member) + "", true);
+            // Add a blank field to pad the first row
+            e.addBlankField(true);
 
             // And their activities
             List<CharSequence> activities = new ArrayList<>();
@@ -218,35 +228,93 @@ public class UserInfoCommand extends SlashCommand {
             e.addField("Pronouns", pronouns, true);
         }
 
+        int missingFields = 0;
+        int cur = 0;
+        for (MessageEmbed.Field field : e.getFields()) {
+            if(field.isInline()) cur++;
+        }
+        missingFields = 3 - cur % 3;
+        if (missingFields == 3) missingFields = 0;
+        for (int i = 0; i < missingFields; i++) {
+            e.addBlankField(true);
+        }
+
         // Give credit
         List<String> credits = new ArrayList<>();
         if (dbio != null) credits.add("Profile info provided by discord.bio");
         if (pronouns != null) credits.add("Pronoun data from pronoundb.org");
         if (!credits.isEmpty()) e.setFooter(String.join(" - ", credits));
 
+        List<String> createInfo = new ArrayList<>();
+        createInfo.add(TimeFormat.DATE_TIME_SHORT.format(user.getTimeCreated()));
+        createInfo.add(DateTime.timeAgoShort(user.getTimeCreated().toInstant(), true));
+
         if (onServer) {
-            e.addField("Joined", TimeFormat.DATE_TIME_SHORT.format(member.getTimeJoined()) + "\n" + DateTime.timeAgoShort(member.getTimeJoined().toInstant(), true) + " ago", true);
+            List<String> joinInfo = Arrays.asList(
+                "Join Position: " + getJoinPosition(member),
+                TimeFormat.DATE_TIME_SHORT.format(member.getTimeJoined()),
+                DateTime.timeAgoShort(member.getTimeJoined().toInstant(), true) + " ago"
+            );
+
+            e.addField("Joined", String.join("\n", joinInfo), true);
+
+            int agePosition = getAgePosition(member);
+            // If they are more new than old
+            if (agePosition > (server.getMembers().size() / 2)) {
+                int position = server.getMembers().size() - agePosition;
+                createInfo.add(0, "#" + position + " youngest (this server)");
+            } else {
+                createInfo.add(0, "#" + agePosition + " oldest (this server)");
+            }
         }
-        e.addField("Created", TimeFormat.DATE_TIME_SHORT.format(user.getTimeCreated()) + "\n" + DateTime.timeAgoShort(user.getTimeCreated().toInstant(), true), true);
+
+        e.addField("Created", String.join("\n", createInfo), true);
 
         return e;
     }
 
     /**
-     * Gather server specific info
+     * Gather the join position of a specified member
      *
-     * @param server the server
      * @param member the member
      * @return an embed
      */
-    public static int getJoinPosition(Guild server, Member member) {
+    public static int getJoinPosition(Member member) {
         // Find their join position
+        Guild server = member.getGuild();
         List<Member> members = server.getMemberCache().asList();
         Member[] bruh = members.toArray(new Member[0]);
         Arrays.sort(bruh, (o1, o2) -> {
             if (o1.getTimeJoined().toEpochSecond() > o2.getTimeJoined().toEpochSecond())
                 return 1;
             else if (o1.getTimeJoined() == o2.getTimeJoined())
+                return 0;
+            else
+                return -1;
+        });
+        for (int i = 0; i < bruh.length; i++) {
+            if (member.getId().equals(bruh[i].getId())) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Gather the age position of a specified member
+     *
+     * @param member the member
+     * @return an embed
+     */
+    public static int getAgePosition(Member member) {
+        // Find their join position
+        Guild server = member.getGuild();
+        List<Member> members = server.getMemberCache().asList();
+        Member[] bruh = members.toArray(new Member[0]);
+        Arrays.sort(bruh, (o1, o2) -> {
+            if (o1.getTimeCreated().toEpochSecond() > o2.getTimeCreated().toEpochSecond())
+                return 1;
+            else if (o1.getTimeCreated() == o2.getTimeCreated())
                 return 0;
             else
                 return -1;
