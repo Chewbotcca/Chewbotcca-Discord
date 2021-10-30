@@ -67,7 +67,7 @@ public class ServerSettingsCommand extends SlashCommand {
             .setTitle("Server Settings for " + ser.getName())
             .setDescription("To set an option, execute `" + prefix + "serversettings set option value`.\n" +
                 "To view a list of valid options, simply run `" + prefix + "serversettings set` " +
-                "or visit the [wiki](https://wiki.chew.pro/index.php/Commands/serversettings)")
+                "or visit the [wiki](https://wiki.chew.pro/view/Commands/serversettings)")
             .setFooter("ID: " + server.getId());
 
         embed.addField("Prefix", server.getPrefix() == null ? "Set with `" + prefix + "serversettings set prefix [prefix]`" : server.getPrefix(), true);
