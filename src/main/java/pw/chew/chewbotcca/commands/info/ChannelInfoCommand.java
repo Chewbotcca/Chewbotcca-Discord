@@ -29,6 +29,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -40,10 +41,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.awaitility.Awaitility.await;
 
 // %^channelinfo command
 public class ChannelInfoCommand extends SlashCommand {
@@ -202,14 +199,17 @@ public class ChannelInfoCommand extends SlashCommand {
             String user = entry.getKey();
             int pinCount = entry.getValue();
             User userById = jda.getUserById(user);
-            AtomicReference<String> tag = new AtomicReference<>();
+            String tag;
             if(userById == null) {
-                jda.retrieveUserById(user).queue(bruh -> tag.set(bruh.getAsTag()), error -> tag.set("Deleted User"));
+                try {
+                    tag = jda.retrieveUserById(user).complete().getAsTag();
+                } catch (ErrorResponseException ignored) {
+                    tag = "Unknown User";
+                }
             } else {
-                tag.set(userById.getAsTag());
+                tag = userById.getAsTag();
             }
-            await().atMost(5, TimeUnit.SECONDS).until(() -> tag.get() != null);
-            top.add("#" + (i+1) + ": " + pinCount + " pins - " + tag.get());
+            top.add("#" + (i+1) + ": " + pinCount + " pins - " + tag);
         }
         e.setDescription(String.join("\n", top));
         return e;

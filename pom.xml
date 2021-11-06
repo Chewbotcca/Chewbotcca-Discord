@@ -39,7 +39,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.3.0_339</version>
+            <version>4.3.0_340</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -82,14 +82,6 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- Async destroyer -->
-        <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <version>4.1.1</version>
-            <scope>compile</scope>
-        </dependency>
-
         <!-- Error catcher, not very good with our current logger -->
         <dependency>
             <groupId>io.sentry</groupId>
@@ -124,7 +116,7 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.10.1</version>
+            <version>0.10.2</version>
         </dependency>
 
         <!-- MEMERATOR API FOR MEMERATOR COMMANDS -->
