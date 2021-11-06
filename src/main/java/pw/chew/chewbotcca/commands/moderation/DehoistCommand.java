@@ -23,9 +23,6 @@ import net.dv8tion.jda.api.entities.Member;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.awaitility.Awaitility.await;
 
 public class DehoistCommand extends Command {
     // List from https://github.com/jagrosh/Vortex/blob/e1f0/src/main/java/com/jagrosh/vortex/utils/OtherUtil.java#L37-L40
@@ -46,10 +43,6 @@ public class DehoistCommand extends Command {
     @Override
     protected void execute(CommandEvent event) {
         event.getChannel().sendTyping().queue();
-
-        // Load members
-        new Thread(() -> event.getGuild().loadMembers().get());
-        await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
 
         int successful = 0;
         for (Member member : event.getGuild().getMembers()) {
