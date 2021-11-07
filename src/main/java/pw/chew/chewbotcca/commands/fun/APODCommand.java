@@ -54,10 +54,12 @@ public class APODCommand extends SlashCommand {
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
         this.options = List.of(
-            new OptionData(OptionType.INTEGER, "year", "The year for the pic, blank for this year. Range: (1995-)"),
+            new OptionData(OptionType.INTEGER, "year", "The year for the pic, blank for this year. Range: (1995-)")
+                .setMinValue(1995).setMaxValue(OffsetDateTime.now().getYear()),
             new OptionData(OptionType.INTEGER, "month", "The month for the pic, blank for this month.")
                 .addChoices(buildMonthChoices()),
             new OptionData(OptionType.INTEGER, "day", "The day for the pic, blank for this day.")
+                .setMinValue(1).setMaxValue(31)
         );
     }
 
