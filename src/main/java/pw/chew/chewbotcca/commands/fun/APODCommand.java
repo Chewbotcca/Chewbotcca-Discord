@@ -25,20 +25,12 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import org.htmlcleaner.CleanerProperties;
-import org.htmlcleaner.DomSerializer;
-import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.TagNode;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import java.text.DateFormatSymbols;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -106,32 +98,16 @@ public class APODCommand extends SlashCommand {
 
         String page = RestClient.get(url);
 
-        // Configure parser for later
-        TagNode tagNode = new HtmlCleaner().clean(page);
-        Document doc;
-        try {
-            doc = new DomSerializer(new CleanerProperties()).createDOM(tagNode);
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Error configuring Parser!");
-        }
+        // Parse the page content
+        Document doc = Jsoup.parse(page);
 
-        // Find the image
-        XPath xPath = XPathFactory.newInstance().newXPath();
-        String title = "Date: ";
-        String img = "https://apod.nasa.gov/apod/";
-        try {
-            title += ((String) xPath.evaluate("/html/body/center[1]/p[2]/text()", doc, XPathConstants.STRING)).trim();
-            Node src = (Node) xPath.evaluate("/html/body/center[1]/p[2]/a/img", doc, XPathConstants.NODE);
-            img += src.getAttributes().getNamedItem("src").toString().replace("src=", "").replace("\"", "");
-        } catch (NullPointerException ignored) {
-        } catch (XPathExpressionException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Error in XPath Expression!");
-        }
-
-        // If 404 somehow
-        if (img.equals("https://apod.nasa.gov/apod/")) {
+        // Get title and img
+        String title = "Date: " + doc.select("body > center:nth-child(1) > p:nth-child(3)").text();
+        String img = "https://apod.nasa.gov/apod/" + doc.select("body > center:nth-child(1) > p:nth-child(3) > a > img").attr("src");
+        // Ensure img is a valid image
+        if (!EmbedBuilder.URL_PATTERN.matcher(img).matches() || img.equals("https://apod.nasa.gov/apod/")) {
+            // debug output the image url for debugging
+            LoggerFactory.getLogger(APODCommand.class).error("Invalid image url: " + img);
             throw new IllegalArgumentException("No image found for this date! Ensure your date range is June 16th, 1995 to today! Link: " + url);
         }
 

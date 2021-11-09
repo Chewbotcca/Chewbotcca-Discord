@@ -24,22 +24,13 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import org.htmlcleaner.CleanerProperties;
-import org.htmlcleaner.DomSerializer;
-import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.TagNode;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -115,28 +106,15 @@ public class MCWikiCommand extends SlashCommand {
         // Actually get the page
         String page = RestClient.get(url);
 
-        // Configure parser for later
-        TagNode tagNode = new HtmlCleaner().clean(page);
-        Document doc;
-        try {
-            doc = new DomSerializer(new CleanerProperties()).createDOM(tagNode);
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Error configuring Parser!");
-        }
+        // Parse the page content
+        Document doc = Jsoup.parse(page);
 
-        // Find the summary text and image (if there is one)
-        XPath xPath = XPathFactory.newInstance().newXPath();
-        String summary = null;
-        String img = null;
-        try {
-            summary = (String) xPath.evaluate("//*[@id=\"mw-content-text\"]/div/p[1]", doc, XPathConstants.STRING);
-            Node src = (Node) xPath.evaluate("//*[@id=\"mw-content-text\"]/div/div[1]/div[2]/div[1]/a/img", doc, XPathConstants.NODE);
-            img = src.getAttributes().getNamedItem("src").toString().replace("src=", "").replace("\"", "");
-        } catch (NullPointerException ignored) {
-        } catch (XPathExpressionException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("Error in XPath Expression!");
+        // Get summary
+        String summary = doc.select("#mw-content-text > div.mw-parser-output > p:nth-child(3)").text();
+        String img = doc.select("#mw-content-text > div.mw-parser-output > div.notaninfobox > div.infobox-imagearea.animated-container > div:nth-child(1) > a > img").attr("data-src");
+        // Ensure img is a valid image
+        if (!EmbedBuilder.URL_PATTERN.matcher(img).matches()) {
+            img = null;
         }
 
         // Return the results
