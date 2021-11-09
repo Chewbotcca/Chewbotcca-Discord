@@ -102,19 +102,22 @@ public class APODCommand extends SlashCommand {
         Document doc = Jsoup.parse(page);
 
         // Get title and img
-        String title = "Date: " + doc.select("body > center:nth-child(1) > p:nth-child(3)").text();
+        String friendlyDate = "Date: " + doc.select("body > center:nth-child(1) > p:nth-child(3)").text();
+        String title = doc.select("body > center:nth-child(2) > b:nth-child(1)").text();
+        String description = "";
         String img = "https://apod.nasa.gov/apod/" + doc.select("body > center:nth-child(1) > p:nth-child(3) > a > img").attr("src");
         // Ensure img is a valid image
         if (!EmbedBuilder.URL_PATTERN.matcher(img).matches() || img.equals("https://apod.nasa.gov/apod/")) {
             // debug output the image url for debugging
-            LoggerFactory.getLogger(APODCommand.class).error("Invalid image url: " + img);
-            throw new IllegalArgumentException("No image found for this date! Ensure your date range is June 16th, 1995 to today! Link: " + url);
+            description = "Could not find an image for this date! You will need to visit the page to enjoy today's \"picture\".";
         }
 
         EmbedBuilder embed = new EmbedBuilder();
         embed.setImage(img)
             .setAuthor("NASA Astronomy Picture of the Day")
-            .setTitle(title, url);
+            .setTitle(title, url)
+            .setDescription(description)
+            .setFooter(friendlyDate);
         return embed.build();
     }
 
