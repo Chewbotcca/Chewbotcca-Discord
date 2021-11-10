@@ -27,7 +27,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.slf4j.LoggerFactory;
+import org.jsoup.select.Elements;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
@@ -104,8 +104,9 @@ public class APODCommand extends SlashCommand {
         // Get title and img
         String friendlyDate = "Date: " + doc.select("body > center:nth-child(1) > p:nth-child(3)").text();
         String title = doc.select("body > center:nth-child(2) > b:nth-child(1)").text();
-        String description = "";
-        String img = "https://apod.nasa.gov/apod/" + doc.select("body > center:nth-child(1) > p:nth-child(3) > a > img").attr("src");
+        Elements image = doc.select("body > center:nth-child(1) > p:nth-child(3) > a > img");
+        String description = image.attr("alt").replaceAll("\n", " ");
+        String img = "https://apod.nasa.gov/apod/" + image.attr("src");
         // Ensure img is a valid image
         if (!EmbedBuilder.URL_PATTERN.matcher(img).matches() || img.equals("https://apod.nasa.gov/apod/")) {
             // debug output the image url for debugging
