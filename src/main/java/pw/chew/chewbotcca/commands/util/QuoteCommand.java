@@ -33,7 +33,7 @@ import net.dv8tion.jda.api.exceptions.MissingAccessException;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.Mention;
-import pw.chew.chewbotcca.util.ResponseHelper;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Collections;
 
@@ -53,7 +53,7 @@ public class QuoteCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         Message message;
-        String[] link = ResponseHelper.guaranteeStringOption(event, "message_link", "").split("/");
+        String[] link = OptionHelper.optString(event, "message_link", "").split("/");
         try {
             message = retrieveMessageFromLink(link, event.getJDA(), event.getChannelType() == ChannelType.TEXT ? event.getTextChannel() : null);
         } catch (IllegalArgumentException e) {

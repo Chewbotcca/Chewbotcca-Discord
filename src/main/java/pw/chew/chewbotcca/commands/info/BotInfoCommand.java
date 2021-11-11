@@ -30,6 +30,7 @@ import pw.chew.chewbotcca.objects.Bot;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.awt.Color;
 import java.time.OffsetDateTime;
@@ -57,11 +58,11 @@ public class BotInfoCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        String botId = ResponseHelper.guaranteeStringOption(event, "bot", "");
+        String botId = OptionHelper.optString(event, "bot", "");
 
         // Get it from the specified list if it's valid, and let them know
         try {
-            switch (ResponseHelper.guaranteeStringOption(event, "list", "dbots")) {
+            switch (OptionHelper.optString(event, "list", "dbots")) {
                 case "topgg" -> event.replyEmbeds(gatherTopggInfo(botId, event.getJDA()).build()).queue();
                 case "del" -> event.replyEmbeds(gatherDELInfo(botId, event.getJDA()).build()).queue();
                 default -> event.replyEmbeds(gatherDBotsInfo(botId, event.getJDA()).build()).queue();

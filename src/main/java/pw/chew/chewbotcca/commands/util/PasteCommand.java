@@ -27,8 +27,8 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,7 +55,7 @@ public class PasteCommand extends SlashCommand {
         // Store message and file URL for later
         Message message;
         String file;
-        String args = ResponseHelper.guaranteeStringOption(event, "url", "");
+        String args = OptionHelper.optString(event, "url", "");
         boolean fromAttachment = false;
         // Check if there's no args, and we're in a TEXT channel or DM.
         if (args.isBlank() && (event.getChannelType() == ChannelType.TEXT || event.getChannelType() == ChannelType.PRIVATE)) {

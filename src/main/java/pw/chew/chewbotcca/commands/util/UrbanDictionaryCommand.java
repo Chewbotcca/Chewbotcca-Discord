@@ -29,8 +29,8 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -57,7 +57,7 @@ public class UrbanDictionaryCommand extends SlashCommand {
             return;
         }
 
-        String word = ResponseHelper.guaranteeStringOption(event, "word", "");
+        String word = OptionHelper.optString(event, "word", "");
 
         // Send message then edit it
         try {

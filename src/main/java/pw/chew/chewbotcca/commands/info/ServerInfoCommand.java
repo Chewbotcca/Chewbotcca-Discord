@@ -38,6 +38,7 @@ import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.ResponseHelper;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -369,8 +370,8 @@ public class ServerInfoCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            boolean displayMode = ResponseHelper.guaranteeBooleanOption(event, "display_role", false);
-            boolean onlineMode = ResponseHelper.guaranteeBooleanOption(event, "online", false);
+            boolean displayMode = OptionHelper.optBoolean(event, "display_role", false);
+            boolean onlineMode = OptionHelper.optBoolean(event, "online", false);
 
             event.replyEmbeds(new EmbedBuilder().setDescription("Gathering the details...").build()).queue(interactionHook -> {
                 interactionHook.retrieveOriginal().queue(message -> {
@@ -488,7 +489,7 @@ public class ServerInfoCommand extends SlashCommand {
         protected void execute(SlashCommandEvent event) {
             event.replyEmbeds(new EmbedBuilder().setDescription("Gathering the details...").build()).queue(interactionHook -> {
                 interactionHook.retrieveOriginal().queue(message -> {
-                    gatherData(guaranteeGuild(event), event.getUser(), event.getTextChannel(), ResponseHelper.guaranteeBooleanOption(event, "render_mention", false))
+                    gatherData(guaranteeGuild(event), event.getUser(), event.getTextChannel(), OptionHelper.optBoolean(event, "render_mention", false))
                         .paginate(message, 1);
                 });
             });
@@ -547,7 +548,7 @@ public class ServerInfoCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             try {
-                event.replyEmbeds(UserInfoCommand.gatherMainInfo(guaranteeGuild(event), gatherMember(guaranteeGuild(event), (int) event.getOption("position").getAsLong()).getUser(), event.getUser()).build()).queue();
+                event.replyEmbeds(UserInfoCommand.gatherMainInfo(guaranteeGuild(event), gatherMember(guaranteeGuild(event), (int) OptionHelper.optLong(event, "position", 0)).getUser(), event.getUser()).build()).queue();
             } catch (IllegalArgumentException e) {
                 event.replyEmbeds(ResponseHelper.generateFailureEmbed(null, e.getMessage())).queue();
             }

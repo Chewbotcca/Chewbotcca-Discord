@@ -28,8 +28,8 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -87,7 +87,7 @@ public class RoryCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            JSONObject rory = new JSONObject(RestClient.get("https://rory.cat/purr/" + ResponseHelper.guaranteeStringOption(event, "id", "")));
+            JSONObject rory = new JSONObject(RestClient.get("https://rory.cat/purr/" + OptionHelper.optString(event, "id", "")));
             if (rory.has("error")) {
                 event.reply(rory.getString("error")).setEphemeral(true).queue();
                 return;

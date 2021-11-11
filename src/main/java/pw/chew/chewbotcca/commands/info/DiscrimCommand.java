@@ -29,7 +29,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.MiscUtil;
-import pw.chew.chewbotcca.util.ResponseHelper;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -115,7 +115,7 @@ public class DiscrimCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            String discrim = ResponseHelper.guaranteeStringOption(event, "discriminator", event.getUser().getDiscriminator());
+            String discrim = OptionHelper.optString(event, "discriminator", event.getUser().getDiscriminator());
             if (!(discrim.length() == 4 && discrim.matches("[0-9]{4}"))) {
                 event.reply("Invalid discriminator provided!").setEphemeral(true).queue();
                 return;

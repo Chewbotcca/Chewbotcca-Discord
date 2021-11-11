@@ -34,6 +34,7 @@ import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,7 +57,7 @@ public class InfoCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         try {
-            event.replyEmbeds(gatherData(ResponseHelper.guaranteeStringOption(event, "command", ""))).queue();
+            event.replyEmbeds(gatherData(OptionHelper.optString(event, "command", ""))).queue();
         } catch (IllegalArgumentException e) {
             if (e.getMessage().contains("Did you mean? ")) {
                 SelectionMenu menu = buildSuggestionMenu(e.getMessage());

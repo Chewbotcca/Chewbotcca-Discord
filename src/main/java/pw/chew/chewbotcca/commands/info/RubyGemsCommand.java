@@ -30,6 +30,7 @@ import org.json.JSONObject;
 import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ public class RubyGemsCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         try {
-            event.replyEmbeds(gatherGemData(ResponseHelper.guaranteeStringOption(event, "gem", ""))).queue();
+            event.replyEmbeds(gatherGemData(OptionHelper.optString(event, "gem", ""))).queue();
         } catch (IllegalArgumentException e) {
             event.replyEmbeds(ResponseHelper.generateFailureEmbed(null, e.getMessage())).setEphemeral(true).queue();
         }

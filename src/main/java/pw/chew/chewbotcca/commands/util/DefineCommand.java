@@ -30,8 +30,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.PropertiesManager;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Collections;
 
@@ -51,7 +51,7 @@ public class DefineCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         // Get the word from the command
-        String word = ResponseHelper.guaranteeStringOption(event, "word", "");
+        String word = OptionHelper.optString(event, "word", "");
 
         // Send message then edit it
         EmbedPaginator paginator;

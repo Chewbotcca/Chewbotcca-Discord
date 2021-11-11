@@ -27,7 +27,7 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.objects.ServerSettings;
-import pw.chew.chewbotcca.util.ResponseHelper;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Arrays;
 import java.util.List;
@@ -124,8 +124,8 @@ public class ServerSettingsCommand extends SlashCommand {
             ServerSettings server = ServerSettings.retrieveServer(event.getGuild().getId());
 
             server.saveData(
-                ResponseHelper.guaranteeStringOption(event, "key", ""),
-                ResponseHelper.guaranteeStringOption(event, "value", "")
+                OptionHelper.optString(event, "key", ""),
+                OptionHelper.optString(event, "value", "")
             );
 
             event.reply("If you see this message, then it saved successfully... hopefully.").setEphemeral(true).queue();

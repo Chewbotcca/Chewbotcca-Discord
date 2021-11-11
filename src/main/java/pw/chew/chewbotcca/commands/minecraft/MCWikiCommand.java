@@ -28,8 +28,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -53,7 +53,7 @@ public class MCWikiCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         try {
-            event.replyEmbeds(gatherData(ResponseHelper.guaranteeStringOption(event, "query", ""))).queue();
+            event.replyEmbeds(gatherData(OptionHelper.optString(event, "query", ""))).queue();
         } catch (IllegalArgumentException e) {
             event.reply(e.getMessage()).setEphemeral(true).queue();
         }

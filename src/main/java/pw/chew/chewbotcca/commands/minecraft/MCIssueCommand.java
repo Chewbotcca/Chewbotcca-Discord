@@ -25,8 +25,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONException;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -60,7 +60,7 @@ public class MCIssueCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        String args = ResponseHelper.guaranteeStringOption(event, "issue", "");
+        String args = OptionHelper.optString(event, "issue", "");
 
         if (args.length() < 4) {
             event.reply("Please specify a project AND issue, for example, 'WEB-2303'").setEphemeral(true).queue();

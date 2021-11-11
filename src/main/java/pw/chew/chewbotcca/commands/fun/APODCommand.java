@@ -28,8 +28,8 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.text.DateFormatSymbols;
 import java.time.OffsetDateTime;
@@ -60,9 +60,9 @@ public class APODCommand extends SlashCommand {
         try {
             // Check for no input
             OffsetDateTime today = OffsetDateTime.now();
-            String month = ResponseHelper.guaranteeStringOption(event, "month", String.valueOf(today.getMonthValue()));
-            String day = ResponseHelper.guaranteeStringOption(event, "day", String.valueOf(today.getDayOfMonth()));
-            String year = ResponseHelper.guaranteeStringOption(event, "year", String.valueOf(today.getYear()));
+            String month = OptionHelper.optString(event, "month", String.valueOf(today.getMonthValue()));
+            String day = OptionHelper.optString(event, "day", String.valueOf(today.getDayOfMonth()));
+            String year = OptionHelper.optString(event, "year", String.valueOf(today.getYear()));
             String date = month + "/" + day + "/" + year;
 
             event.replyEmbeds(gatherPicture(date)).queue();

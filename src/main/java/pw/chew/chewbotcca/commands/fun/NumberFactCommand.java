@@ -24,8 +24,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Arrays;
 
@@ -50,8 +50,8 @@ public class NumberFactCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         event.replyEmbeds(gatherFact(
-            ResponseHelper.guaranteeStringOption(event, "number", "0"),
-            ResponseHelper.guaranteeStringOption(event, "type", "trivia")
+            OptionHelper.optString(event, "number", "0"),
+            OptionHelper.optString(event, "type", "trivia")
         )).queue();
     }
 

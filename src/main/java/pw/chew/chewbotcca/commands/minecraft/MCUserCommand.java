@@ -28,8 +28,8 @@ import net.dv8tion.jda.api.utils.TimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -52,7 +52,7 @@ public class MCUserCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        String name = ResponseHelper.guaranteeStringOption(event, "user", "");
+        String name = OptionHelper.optString(event, "user", "");
         try {
             event.replyEmbeds(gatherData(name)).queue();
         } catch (IllegalArgumentException e) {

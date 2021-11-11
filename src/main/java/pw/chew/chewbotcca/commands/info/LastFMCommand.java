@@ -28,8 +28,8 @@ import org.json.JSONObject;
 import pw.chew.chewbotcca.objects.UserProfile;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.PropertiesManager;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.awt.Color;
 import java.util.Collections;
@@ -50,7 +50,7 @@ public class LastFMCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         // Get args, assume it's a username, and find their stats
-        String args = ResponseHelper.guaranteeStringOption(event, "username", "");
+        String args = OptionHelper.optString(event, "username", "");
         if (args.isBlank()) {
             UserProfile profile = UserProfile.getProfile(event.getUser().getId());
             if (profile.getLastFm() != null) {

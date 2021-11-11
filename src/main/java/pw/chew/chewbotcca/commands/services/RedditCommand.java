@@ -27,8 +27,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -51,7 +51,7 @@ public class RedditCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         int num = (int) event.getOptionsByName("number").get(0).getAsLong();
-        String subreddit = ResponseHelper.guaranteeStringOption(event, "subreddit", "");
+        String subreddit = OptionHelper.optString(event, "subreddit", "");
         boolean nsfwAllowed = event.getChannelType() == ChannelType.TEXT && !event.getTextChannel().isNSFW();
 
         try {

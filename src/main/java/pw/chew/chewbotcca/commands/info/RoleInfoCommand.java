@@ -30,7 +30,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.Mention;
-import pw.chew.chewbotcca.util.ResponseHelper;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -60,7 +60,7 @@ public class RoleInfoCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        String mode = ResponseHelper.guaranteeStringOption(event, "mode", "general");
+        String mode = OptionHelper.optString(event, "mode", "general");
 
         // "Nullable" begone
         if (event.getGuild() == null || event.getMember() == null) return;

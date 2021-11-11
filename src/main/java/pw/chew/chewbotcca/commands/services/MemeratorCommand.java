@@ -35,6 +35,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.ResponseHelper;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,7 +86,7 @@ public class MemeratorCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             try {
-                event.replyEmbeds(buildMemeEmbed(ResponseHelper.guaranteeStringOption(event, "meme", ""), event.getChannel())).queue();
+                event.replyEmbeds(buildMemeEmbed(OptionHelper.optString(event, "meme", ""), event.getChannel())).queue();
             } catch (IllegalArgumentException e) {
                 event.replyEmbeds(ResponseHelper.generateFailureEmbed("The meme machine ran dry...", e.getMessage()))
                     .setEphemeral(true)
@@ -190,7 +191,7 @@ public class MemeratorCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             try {
-                User user = api.getUser(ResponseHelper.guaranteeStringOption(event, "user", ""));
+                User user = api.getUser(OptionHelper.optString(event, "user", ""));
                 event.replyEmbeds(generateUserEmbed(user).build()).queue();
             } catch (NotFound notFound) {
                 event.reply("User not found!").setEphemeral(true).queue();

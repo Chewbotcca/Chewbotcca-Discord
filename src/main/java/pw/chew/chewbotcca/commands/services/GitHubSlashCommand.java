@@ -29,7 +29,7 @@ import org.kohsuke.github.GHUser;
 import org.kohsuke.github.PagedIterator;
 import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.objects.UserProfile;
-import pw.chew.chewbotcca.util.ResponseHelper;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -75,8 +75,8 @@ public class GitHubSlashCommand extends SlashCommand {
         protected void execute(SlashCommandEvent event) {
             GHIssue issue;
 
-            String repo = ResponseHelper.guaranteeStringOption(event, "repo", "");
-            String term = ResponseHelper.guaranteeStringOption(event, "issue", "");
+            String repo = OptionHelper.optString(event, "repo", "");
+            String term = OptionHelper.optString(event, "issue", "");
             try {
                 issue = parseMessage(repo, term);
             } catch (IOException e) {
@@ -134,7 +134,7 @@ public class GitHubSlashCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             // Get the repo
-            String repoName = ResponseHelper.guaranteeStringOption(event, "repo", "");
+            String repoName = OptionHelper.optString(event, "repo", "");
             if (!repoName.contains("/")) {
                 event.reply("Make sure your input contains a UserOrOrg/RepositoryName (e.g. Chewbotcca/Discord).").setEphemeral(true).queue();
                 return;
@@ -164,7 +164,7 @@ public class GitHubSlashCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             // Get the input
-            String username = ResponseHelper.guaranteeStringOption(event, "username", "");
+            String username = OptionHelper.optString(event, "username", "");
             if (username.isBlank()) {
                 UserProfile profile = UserProfile.getProfile(event.getUser().getId());
                 if (profile.getGitHub() != null) {
