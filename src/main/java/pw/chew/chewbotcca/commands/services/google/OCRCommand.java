@@ -27,8 +27,8 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
-import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -51,7 +51,7 @@ public class OCRCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         try {
-            String url = new URL(ResponseHelper.guaranteeStringOption(event, "url", "")).toString();
+            String url = new URL(OptionHelper.optString(event, "url", "")).toString();
             event.replyEmbeds(gatherData(url)).queue();
         } catch (MalformedURLException e) {
             event.reply("The provided arguments is not a valid URL!").setEphemeral(true).queue();

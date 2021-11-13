@@ -32,6 +32,7 @@ import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.awt.Color;
 import java.net.URLEncoder;
@@ -68,7 +69,7 @@ public class YouTubeCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.replyEmbeds(gatherInfo(ResponseHelper.guaranteeStringOption(event, "query", ""), event.getChannel())).queue();
+        event.replyEmbeds(gatherInfo(OptionHelper.optString(event, "query", ""), event.getChannel())).queue();
     }
 
     /**

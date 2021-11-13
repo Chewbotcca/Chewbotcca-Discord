@@ -26,7 +26,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.MissingAccessException;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import pw.chew.chewbotcca.util.ResponseHelper;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Collections;
 
@@ -47,7 +47,7 @@ public class UnsuppressCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        String args = ResponseHelper.guaranteeStringOption(event, "message_link", "");
+        String args = OptionHelper.optString(event, "message_link", "");
         Message message;
         try {
             message = retrieveMessageFromLink(args.split("/"), event.getJDA(), null);
