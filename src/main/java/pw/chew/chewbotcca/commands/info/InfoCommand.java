@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
+import net.dv8tion.jda.internal.utils.Checks;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.objects.Memory;
@@ -103,6 +104,8 @@ public class InfoCommand extends SlashCommand {
      * @param event the selection menu event
      */
     public static void updateInfo(SelectionMenuEvent event) {
+        // Selected options is only null if ephemeral, which it never will be
+        Checks.notNull(event.getSelectedOptions(), "Selected options");
         String selected = event.getSelectedOptions().get(0).getValue();
         if (selected.equals("NONE")) {
             event.editComponents(new ArrayList<>()).queue();

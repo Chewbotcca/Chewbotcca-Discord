@@ -26,6 +26,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.internal.utils.Checks;
 import pw.chew.chewbotcca.objects.ServerSettings;
 import pw.chew.jdachewtils.command.OptionHelper;
 
@@ -82,12 +83,14 @@ public class ServerSettingsCommand extends SlashCommand {
             this.help = "Gets this server's settings";
             this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
             this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
-            this.guildOnly = false;
+            this.guildOnly = true;
         }
 
         @Override
         protected void execute(SlashCommandEvent event) {
             Guild ser = event.getGuild();
+            // This command only works inside servers, so this will never be null
+            Checks.notNull(ser, "Server");
             ServerSettings server = ServerSettings.retrieveServer(ser.getId());
             event.replyEmbeds(getServerData(server, event.getGuild(), "/")).queue();
         }
@@ -121,6 +124,7 @@ public class ServerSettingsCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             // Get Bot Profile details and send
+            Checks.notNull(event.getGuild(), "Server");
             ServerSettings server = ServerSettings.retrieveServer(event.getGuild().getId());
 
             server.saveData(

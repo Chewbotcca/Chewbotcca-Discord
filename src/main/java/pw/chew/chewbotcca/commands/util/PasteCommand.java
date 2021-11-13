@@ -37,7 +37,7 @@ import java.util.Map;
 
 // %^paste command
 public class PasteCommand extends SlashCommand {
-    Map<String, String> pasted = new HashMap<>();
+    final Map<String, String> pasted = new HashMap<>();
 
     public PasteCommand() {
         this.name = "paste";

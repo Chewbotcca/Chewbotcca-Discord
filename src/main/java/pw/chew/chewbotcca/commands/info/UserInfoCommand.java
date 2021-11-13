@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -228,7 +228,7 @@ public class UserInfoCommand extends SlashCommand {
             e.addField("Pronouns", pronouns, true);
         }
 
-        int missingFields = 0;
+        int missingFields;
         int cur = 0;
         for (MessageEmbed.Field field : e.getFields()) {
             if(field.isInline()) cur++;
