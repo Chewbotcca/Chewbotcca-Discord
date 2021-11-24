@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.RoleIcon;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -113,13 +114,22 @@ public class RoleInfoCommand extends SlashCommand {
             id = false;
         }
         if(arg.contains("<")) {
-            role = (Role) Mention.parseMention(arg, event.getGuild(), event.getJDA());
+            role = event.getMessage().getMentionedRoles().get(0);
         } else if(id) {
             role = event.getGuild().getRoleById(arg);
         } else {
             List<Role> roles = event.getGuild().getRolesByName(arg, true);
             if(roles.size() > 0) {
-                role = roles.get(0);
+                for (Role check : roles) {
+                    if (role != null) continue;
+
+                    if (check.getName().equals(arg)) {
+                        role = check;
+                    }
+                }
+                if (role == null) {
+                    role = roles.get(0);
+                }
             }
         }
         if(role == null) {
@@ -154,6 +164,16 @@ public class RoleInfoCommand extends SlashCommand {
         // Return the member count
         embed.addField("Members", NumberFormat.getNumberInstance(Locale.US).format(members) + " / " + NumberFormat.getNumberInstance(Locale.US).format(total) + " (" + percent + "%)", true);
         embed.addField("Mention / ID", role.getAsMention() + "\n" + role.getId(), true);
+        // Set role icon
+        RoleIcon roleIcon = role.getIcon();
+        if (roleIcon != null) {
+            // Get the icon
+            String icon = roleIcon.getIconUrl();
+            // If it's an emoji, use that instead
+            if (icon == null) icon = roleIcon.getEmoji();
+            // Set thumbnail
+            embed.setThumbnail(icon);
+        }
         // Find and provide info
         List<String> info = new ArrayList<>();
         info.add(getInfoFormat(role.isHoisted(), "Hoisted"));
