@@ -27,11 +27,13 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import net.dv8tion.jda.api.EmbedBuilder;
-import pw.chew.chewbotcca.util.ResponseHelper;
 
 import java.awt.Color;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class EvalCommand extends Command {
@@ -51,7 +53,14 @@ public class EvalCommand extends Command {
         GroovyShell shell = new GroovyShell(binding);
 
         try {
-            Object resp = shell.evaluate(event.getArgs());
+            String args = event.getArgs();
+            // Strip ``` from the beginning and end of the args
+            args = args.trim();
+            if (args.startsWith("```java") && args.endsWith("```")) {
+                args = args.substring(7, args.length() - 3);
+            }
+
+            Object resp = shell.evaluate(args);
             String respString = String.valueOf(resp);
             event.reply(new EmbedBuilder()
                 .setTitle("Evaluated successfully!")
@@ -63,11 +72,10 @@ public class EvalCommand extends Command {
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             String stackTrace = sw.toString();
-            if (stackTrace.length() > 4000) {
-                stackTrace = stackTrace.substring(0, 3999);
-            }
-            String text = "```groovy\n" + stackTrace + "```";
-            event.reply(ResponseHelper.generateFailureEmbed("Evaluation failed!", text));
+            InputStream stream = new ByteArrayInputStream(stackTrace.getBytes(StandardCharsets.UTF_8));
+
+            // Send the file to the discord channel
+            event.getChannel().sendMessage("Error occurred!").addFile(stream, "error.txt").queue();
         }
     }
 }
