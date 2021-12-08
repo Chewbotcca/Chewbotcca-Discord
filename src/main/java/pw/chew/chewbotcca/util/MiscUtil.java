@@ -17,10 +17,14 @@
 package pw.chew.chewbotcca.util;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -101,5 +105,39 @@ public class MiscUtil {
         }
         DecimalFormat df = new DecimalFormat("#.##");
         return df.format(bytes / Math.pow(k, i)) + " " + measure[(int) i + 1];
+    }
+
+    /**
+     * Parse a given date with a given format
+     *
+     * @param date   The date string to parse
+     * @param format The format to parse
+     * @return the parsed date
+     */
+    public static OffsetDateTime dateParser(String date, String format) {
+        DateTimeFormatter inputFormat = DateTimeFormatter.ofPattern(format);
+        return OffsetDateTime.parse(date, inputFormat);
+    }
+
+    /**
+     * Delimits a value into common "1,000,000.00" (US) format.
+     *
+     * @param value The value
+     * @return A delimited string
+     */
+    public static String delimitNumber(long value) {
+        return NumberFormat.getNumberInstance(Locale.US).format(value);
+    }
+
+    /**
+     * Formats a percentage based on a decimal value.
+     * E.g. 0.05 => 5%
+     *
+     * @param value The value
+     * @return A percentage
+     */
+    public static String formatPercent(float value) {
+        DecimalFormat df = new DecimalFormat("#.##");
+        return df.format(value * 100) + "%";
     }
 }

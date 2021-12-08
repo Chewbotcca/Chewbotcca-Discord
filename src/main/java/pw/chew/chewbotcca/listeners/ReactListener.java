@@ -31,7 +31,7 @@ import pw.chew.chewbotcca.commands.services.MemeratorCommand;
 import pw.chew.chewbotcca.commands.services.github.GHIssueCommand;
 import pw.chew.chewbotcca.commands.services.google.YouTubeCommand;
 import pw.chew.chewbotcca.objects.Memory;
-import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.objects.services.YouTubeVideo;
 import pw.chew.chewbotcca.util.RestClient;
 
 import javax.annotation.Nonnull;
@@ -76,7 +76,7 @@ public class ReactListener extends ListenerAdapter {
             String content = msg.getContentStripped().replace(">", "");
             if(content.contains("youtube.com") || content.contains("youtu.be")) {
                 // If it's a YouTube video
-                handleYouTube(content, event, msg);
+                handleYouTube(content, msg);
             } else if(content.contains("github.com") && (content.contains("/issues") || content.contains("/pull"))) {
                 // If it's a github issue or pr
                 handleGitHub(content, msg);
@@ -96,10 +96,9 @@ public class ReactListener extends ListenerAdapter {
     /**
      * Handle a YouTube video message
      * @param content the message content
-     * @param event the reaction event
      * @param msg the message itself
      */
-    public void handleYouTube(String content, GuildMessageReactionAddEvent event, Message msg) {
+    public void handleYouTube(String content, Message msg) {
         // Find the video ID
         String video = null;
         for(String query : content.split(" ")) {
@@ -115,9 +114,9 @@ public class ReactListener extends ListenerAdapter {
         // Mark it as described
         described(msg.getId());
         // Get the video
-        JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + video + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics"));
+        YouTubeVideo youTubeVideo = YouTubeCommand.getVideo(video);
         // make a YouTube video embed response
-        msg.replyEmbeds(new YouTubeCommand().response(url, video, event.getChannel()).build()).mentionRepliedUser(false).queue();
+        msg.replyEmbeds(YouTubeCommand.buildVideoEmbed(youTubeVideo).build()).mentionRepliedUser(false).queue();
     }
 
     /**
