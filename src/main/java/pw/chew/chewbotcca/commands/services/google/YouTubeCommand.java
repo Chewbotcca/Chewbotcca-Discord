@@ -144,9 +144,15 @@ public class YouTubeCommand extends SlashCommand {
 
         // Add and format rating
         if (video.getLikes() != null || video.getDislikes() != null) {
-            float totalLikes = video.getLikes() + video.getDislikes();
-            String likes = video.getLikes() == null ? "Unknown" : String.format("<:ytup:717600455580188683> **%s** *(%s)*", MiscUtil.delimitNumber(video.getLikes()), MiscUtil.formatPercent(video.getLikes() / totalLikes));
-            String dislikes = video.getDislikes() == null ? "Unknown" : String.format("<:ytdown:717600455353696317> **%s** *(%s)*", MiscUtil.delimitNumber(video.getDislikes()), MiscUtil.formatPercent(video.getDislikes() / totalLikes));
+            String likes, dislikes;
+            if (video.getLikes() == null || video.getDislikes() == null) {
+                likes = video.getLikes() == null ? "<:ytup:717600455580188683> Unknown" : String.format("<:ytup:717600455580188683> **%s**", MiscUtil.delimitNumber(video.getLikes()));
+                dislikes = video.getDislikes() == null ? "<:ytdown:717600455353696317> Unknown" : String.format("<:ytdown:717600455353696317> **%s**", MiscUtil.delimitNumber(video.getDislikes()));
+            } else {
+                float totalLikes = video.getLikes() + video.getDislikes();
+                likes = String.format("<:ytup:717600455580188683> **%s** *(%s)*", MiscUtil.delimitNumber(video.getLikes()), MiscUtil.formatPercent(video.getLikes() / totalLikes));
+                dislikes = String.format("<:ytdown:717600455353696317> **%s** *(%s)*", MiscUtil.delimitNumber(video.getDislikes()), MiscUtil.formatPercent(video.getDislikes() / totalLikes));
+            }
             embed.addField("Rating", likes + "\n" + dislikes, true);
         }
 

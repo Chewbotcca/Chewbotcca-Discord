@@ -32,7 +32,7 @@ public class YouTubeVideo {
     }
 
     public String getURL() {
-        return "https://youtu.be" + getId();
+        return "https://youtu.be/" + getId();
     }
 
     public String getTitle() {
