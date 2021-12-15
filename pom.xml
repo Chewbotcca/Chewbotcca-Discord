@@ -39,7 +39,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.3.0_348</version>
+            <version>4.4.0_351</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.7</version>
+            <version>1.2.8</version>
             <scope>compile</scope>
         </dependency>
 
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>4.9.2</version>
+            <version>4.9.3</version>
             <scope>compile</scope>
         </dependency>
 
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20210307</version>
+            <version>20211205</version>
             <scope>compile</scope>
         </dependency>
 
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry</artifactId>
-            <version>5.4.0</version>
+            <version>5.5.0</version>
             <scope>compile</scope>
         </dependency>
 
