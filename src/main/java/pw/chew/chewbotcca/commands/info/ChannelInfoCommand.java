@@ -16,34 +16,57 @@
  */
 package pw.chew.chewbotcca.commands.info;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.awaitility.Awaitility.await;
 
 // %^channelinfo command
-public class ChannelInfoCommand extends Command {
+public class ChannelInfoCommand extends SlashCommand {
     public ChannelInfoCommand() {
         this.name = "channelinfo";
+        this.help = "Gathers info about a specified channel";
         this.aliases = new String[]{"cinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = false;
+        this.guildOnly = true;
+        this.options = Arrays.asList(
+            new OptionData(OptionType.CHANNEL, "channel", "The channel to find info about").setRequired(true),
+            new OptionData(OptionType.STRING, "type", "The type of information to return. default: general")
+                .addChoices(
+                    new Command.Choice("General Information", "general"),
+                    new Command.Choice("Pins", "pins")
+                )
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        GuildChannel channel = OptionHelper.optGuildChannel(event, "channel", event.getGuildChannel());
+        event.replyEmbeds(switch (OptionHelper.optString(event, "type", "general")) {
+            case "pins" -> getPinsInfo((TextChannel) channel, event.getJDA()).build();
+            default -> gatherMainInfo(channel, null).build();
+        }).queue();
     }
 
     @Override
@@ -82,7 +105,7 @@ public class ChannelInfoCommand extends Command {
 
         // Generate and send data based on input
         if(mode.equals("pins") && channel.getType() == ChannelType.TEXT) {
-            commandEvent.reply(getPinsInfo((TextChannel)channel, commandEvent).build());
+            commandEvent.reply(getPinsInfo((TextChannel)channel, commandEvent.getJDA()).build());
         } else if(mode.equals("pins")) {
             commandEvent.reply("Pins sub-command only works in Text channels!");
         } else {
@@ -115,16 +138,23 @@ public class ChannelInfoCommand extends Command {
         if (channel.getType() == ChannelType.TEXT || channel.getType() == ChannelType.VOICE)
             e.addField("Users in Channel", String.valueOf(channel.getMembers().size()), true);
 
+        if (channel.getType() == ChannelType.VOICE) {
+            VoiceChannel vc = ((VoiceChannel) channel);
+            e.addField("Voice Region", vc.getRegion().getEmoji() + " " + vc.getRegion().getName(), true);
+        }
+
         e.addField("Type", channel.getType().toString(), true);
 
         // If it's a text channel and we can access the webhooks, add the count.
-        if(channel.getType() == ChannelType.TEXT) {
+        if (channel.getType() == ChannelType.TEXT) {
             TextChannel textChannel = ((TextChannel) channel);
-            if (commandEvent.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
+            if (commandEvent != null && commandEvent.getSelfMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
                 List<Webhook> hooks = textChannel.retrieveWebhooks().complete();
                 e.addField("Webhooks", String.valueOf(hooks.size()), true);
             }
-            e.addField("Pins", textChannel.retrievePinnedMessages().complete().size() + " / 50", true);
+            if (commandEvent != null && commandEvent.getSelfMember().hasPermission(Permission.VIEW_CHANNEL)) {
+                e.addField("Pins", textChannel.retrievePinnedMessages().complete().size() + " / 50", true);
+            }
             List<String> info = new ArrayList<>();
             if (textChannel.isNews())
                 info.add("<:news:725504846937063595> News");
@@ -143,10 +173,10 @@ public class ChannelInfoCommand extends Command {
     /**
      * Get pins info for a channel
      * @param channel the channel
-     * @param commandEvent the command event
+     * @param jda jda for getting users
      * @return an embed ready to be build
      */
-    public EmbedBuilder getPinsInfo(TextChannel channel, CommandEvent commandEvent) {
+    public EmbedBuilder getPinsInfo(TextChannel channel, JDA jda) {
         EmbedBuilder e = new EmbedBuilder();
         // Retrieve the channel pins
         List<Message> pins = channel.retrievePinnedMessages().complete();
@@ -168,15 +198,18 @@ public class ChannelInfoCommand extends Command {
             Map.Entry<String, Integer> entry = l.get(i);
             String user = entry.getKey();
             int pinCount = entry.getValue();
-            User userById = commandEvent.getJDA().getUserById(user);
-            AtomicReference<String> tag = new AtomicReference<>();
+            User userById = jda.getUserById(user);
+            String tag;
             if(userById == null) {
-                commandEvent.getJDA().retrieveUserById(user).queue(bruh -> tag.set(bruh.getAsTag()), error -> tag.set("Deleted User"));
+                try {
+                    tag = jda.retrieveUserById(user).complete().getAsTag();
+                } catch (ErrorResponseException ignored) {
+                    tag = "Unknown User";
+                }
             } else {
-                tag.set(userById.getAsTag());
+                tag = userById.getAsTag();
             }
-            await().atMost(5, TimeUnit.SECONDS).until(() -> tag.get() != null);
-            top.add("#" + (i+1) + ": " + pinCount + " pins - " + tag.get());
+            top.add("#" + (i+1) + ": " + pinCount + " pins - " + tag);
         }
         e.setDescription(String.join("\n", top));
         return e;

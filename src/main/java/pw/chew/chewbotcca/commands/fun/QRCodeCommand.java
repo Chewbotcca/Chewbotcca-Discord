@@ -16,21 +16,42 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 // %^qrcode command
-public class QRCodeCommand extends Command {
+public class QRCodeCommand extends SlashCommand {
+
     public QRCodeCommand() {
         this.name = "qrcode";
+        this.help = "Converts arguments into a QR Code";
         this.aliases = new String[]{"qr"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "data", "The data to convert into a QR Code").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        // Get the query string
+        String code = OptionHelper.optString(event, "data", "");
+        event.replyEmbeds(new EmbedBuilder()
+            // Encode the input and return an image from google chart apis
+            .setImage("https://chart.apis.google.com/chart?chl=" + URLEncoder.encode(code, StandardCharsets.UTF_8) + "&chld=H|0&chs=500x500&cht=qr")
+            .build()
+        ).queue();
     }
 
     @Override
@@ -38,9 +59,9 @@ public class QRCodeCommand extends Command {
         // Get the query string
         String code = commandEvent.getArgs();
         commandEvent.reply(new EmbedBuilder()
-                // Encode the input and return an image from google chart apis
-                .setImage("https://chart.apis.google.com/chart?chl=" + URLEncoder.encode(code, StandardCharsets.UTF_8) + "&chld=H|0&chs=500x500&cht=qr")
-                .build()
+            // Encode the input and return an image from google chart apis
+            .setImage("https://chart.apis.google.com/chart?chl=" + URLEncoder.encode(code, StandardCharsets.UTF_8) + "&chld=H|0&chs=500x500&cht=qr")
+            .build()
         );
     }
 }

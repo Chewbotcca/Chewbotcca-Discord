@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.objects.Memory;
 
+import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +34,7 @@ import java.util.Map;
 // Off brand RestClient based on the ruby gem of the same name
 public class RestClient {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static final String userAgent = "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095";
 
     /**
      * Make a GET request
@@ -43,7 +45,7 @@ public class RestClient {
         Request request = new Request.Builder()
                 .url(url)
                 .get()
-                .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+                .addHeader("User-Agent", userAgent)
                 .build();
 
         LoggerFactory.getLogger(RestClient.class).debug("Making call to GET " + url);
@@ -60,7 +62,7 @@ public class RestClient {
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Authorization", key)
-                .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+                .addHeader("User-Agent", userAgent)
                 .get()
                 .build();
 
@@ -80,7 +82,7 @@ public class RestClient {
                 .url(url)
                 .post(bodyFromHash(args))
                 .addHeader("Authorization", key)
-                .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+                .addHeader("User-Agent", userAgent)
                 .build();
 
         LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
@@ -94,12 +96,12 @@ public class RestClient {
      * @return a response
      */
     public static String post(String url, JSONObject json) {
-        RequestBody body = RequestBody.create(JSON, json.toString());
+        RequestBody body = RequestBody.create(json.toString(), JSON);
 
         Request request = new Request.Builder()
             .url(url)
             .post(body)
-            .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+            .addHeader("User-Agent", userAgent)
             .build();
 
         LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
@@ -120,7 +122,7 @@ public class RestClient {
             .url(url)
             .post(body)
             .addHeader("Authorization", key)
-            .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+            .addHeader("User-Agent", userAgent)
             .build();
 
         LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
@@ -138,7 +140,7 @@ public class RestClient {
             .url(url)
             .delete()
             .addHeader("Authorization", key)
-            .addHeader("User-Agent", "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095")
+            .addHeader("User-Agent", userAgent)
             .build();
 
         LoggerFactory.getLogger(RestClient.class).debug("Making call to DELETE " + url);
@@ -155,20 +157,25 @@ public class RestClient {
             String body;
             ResponseBody responseBody = response.body();
             if(responseBody == null) {
-                body = null;
+                body = "{}";
             } else {
                 body = responseBody.string();
             }
             LoggerFactory.getLogger(RestClient.class).debug("Response is " + body);
             return body;
+        } catch (SSLHandshakeException e) {
+            LoggerFactory.getLogger(RestClient.class).warn("Call to " + request.url() + " failed with SSLHandshakeException!");
+            return "{error: 'SSLHandshakeException'}";
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger(RestClient.class).warn("Call to " + request.url() + " failed with IOException!");
+            return "{error: 'IOException'}";
         }
-        return null;
     }
 
     public static RequestBody bodyFromHash(HashMap<String, Object> args) {
         FormBody.Builder bodyArgs = new FormBody.Builder();
+        if (args == null)
+            return bodyArgs.build();
         for(Map.Entry<String, Object> entry : args.entrySet()) {
             bodyArgs.add(entry.getKey(), String.valueOf(entry.getValue()));
         }

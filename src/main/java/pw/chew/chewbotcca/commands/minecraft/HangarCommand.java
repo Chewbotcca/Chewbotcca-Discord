@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.util.RestClient;
@@ -29,10 +30,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 public class HangarCommand extends Command {
-    private static final String baseUrl = "https://hangar.minidigger.me/";
-    private static final String apiUrl = "https://hangar.minidigger.me/api/v1/";
-    private static String key = null;
-    private static Instant lastUpdate = Instant.now();
+    private static final String baseUrl = "https://hangar.benndorf.dev/";
+    private static final String apiUrl = baseUrl + "api/v1/";
 
     public HangarCommand() {
         this.name = "hangar";
@@ -44,18 +43,26 @@ public class HangarCommand extends Command {
 
     @Override
     protected void execute(CommandEvent event) {
-        if (lastUpdate.isBefore(Instant.now().minusSeconds(10800)) || key == null) {
-            regenerateKey();
+        try {
+            event.reply(buildPluginEmbed(event.getArgs()));
+        } catch (IllegalArgumentException e) {
+            event.replyError(e.getMessage());
         }
-        String args = URLEncoder.encode(event.getArgs(), StandardCharsets.UTF_8);
-        JSONObject response = new JSONObject(RestClient.get(apiUrl + "projects?q=" + args + "&limit=1", "HangarApi session=\"" + key + "\""));
-        LoggerFactory.getLogger(HangarCommand.class).debug(response.toString());
+    }
+
+    /**
+     * Searches Hangar for a plugin and returns an embed with the plugin's information.
+     *
+     * @param args The plugin name to search for.
+     * @return The embed with the plugin's information.
+     */
+    private MessageEmbed buildPluginEmbed(String args) {
+        args = URLEncoder.encode(args, StandardCharsets.UTF_8);
+        JSONObject response = new JSONObject(RestClient.get(apiUrl + "projects?q=" + args + "&limit=1"));
         EmbedBuilder embed = new EmbedBuilder();
         embed.setAuthor("Hangar Plugin Repository Search Results", baseUrl);
         if (response.getJSONObject("pagination").getInt("count") == 0) {
-            embed.setDescription("No results found!");
-            event.reply(embed.build());
-            return;
+            throw new IllegalArgumentException("No results found!");
         }
 
         JSONObject plugin = response.getJSONArray("result").getJSONObject(0);
@@ -64,9 +71,9 @@ public class HangarCommand extends Command {
 
         embed.setTitle(plugin.getString("name"), projectURL);
         embed.setDescription(plugin.getString("description"));
-        embed.setThumbnail(plugin.getString("icon_url"));
-        if (plugin.getJSONArray("promoted_versions").length() > 0) {
-            embed.addField("Latest", plugin.getJSONArray("promoted_versions").getJSONObject(0).getString("version"), true);
+        embed.setThumbnail(projectURL + "/icon?nocache" + Instant.now());
+        if (plugin.getJSONArray("promotedVersions").length() > 0) {
+            embed.addField("Latest", plugin.getJSONArray("promotedVersions").getJSONObject(0).getString("version"), true);
         }
 
         JSONObject stats = plugin.getJSONObject("stats");
@@ -75,12 +82,6 @@ public class HangarCommand extends Command {
         embed.addField("Stars", String.valueOf(stats.getInt("stars")), true);
         embed.addField("Watchers", String.valueOf(stats.getInt("watchers")), true);
 
-        event.reply(embed.build());
-    }
-
-    private void regenerateKey() {
-        JSONObject response = new JSONObject(RestClient.post(apiUrl + "authenticate", new JSONObject()));
-        key = response.getString("session");
-        lastUpdate = Instant.now();
+        return embed.build();
     }
 }

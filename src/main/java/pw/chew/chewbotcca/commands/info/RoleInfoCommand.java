@@ -16,34 +16,69 @@
  */
 package pw.chew.chewbotcca.commands.info;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.RoleIcon;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.Mention;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
-
-import static org.awaitility.Awaitility.await;
+import java.util.Set;
+import java.util.TreeSet;
 
 // %^rinfo command
-public class RoleInfoCommand extends Command {
+public class RoleInfoCommand extends SlashCommand {
 
     public RoleInfoCommand() {
         this.name = "roleinfo";
+        this.help = "Find some information about roles";
         this.aliases = new String[]{"rinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION};
         this.guildOnly = true;
+        this.options = Arrays.asList(
+            new OptionData(OptionType.ROLE, "role", "The role to get info about").setRequired(true),
+            new OptionData(OptionType.STRING, "mode", "The type of data to receive")
+                .addChoice("General Info", "general")
+                .addChoice("Members", "members")
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        String mode = OptionHelper.optString(event, "mode", "general");
+
+        // "Nullable" begone
+        if (event.getGuild() == null || event.getMember() == null) return;
+
+        Role role = event.getOptionsByName("role").get(0).getAsRole();
+
+        // Make a response depending on the mode
+        if (mode.equals("members")) {
+            // Send message then edit it
+            event.replyEmbeds(new EmbedBuilder().setDescription("Gathering members...").build()).queue(interactionHook -> {
+                interactionHook.retrieveOriginal().queue(message -> {
+                    gatherMembersInfo(event.getGuild(), role, false, event.getUser()).paginate(message, 1);
+                });
+            });
+        } else {
+            event.replyEmbeds(gatherMainInfo(event.getGuild(), role, event.getMember()).build()).queue();
+        }
     }
 
     @Override
@@ -79,13 +114,22 @@ public class RoleInfoCommand extends Command {
             id = false;
         }
         if(arg.contains("<")) {
-            role = (Role) Mention.parseMention(arg, event.getGuild(), event.getJDA());
+            role = event.getMessage().getMentionedRoles().get(0);
         } else if(id) {
             role = event.getGuild().getRoleById(arg);
         } else {
             List<Role> roles = event.getGuild().getRolesByName(arg, true);
             if(roles.size() > 0) {
-                role = roles.get(0);
+                for (Role check : roles) {
+                    if (role != null) continue;
+
+                    if (check.getName().equals(arg)) {
+                        role = check;
+                    }
+                }
+                if (role == null) {
+                    role = roles.get(0);
+                }
             }
         }
         if(role == null) {
@@ -95,45 +139,63 @@ public class RoleInfoCommand extends Command {
 
         // Make a response depending on the mode
         if(mode.equals("members")) {
-            gatherMembersInfo(event, role, mention);
+            gatherMembersInfo(event.getGuild(), role, mention, event.getAuthor()).paginate(event.getChannel(), 1);
         } else {
-            event.reply(gatherMainInfo(event, role).build());
+            event.reply(gatherMainInfo(event.getGuild(), role, event.getMember()).build());
         }
     }
 
     /**
      * Gather main role info
-     * @param event the command event
-     * @param role the role
+     *
+     * @param server the server to get the role from
+     * @param role   the role
+     * @param author the author of the message for perm checks
      * @return an embed to be build
      */
-    public EmbedBuilder gatherMainInfo(CommandEvent event, Role role) {
+    public EmbedBuilder gatherMainInfo(Guild server, Role role, Member author) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Role Information for: " + role.getName());
-        // Send typing, it'll be a while
-        event.getChannel().sendTyping().queue();
-        new Thread(() -> event.getGuild().loadMembers().get());
-        // I hate async, so this puts it back in sync
-        await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
         // Get the member counts
-        int members = event.getGuild().getMembersWithRoles(role).size();
-        int total = event.getGuild().getMemberCount();
+        int members = server.getMembersWithRoles(role).size();
+        int total = server.getMemberCount();
         DecimalFormat df = new DecimalFormat("#.##");
-        String percent = df.format((float)members / (float)total * 100);
+        String percent = df.format((float) members / (float) total * 100);
         // Return the member count
         embed.addField("Members", NumberFormat.getNumberInstance(Locale.US).format(members) + " / " + NumberFormat.getNumberInstance(Locale.US).format(total) + " (" + percent + "%)", true);
         embed.addField("Mention / ID", role.getAsMention() + "\n" + role.getId(), true);
+        // Set role icon
+        RoleIcon roleIcon = role.getIcon();
+        if (roleIcon != null) {
+            // Get the icon
+            String icon = roleIcon.getIconUrl();
+            // If it's an emoji, use that instead
+            if (icon == null) icon = roleIcon.getEmoji();
+            // Set thumbnail
+            embed.setThumbnail(icon);
+        }
         // Find and provide info
         List<String> info = new ArrayList<>();
         info.add(getInfoFormat(role.isHoisted(), "Hoisted"));
         info.add(getInfoFormat(role.isMentionable(), "Mentionable"));
-        info.add(getInfoFormat(role.isMentionable(), "Managed"));
+        info.add(getInfoFormat(role.getTags().isBot(), "Bot Role"));
+        info.add(getInfoFormat(role.getTags().isBoost(), "Boost Role"));
+        info.add(getInfoFormat(role.getTags().isIntegration(), "Integration Role"));
         embed.addField("Information", String.join("\n", info), true);
         embed.setColor(role.getColor());
         embed.setFooter("Created");
         // If the user has permission to manage roles, show the permissions
-        if(event.getMember().hasPermission(Permission.MANAGE_ROLES))
-            embed.setDescription(generatePermissionList(role.getPermissions()));
+        if (author.hasPermission(Permission.MANAGE_ROLES)) {
+            Permission[] perms = role.getPermissions().toArray(new Permission[0]);
+            Set<Permission> temp = new TreeSet<>(Arrays.asList(perms));
+            String description = "";
+            if (!role.isPublicRole()) {
+                Permission[] every = server.getPublicRole().getPermissions().toArray(new Permission[0]);
+                Arrays.asList(every).forEach(temp::remove);
+                description = "Elevated permissions (perms this role has that everyone role doesn't)\n\n";
+            }
+            embed.setDescription(description + generatePermissionList(temp));
+        }
         embed.setTimestamp(role.getTimeCreated());
 
         return embed;
@@ -141,25 +203,21 @@ public class RoleInfoCommand extends Command {
 
     /**
      * Gather members of a role
-     * @param event the command event
-     * @param role the role
+     *
+     * @param server  the server to get role from
+     * @param role    the role
      * @param mention should render mentions or not
      */
-    public void gatherMembersInfo(CommandEvent event, Role role, boolean mention) {
-        if(role == event.getGuild().getPublicRole()) {
-            event.reply("Finding all members is unsupported.");
-            return;
+    public Paginator gatherMembersInfo(Guild server, Role role, boolean mention, User author) {
+        if (role == server.getPublicRole()) {
+            throw new IllegalArgumentException("Finding all members is unsupported.");
         }
         Paginator.Builder paginator = JDAUtilUtil.makePaginator().clearItems();
         paginator.setText("Members in role " + role.getName());
-        // Get members
-        new Thread(() -> event.getGuild().loadMembers().get());
-        // Put response back in sync
-        await().atMost(30, TimeUnit.SECONDS).until(() -> event.getGuild().getMemberCache().size() == event.getGuild().getMemberCount());
         // Get the member list and find how members actually with the role
-        List<Member> memberList = event.getGuild().getMemberCache().asList();
-        for(Member member : memberList) {
-            if(member.getRoles().contains(role)) {
+        List<Member> memberList = server.getMemberCache().asList();
+        for (Member member : memberList) {
+            if (member.getRoles().contains(role)) {
                 if (mention)
                     paginator.addItems(member.getAsMention());
                 else
@@ -169,9 +227,7 @@ public class RoleInfoCommand extends Command {
         if (paginator.getItems().isEmpty())
             paginator.addItems("No one has this role!");
 
-        Paginator p = paginator.setUsers(event.getAuthor()).build();
-
-        p.paginate(event.getChannel(), 1);
+        return paginator.setUsers(author).build();
     }
 
     /**
@@ -179,7 +235,7 @@ public class RoleInfoCommand extends Command {
      * @param permissions the permissions
      * @return a permission list
      */
-    public String generatePermissionList(EnumSet<Permission> permissions) {
+    public String generatePermissionList(Set<Permission> permissions) {
         ArrayList<CharSequence> perms = new ArrayList<>();
         Permission[] permList = permissions.toArray(new Permission[0]);
         if (permissions.isEmpty()) {

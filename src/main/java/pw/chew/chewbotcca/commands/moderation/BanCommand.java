@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
-import pw.chew.chewbotcca.util.Mention;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class BanCommand extends Command {
     public BanCommand() {
@@ -37,21 +37,23 @@ public class BanCommand extends Command {
     @Override
     protected void execute(CommandEvent event) {
         String[] args = event.getArgs().split(" ");
-        if(args.length == 0) {
+        if (args.length == 0) {
             event.reply("Sorry, but you need to mention the person you want to ban");
             return;
         }
 
         User user;
-        try {
-            user = Mention.parseUserMention(args[0], event.getJDA());
-        } catch (IllegalArgumentException e) {
-            user = event.getJDA().getUserById(args[0]);
-        }
-
-        if (user == null) {
-            event.reply("Could not find user in question. Make sure they exist!");
-            return;
+        // Get mentioned users
+        List<User> mentioned = event.getMessage().getMentionedUsers();
+        if (mentioned.isEmpty()) {
+            try {
+                user = event.getJDA().retrieveUserById(args[0]).complete();
+            } catch (RuntimeException e) {
+                event.replyError("Could not find the specified user by ID!");
+                return;
+            }
+        } else {
+            user = mentioned.get(0);
         }
 
         int days = 0;
@@ -74,8 +76,8 @@ public class BanCommand extends Command {
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.setTitle("Somebody order a ban hammer?");
                 embed.setColor(0x7d5eba);
-                embed.setDescription("That dude? Finna yeeted the guy. We don't need troublemakers here! Begone!\n" +
-                    "You just banned some DUDE (aka " + finalUser.getAsTag() + ").\n" +
+                embed.setDescription("Oh them? They got yeeted. We don't need troublemakers here! Begone!\n" +
+                    "You just banned " + finalUser.getAsTag() + "!\n" +
                     "How much history got deleted? " + finalDays + " days...");
 
                 embed.setAuthor("The banner (you): " + event.getAuthor().getAsTag());
@@ -83,7 +85,7 @@ public class BanCommand extends Command {
                 event.reply(embed.build());
             });
         } catch (HierarchyException e) {
-            event.reply("Well, I couldn't ban the guy. Reason: That user has a role higher or equal to my highest role.\n" +
+            event.reply("Bad news, I couldn't ban them. Reason: That user has a role higher or equal to my highest role.\n" +
                 "Please make sure this is fixed and try again, thanks!");
         }
     }

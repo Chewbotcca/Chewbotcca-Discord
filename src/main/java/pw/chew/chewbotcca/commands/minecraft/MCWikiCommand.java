@@ -16,57 +16,73 @@
  */
 package pw.chew.chewbotcca.commands.minecraft;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import org.htmlcleaner.CleanerProperties;
-import org.htmlcleaner.DomSerializer;
-import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.TagNode;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 // %^mcwiki command
-public class MCWikiCommand extends Command {
+public class MCWikiCommand extends SlashCommand {
 
     public MCWikiCommand() {
         this.name = "mcwiki";
+        this.help = "Search the Minecraft Wiki";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "query", "The query to lookup on the wiki").setRequired(true)
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        try {
+            event.replyEmbeds(gatherData(OptionHelper.optString(event, "query", ""))).queue();
+        } catch (IllegalArgumentException e) {
+            event.reply(e.getMessage()).setEphemeral(true).queue();
+        }
     }
 
     @Override
     protected void execute(CommandEvent commandEvent) {
-        String apiUrl = "http://minecraft.gamepedia.com/api.php?action=opensearch&search=";
-        String mcUrl = "http://minecraft.gamepedia.com/";
+        try {
+            commandEvent.reply(gatherData(commandEvent.getArgs().strip()));
+        } catch (IllegalArgumentException e) {
+            commandEvent.replyWarning(e.getMessage());
+        }
+    }
+
+    private MessageEmbed gatherData(String query) {
+        String apiUrl = "https://minecraft.gamepedia.com/api.php?action=opensearch&search=";
+        String mcUrl = "https://minecraft.gamepedia.com/";
 
         JSONArray j;
 
         // Try and find a result
         try {
-            j = new JSONArray(RestClient.get(apiUrl + URLEncoder.encode(commandEvent.getArgs().strip(), StandardCharsets.UTF_8))).getJSONArray(1);
-        } catch(JSONException e) {
+            j = new JSONArray(RestClient.get(apiUrl + URLEncoder.encode(query, StandardCharsets.UTF_8))).getJSONArray(1);
+        } catch (JSONException e) {
             e.printStackTrace();
-            commandEvent.reply("Error reading search results!");
-            return;
+            throw new IllegalArgumentException("Error reading search results!");
         }
         if(j.isEmpty()) {
-            commandEvent.reply("No results found!");
-            return;
+            throw new IllegalArgumentException("No results found!");
         }
 
         // If there's a result, find the right article
@@ -90,39 +106,24 @@ public class MCWikiCommand extends Command {
         // Actually get the page
         String page = RestClient.get(url);
 
-        // Configure parser for later
-        TagNode tagNode = new HtmlCleaner().clean(page);
-        Document doc;
-        try {
-            doc = new DomSerializer(new CleanerProperties()).createDOM(tagNode);
-        } catch (ParserConfigurationException e) {
-            commandEvent.reply("Error configuring Parser!");
-            e.printStackTrace();
-            return;
-        }
+        // Parse the page content
+        Document doc = Jsoup.parse(page);
 
-        // Find the summary text and image (if there is one)
-        XPath xPath = XPathFactory.newInstance().newXPath();
-        String summary = null;
-        String img = null;
-        try {
-            summary = (String) xPath.evaluate("//*[@id=\"mw-content-text\"]/div/p[1]", doc, XPathConstants.STRING);
-            Node src = (Node) xPath.evaluate("//*[@id=\"mw-content-text\"]/div/div[1]/div[2]/div[1]/a/img", doc, XPathConstants.NODE);
-            img = src.getAttributes().getNamedItem("src").toString().replace("src=", "").replace("\"", "");
-        } catch (NullPointerException ignored) {
-        } catch (XPathExpressionException e) {
-            commandEvent.reply("Error in XPath Expression!");
-            e.printStackTrace();
-            return;
+        // Get summary
+        String summary = doc.select("#mw-content-text > div.mw-parser-output > p:nth-child(3)").text();
+        String img = doc.select("#mw-content-text > div.mw-parser-output > div.notaninfobox > div.infobox-imagearea.animated-container > div:nth-child(1) > a > img").attr("data-src");
+        // Ensure img is a valid image
+        if (!EmbedBuilder.URL_PATTERN.matcher(img).matches()) {
+            img = null;
         }
 
         // Return the results
-        commandEvent.reply(new EmbedBuilder()
-                .setAuthor("Minecraft Wiki Search Results")
-                .setTitle(articleName.replace("_", " "), url)
-                .setDescription(summary)
-                .setThumbnail(img)
-                .build()
+        return (new EmbedBuilder()
+            .setAuthor("Minecraft Wiki Search Results")
+            .setTitle(articleName.replace("_", " "), url)
+            .setDescription(summary)
+            .setThumbnail(img)
+            .build()
         );
     }
 }

@@ -20,10 +20,21 @@
 
 package pw.chew.chewbotcca.util;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 
-// Find time difference between 2 date in words
+/**
+ * Find time difference between 2 date in words
+ */
 public class DateTime {
+    /**
+     * Finds the difference of time in words.
+     *
+     * @param different The time to calculate, in milliseconds
+     * @param useSeconds Whether to include seconds in the output
+     * @return A string of the difference, e.g. "1 day, 5 hours"
+     */
     public static String timeAgo(long different, boolean useSeconds) {
         long secondsInMilli = 1000;
         long minutesInMilli = secondsInMilli * 60;
@@ -71,7 +82,40 @@ public class DateTime {
         return response.toString();
     }
 
+    /**
+     * Finds the difference of time in words.
+     *
+     * @param different The time to calculate, in milliseconds
+     * @return A string of the difference, e.g. "1 day, 5 hours"
+     */
     public static String timeAgo(long different) {
         return timeAgo(different, true);
+    }
+
+    /**
+     * Finds the difference of time in words.
+     *
+     * @param time The time to compare against now ran as now minus this
+     * @return A string of the difference, e.g. "1 day, 5 hours"
+     */
+    public static String timeAgoFromNow(Instant time) {
+        long diff = Instant.now().toEpochMilli() - time.toEpochMilli();
+        return timeAgo(diff, true);
+    }
+
+    public static String timeAgoShort(long different, boolean useSeconds) {
+        String timeAgo = timeAgo(different, useSeconds);
+        String[] parts = timeAgo.replace(" and", "").split(", ");
+        List<String> response = new ArrayList<>();
+        for (String part : parts) {
+            String[] values = part.split(" ");
+            response.add(values[0] + "" + values[1].charAt(0));
+        }
+        return String.join(" ", response);
+    }
+
+    public static String timeAgoShort(Instant time, boolean useSeconds) {
+        long diff = Instant.now().toEpochMilli() - time.toEpochMilli();
+        return timeAgoShort(diff, useSeconds);
     }
 }

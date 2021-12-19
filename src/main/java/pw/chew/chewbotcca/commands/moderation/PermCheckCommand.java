@@ -39,10 +39,10 @@ public class PermCheckCommand extends Command {
         needed.put(Permission.MESSAGE_EMBED_LINKS, "Required for most commands.");
         needed.put(Permission.MESSAGE_ADD_REACTION, "Required for Paginator to work.");
         needed.put(Permission.MESSAGE_EXT_EMOJI, "Makes some commands look nicer.");
-        needed.put(Permission.MANAGE_ROLES, "Required for `%^role` command.");
-        needed.put(Permission.NICKNAME_MANAGE, "Required for `%^dehoist` command.");
-        needed.put(Permission.MANAGE_WEBHOOKS, "Required to view webhook count in `%^cinfo` and for `%^rory follow`.");
-        needed.put(Permission.BAN_MEMBERS, "Required for `%^ban` command.");
+        needed.put(Permission.MANAGE_ROLES, "Required for `" + event.getPrefix() + "role` command.");
+        needed.put(Permission.NICKNAME_MANAGE, "Required for `" + event.getPrefix() + "dehoist` command.");
+        needed.put(Permission.MANAGE_WEBHOOKS, "Required to view webhook count in `" + event.getPrefix() + "cinfo` and for `" + event.getPrefix() + "rory follow`.");
+        needed.put(Permission.BAN_MEMBERS, "Required for `" + event.getPrefix() + "ban` command.");
 
         List<String> response = new ArrayList<>();
         response.add("Chewbotcca Permission Check - If I'm missing a permission, it will list where/if it's needed.");

@@ -16,23 +16,37 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
 // %^catfact command
-public class CatFactCommand extends Command {
+public class CatFactCommand extends SlashCommand {
 
     public CatFactCommand() {
         this.name = "catfact";
+        this.help = "Find a fun fact about our furry feline friends!";
         this.guildOnly = false;
     }
 
     @Override
+    protected void execute(SlashCommandEvent event) {
+        event.reply(getFact()).queue();
+    }
+
+    @Override
     protected void execute(CommandEvent commandEvent) {
+        commandEvent.reply(getFact());
+    }
+
+    private String getFact() {
         // Get a fact and respond with it
-        String fact = new JSONObject(RestClient.get("https://catfact.ninja/fact")).getString("fact");
-        commandEvent.reply(fact);
+        JSONObject data = new JSONObject(RestClient.get("https://catfact.ninja/fact"));
+        if (data.has("error")) {
+            return "Could not get cat fact :cry: Error: " + data.getString("error");
+        }
+        return data.getString("fact");
     }
 }

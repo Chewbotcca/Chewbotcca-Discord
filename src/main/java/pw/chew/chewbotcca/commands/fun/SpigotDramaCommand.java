@@ -16,31 +16,43 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import pro.chew.api.objects.SpigotDrama;
 import pw.chew.chewbotcca.objects.Memory;
 
 // %^spigotdrama command
-public class SpigotDramaCommand extends Command {
+public class SpigotDramaCommand extends SlashCommand {
     public SpigotDramaCommand() {
         this.name = "spigotdrama";
         this.guildOnly = false;
+        this.help = "Generates some random Spigot drama";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }
 
     @Override
+    protected void execute(SlashCommandEvent slashCommandEvent) {
+        slashCommandEvent.replyEmbeds(generateDramaEmbed()).queue();
+    }
+
+    @Override
     protected void execute(CommandEvent commandEvent) {
+        commandEvent.reply(generateDramaEmbed());
+    }
+
+    private MessageEmbed generateDramaEmbed() {
         // Get a SpigotDrama response
         SpigotDrama response = Memory.getChewAPI().generateSpigotDrama();
         // Make an embed and send it off
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setAuthor("md678685", "https://github.com/md678685/spigot-drama-generator", "https://avatars0.githubusercontent.com/u/1917406");
+        embed.setAuthor("mdcfe", "https://github.com/mdcfe/spigot-drama-generator", "https://avatars0.githubusercontent.com/u/1917406");
         embed.setTitle("Spigot Drama Generator", "https://drama.essentialsx.net/");
         embed.setDescription(response.getPhrase() + "\n\n" + "[Permalink](" + response.getPermalink() + ")");
 
-        commandEvent.reply(embed.build());
+        return embed.build();
     }
 }

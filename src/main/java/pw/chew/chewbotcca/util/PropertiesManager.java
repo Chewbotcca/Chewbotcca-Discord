@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package pw.chew.chewbotcca.util;
+
+import net.dv8tion.jda.api.utils.MiscUtil;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Properties;
 
@@ -110,13 +113,6 @@ public class PropertiesManager {
     }
 
     /**
-     * @return Chew's API key for Chew's bot profiles/server settings.
-     */
-    public static String getChewKey() {
-        return properties.getProperty("chewkey");
-    }
-
-    /**
      * @return a DiscordExtremeList api token
      */
     public static String getDELToken() {
@@ -135,5 +131,45 @@ public class PropertiesManager {
      */
     public static String getMemeratorKey() {
         return properties.getProperty("memerator");
+    }
+
+    /**
+     * @return the Database Host
+     */
+    public static String getDatabaseHost() {
+        return properties.getProperty("database_host");
+    }
+
+    /**
+     * @return the Database username
+     */
+    public static String getDatabaseUsername() {
+        return properties.getProperty("database_user");
+    }
+
+    /**
+     * @return the Database password
+     */
+    public static String getDatabasePassword() {
+        return properties.getProperty("database_pass");
+    }
+
+    /**
+     * This determines whether we should only upsert in a single server, or globally.
+     * In development, this is usually per-server.
+     * In production, this should be null
+     *
+     * @return the forced guild id
+     */
+    @Nullable
+    public static String forceGuildId() {
+        String guildId = properties.getProperty("forced_guild_id");
+        if (guildId.length() < 15) return null;
+        try {
+            MiscUtil.parseSnowflake(guildId);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        return guildId;
     }
 }

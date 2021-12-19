@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,9 @@
  */
 package pw.chew.chewbotcca.listeners;
 
+import me.memerator.api.errors.NotFound;
+import me.memerator.api.object.Meme;
+import me.memerator.api.object.User;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -23,11 +26,12 @@ import org.json.JSONObject;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GitHub;
 import org.slf4j.LoggerFactory;
-import pw.chew.chewbotcca.commands.github.GHIssueCommand;
-import pw.chew.chewbotcca.commands.google.YouTubeCommand;
 import pw.chew.chewbotcca.commands.minecraft.MCIssueCommand;
+import pw.chew.chewbotcca.commands.services.MemeratorCommand;
+import pw.chew.chewbotcca.commands.services.github.GHIssueCommand;
+import pw.chew.chewbotcca.commands.services.google.YouTubeCommand;
 import pw.chew.chewbotcca.objects.Memory;
-import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.objects.services.YouTubeVideo;
 import pw.chew.chewbotcca.util.RestClient;
 
 import javax.annotation.Nonnull;
@@ -35,6 +39,9 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static pw.chew.chewbotcca.commands.services.MemeratorCommand.MemeratorMemeSubCommand.generateMemeEmbed;
+import static pw.chew.chewbotcca.commands.services.MemeratorCommand.MemeratorUserSubCommand.generateUserEmbed;
 
 // Listen to reactions
 public class ReactListener extends ListenerAdapter {
@@ -60,16 +67,28 @@ public class ReactListener extends ListenerAdapter {
 
         // Retrieve the message
         event.getChannel().retrieveMessageById(id).queue((msg) -> {
+            // Ignore if message >= 15 minutes old
+            if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
+                LoggerFactory.getLogger(ReactListener.class).debug("Message older than 15 minutes, not describing!");
+                return;
+            }
+
             String content = msg.getContentStripped().replace(">", "");
             if(content.contains("youtube.com") || content.contains("youtu.be")) {
                 // If it's a YouTube video
-                handleYouTube(content, event, msg);
+                handleYouTube(content, msg);
             } else if(content.contains("github.com") && (content.contains("/issues") || content.contains("/pull"))) {
                 // If it's a github issue or pr
-                handleGitHub(content, event, msg);
+                handleGitHub(content, msg);
             } else if(content.contains("bugs.mojang.com") || content.contains("hub.spigotmc.org/jira")) {
                 // If it's a mojira/spigot jira link
-                handleMcIssue(content, event, msg);
+                handleMcIssue(content, msg);
+            } else if(content.contains("memerator.me/m")) {
+                // If it's a Memerator meme
+                handleMemeratorMeme(content, msg);
+            } else if(content.contains("memerator.me/p")) {
+                // If it's a Memerator user
+                handleMemeratorUser(content, msg);
             }
         });
     }
@@ -77,10 +96,9 @@ public class ReactListener extends ListenerAdapter {
     /**
      * Handle a YouTube video message
      * @param content the message content
-     * @param event the reaction event
      * @param msg the message itself
      */
-    public void handleYouTube(String content, GuildMessageReactionAddEvent event, Message msg) {
+    public void handleYouTube(String content, Message msg) {
         // Find the video ID
         String video = null;
         for(String query : content.split(" ")) {
@@ -93,37 +111,26 @@ public class ReactListener extends ListenerAdapter {
         // If one couldn't be found for whatever reason
         if(video == null)
             return;
-        // Ignore if message >= 15 minutes
-        if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
-            LoggerFactory.getLogger(ReactListener.class).debug("Message older than 15 minutes, not describing!");
-            return;
-        }
         // Mark it as described
         described(msg.getId());
         // Get the video
-        JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + video + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics"));
+        YouTubeVideo youTubeVideo = YouTubeCommand.getVideo(video);
         // make a YouTube video embed response
-        event.getChannel().sendMessage(new YouTubeCommand().response(url, video, event.getChannel()).build()).queue();
+        msg.replyEmbeds(YouTubeCommand.buildVideoEmbed(youTubeVideo).build()).mentionRepliedUser(false).queue();
     }
 
     /**
      * Handle a Github.com link
      * @param content the message content
-     * @param event the reaction event
      * @param msg the message itself
      */
-    public void handleGitHub(String content, GuildMessageReactionAddEvent event, Message msg) {
+    public void handleGitHub(String content, Message msg) {
         // Example: https://github.com/Chewbotcca/Discord/issues/1
         // => "https:" "" "github.com" "Chewbotcca" "Discord" "issues" "1"
         String[] url = content.split("/");
         String repo = url[3] + "/" + url[4];
         // Get the issue num
         int issue = Integer.parseInt(url[6]);
-        // Ignore if message >= 15 minutes old
-        if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
-            LoggerFactory.getLogger(ReactListener.class).debug("Message older than 15 minutes, not describing!");
-            return;
-        }
         // Ignore if described
         described(msg.getId());
         // Initialize GitHub and the response
@@ -134,24 +141,18 @@ public class ReactListener extends ListenerAdapter {
         } catch (IOException e) {
             return;
         }
-        event.getChannel().sendMessage(new GHIssueCommand().issueBuilder(ghIssue).build()).queue();
+        msg.replyEmbeds(GHIssueCommand.issueBuilder(ghIssue).build()).mentionRepliedUser(false).queue();
     }
 
     /**
      * Handle a Mojira / Spigot JIRA link
      * @param content the message content
-     * @param event the reaction event
      * @param msg the message itself
      */
-    public void handleMcIssue(String content, GuildMessageReactionAddEvent event, Message msg) {
+    public void handleMcIssue(String content, Message msg) {
         // Get PROJECT-NUM from URL
         String[] url = content.split("/");
         String issue = url[url.length - 1];
-        // Ignore if message >= 15 minutes old
-        if(OffsetDateTime.now().toInstant().toEpochMilli() - msg.getTimeCreated().toInstant().toEpochMilli() >= 15*60*1000) {
-            LoggerFactory.getLogger(ReactListener.class).debug("Message older than 15 minutes, not describing!");
-            return;
-        }
         // Ignore if described
         described(msg.getId());
         // Ensure we actually track this
@@ -161,7 +162,43 @@ public class ReactListener extends ListenerAdapter {
         // Get response
         JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
         // Initialize GitHub and the response
-        event.getChannel().sendMessage(MCIssueCommand.generateEmbed(data, issue, apiUrl).build()).queue();
+        msg.replyEmbeds(MCIssueCommand.generateEmbed(data, issue, apiUrl).build()).mentionRepliedUser(false).queue();
+    }
+
+    /**
+     * Handles a Memerator Meme Link
+     * @param content the message content
+     * @param msg the message itself
+     */
+    public void handleMemeratorMeme(String content, Message msg) {
+        String id = content.split("/")[content.split("/").length - 1];
+        if (!id.toLowerCase().matches("([a-f]|[0-9]){6,7}")) {
+            return;
+        }
+        // Ignore if described
+        described(msg.getId());
+        // Get the meme
+        Meme meme = MemeratorCommand.MemeratorMemeSubCommand.getMeme(id, true);
+        if (meme == null) {
+            return;
+        }
+        msg.replyEmbeds(generateMemeEmbed(meme).build()).mentionRepliedUser(false).queue();
+        msg.suppressEmbeds(true).queue();
+    }
+
+    public void handleMemeratorUser(String content, Message msg) {
+        String name = content.split("/")[content.split("/").length - 1];
+        // Ignore if described
+        described(msg.getId());
+        // Get the user
+        User user;
+        try {
+            user = MemeratorCommand.getAPI().getUser(name);
+        } catch (NotFound notFound) {
+            return;
+        }
+        msg.replyEmbeds(generateUserEmbed(user).build()).mentionRepliedUser(false).queue();
+        msg.suppressEmbeds(true).queue();
     }
 
     /**

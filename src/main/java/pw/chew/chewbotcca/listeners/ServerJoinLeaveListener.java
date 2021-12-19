@@ -64,7 +64,7 @@ public class ServerJoinLeaveListener extends ListenerAdapter {
         if(joinChannel == null)
             LoggerFactory.getLogger(this.getClass()).error("Join Channel not found, this is not good.");
         else
-            joinChannel.sendMessage(e.build()).queue();
+            joinChannel.sendMessageEmbeds(e.build()).queue();
 
         if(!PropertiesManager.getSentryEnv().equals("development")) {
             syncStats(1, servers);

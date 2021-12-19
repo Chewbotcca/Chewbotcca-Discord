@@ -6,22 +6,19 @@
 
     <groupId>pw.chew</groupId>
     <artifactId>Chewbotcca-JDA</artifactId>
-    <version>1.0</version>
+    <version>2.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>15</maven.compiler.source>
-        <maven.compiler.target>15</maven.compiler.target>
+        <maven.compiler.source>16</maven.compiler.source>
+        <maven.compiler.target>16</maven.compiler.target>
     </properties>
 
     <repositories>
         <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>jcenter</id>
-            <name>jcenter-bintray</name>
-            <url>https://jcenter.bintray.com</url>
+            <id>dv8tion</id>
+            <name>m2-dv8tion</name>
+            <url>https://m2.dv8tion.net/releases</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
@@ -31,38 +28,49 @@
             <id>chew-jenkins</id>
             <url>https://jenkins.chew.pw/plugin/repository/everything/</url>
         </repository>
+        <repository>
+            <id>chew-m2</id>
+            <url>https://m2.chew.pro/releases</url>
+        </repository>
     </repositories>
 
     <dependencies>
-        <!-- The JDA API -->
+        <!-- The JDA API... finally putting the "Discord Bot" in "Chewbotcca Discord Bot" -->
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.2.0_212</version>
+            <version>4.4.0_351</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>opus-java</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <!-- The sdcf4j core module -->
+        <!-- The command wrapper, well, my fork of it -->
         <dependency>
             <groupId>pw.chew</groupId>
             <artifactId>jda-chewtils</artifactId>
-            <version>1.0.0</version>
+            <version>1.23.0</version>
             <scope>compile</scope>
+            <type>pom</type>
         </dependency>
 
-        <!-- Logback classic as out logging framework -->
+        <!-- Logback classic as our logging framework -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <version>1.2.8</version>
             <scope>compile</scope>
         </dependency>
 
-        <!-- OkHttp for REST request -->
+        <!-- A more up-to-date version of OkHttp for REST requests -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>4.9.0</version>
+            <version>4.9.3</version>
             <scope>compile</scope>
         </dependency>
 
@@ -70,67 +78,73 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20200518</version>
+            <version>20211205</version>
             <scope>compile</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <version>4.0.3</version>
-            <scope>compile</scope>
-        </dependency>
-
+        <!-- Error catcher, not very good with our current logger -->
         <dependency>
             <groupId>io.sentry</groupId>
-            <artifactId>sentry-logback</artifactId>
-            <version>1.7.30</version>
+            <artifactId>sentry</artifactId>
+            <version>5.5.0</version>
             <scope>compile</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.kohsuke/github-api -->
+        <!-- The GitHub API for GitHub commands -->
         <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
-            <version>1.116</version>
+            <version>1.301</version>
             <scope>compile</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/net.sourceforge.htmlcleaner/htmlcleaner -->
+        <!-- Nokogiri for Java? Idk, we use it for the Wiki command -->
         <dependency>
-            <groupId>net.sourceforge.htmlcleaner</groupId>
-            <artifactId>htmlcleaner</artifactId>
-            <version>2.24</version>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.14.3</version>
         </dependency>
 
+        <!-- My API for My THINGS -->
         <dependency>
             <groupId>pro.chew.api</groupId>
             <artifactId>ChewAPI</artifactId>
             <version>1.0-b5</version>
         </dependency>
 
-        <dependency>
-            <groupId>bio.discord.api</groupId>
-            <artifactId>dbio4j</artifactId>
-            <version>0.1.0_5</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.mcprohosting</groupId>
-            <artifactId>mcprohosting-api</artifactId>
-            <version>0.1.0-b3</version>
-        </dependency>
-
+        <!-- Lazy command loading -->
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.12</version>
+            <version>0.10.2</version>
         </dependency>
 
+        <!-- MEMERATOR API FOR MEMERATOR COMMANDS -->
         <dependency>
             <groupId>me.memerator.api</groupId>
             <artifactId>MemeratorAPI</artifactId>
-            <version>1.1.0_69</version>
+            <version>1.1.0_70</version>
+        </dependency>
+
+        <!-- ActiveRecord, almost -->
+        <dependency>
+            <groupId>org.javalite</groupId>
+            <artifactId>activejdbc</artifactId>
+            <version>3.0-j11</version>
+        </dependency>
+
+        <!-- mysql2 but 8 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.27</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.codehaus.groovy/groovy-all -->
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>3.0.9</version>
         </dependency>
     </dependencies>
 
@@ -138,25 +152,48 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
-                <configuration>
-                    <source>15</source>
-                    <target>15</target>
-                </configuration>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
                 <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <source>16</source>
+                    <target>16</target>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <source>16</source>
+                    <failOnWarnings>false</failOnWarnings>
+                    <doclint>all</doclint>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>3.2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -179,16 +216,29 @@
                 <!-- Build an executable JAR -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.2.0</version>
                 <configuration>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>pw.chew.chewbotcca.Main</mainClass>
+                            <mainClass>pw.chew.chewbotcca.Chewbotcca</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.javalite</groupId>
+                <artifactId>activejdbc-instrumentation</artifactId>
+                <version>3.0-j11</version>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>instrument</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

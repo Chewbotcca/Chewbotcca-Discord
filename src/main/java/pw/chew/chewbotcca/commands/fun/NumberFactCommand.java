@@ -16,18 +16,43 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
+
+import java.util.Arrays;
 
 // %^numberfact command
-public class NumberFactCommand extends Command {
+public class NumberFactCommand extends SlashCommand {
+
     public NumberFactCommand() {
         this.name = "numberfact";
+        this.help = "Find some cool and interesting facts about a number";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.options = Arrays.asList(
+            new OptionData(OptionType.INTEGER, "number", "The number to get facts about").setRequired(true),
+            new OptionData(OptionType.STRING, "type", "The type of fact to return")
+                .addChoice("Trivia (default)", "trivia")
+                .addChoice("Math", "math")
+                .addChoice("Date", "date")
+                .addChoice("Year", "year")
+        );
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        event.replyEmbeds(gatherFact(
+            OptionHelper.optString(event, "number", "0"),
+            OptionHelper.optString(event, "type", "trivia")
+        )).queue();
     }
 
     @Override
@@ -35,7 +60,7 @@ public class NumberFactCommand extends Command {
         // Get the arguments
         String[] args = commandEvent.getArgs().split(" ");
         // If there's no args
-        if(args.length == 0) {
+        if (args.length == 0) {
             commandEvent.reply("Please specify a number to find a fact for! Also, optionally specify what type of fact, choices: `trivia`, `year`, `date`, `math`.");
             return;
         }
@@ -49,12 +74,16 @@ public class NumberFactCommand extends Command {
         }
         // The type if specified
         String type;
-        if(args.length > 1) {
+        if (args.length > 1) {
             type = args[1].toLowerCase();
         } else {
             type = "trivia";
         }
 
+        commandEvent.reply(gatherFact(number, type));
+    }
+
+    private MessageEmbed gatherFact(String number, String type) {
         // Generate the url based off of the type
         String url = switch (type) {
             default -> "http://numbersapi.com/" + number + "?notfound=";
@@ -77,6 +106,6 @@ public class NumberFactCommand extends Command {
         if (!facto.split(" ")[0].equals(number) && !type.equals("date"))
             embed.setFooter("Your number didn't have a fact, so a number was approximated for you.");
 
-        commandEvent.reply(embed.build());
+        return embed.build();
     }
 }

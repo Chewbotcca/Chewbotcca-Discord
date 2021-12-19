@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2021 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,22 +16,39 @@
  */
 package pw.chew.chewbotcca.commands.settings;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import pw.chew.chewbotcca.objects.Profile;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import pw.chew.chewbotcca.objects.UserProfile;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Arrays;
 import java.util.List;
 
 // %^profile command
-public class ProfileCommand extends Command {
+public class ProfileCommand extends SlashCommand {
 
     public ProfileCommand() {
         this.name = "profile";
+        this.help = "Gets your own bot profile.";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.children = new SlashCommand[]{
+            new GetProfileSubCommand(),
+            new SetProfileSubCommand(),
+            new DeleteProfileSubCommand()
+        };
+    }
+
+    @Override
+    protected void execute(SlashCommandEvent event) {
+        // Not executed because slash commands with children don't have root commands
     }
 
     @Override
@@ -39,38 +56,124 @@ public class ProfileCommand extends Command {
         // Start typing
         commandEvent.getChannel().sendTyping().queue();
         // Get Bot Profile details and send
-        Profile profile = Profile.retrieveProfile(commandEvent.getAuthor().getId());
-        if(commandEvent.getArgs().equals("delete")) {
+        UserProfile profile = UserProfile.retrieveProfile(commandEvent.getAuthor().getId());
+        commandEvent.reply(getProfileData(profile, commandEvent.getPrefix()));
+    }
+
+    private MessageEmbed getProfileData(UserProfile profile, String prefix) {
+        EmbedBuilder embed = new EmbedBuilder()
+            .setTitle("Your Chewbotcca Profile")
+            .setDescription("The profile system is a work in progress! More details will appear soon!")
+            .setFooter("ID: " + profile.getId());
+
+        embed.addField("Lastfm Username", profile.getLastFm() == null ? "Set with `" + prefix + "profile set lastfm [name]`" : profile.getLastFm(), true);
+        embed.addField("GitHub Username", profile.getGitHub() == null ? "Set with `" + prefix + "profile set github [name]`" : profile.getGitHub(), true);
+
+        return embed.build();
+    }
+
+    private class GetProfileSubCommand extends SlashCommand {
+
+        private GetProfileSubCommand() {
+            this.name = "get";
+            this.help = "Gets your bot profile";
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+            this.guildOnly = false;
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            // Get Bot Profile details and send
+            UserProfile profile = UserProfile.retrieveProfile(event.getUser().getId());
+            event.replyEmbeds(getProfileData(profile, "/")).setEphemeral(true).queue();
+        }
+
+        @Override
+        protected void execute(CommandEvent event) {
+            // Get Bot Profile details and send
+            UserProfile profile = UserProfile.retrieveProfile(event.getAuthor().getId());
+            event.reply(getProfileData(profile, "/"));
+        }
+    }
+
+    private static class SetProfileSubCommand extends SlashCommand {
+
+        private SetProfileSubCommand() {
+            this.name = "set";
+            this.help = "Changes information associated with your bot profile";
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+            this.guildOnly = false;
+
+            this.options = Arrays.asList(
+                new OptionData(OptionType.STRING, "key", "Which key to modify")
+                    .setRequired(true)
+                    .addChoices(
+                        new Command.Choice("Last.fm Username", "lastfm"),
+                        new Command.Choice("GitHub Username", "github")
+                    ),
+                new OptionData(OptionType.STRING, "value", "The value to set").setRequired(true)
+            );
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            // Get Bot Profile details and send
+            UserProfile profile = UserProfile.retrieveProfile(event.getUser().getId());
+
+            profile.saveData(
+                OptionHelper.optString(event, "key", ""),
+                OptionHelper.optString(event, "value", "")
+            );
+
+            event.reply("If you see this message, then it saved successfully... hopefully.").setEphemeral(true).queue();
+        }
+
+        @Override
+        protected void execute(CommandEvent event) {
+            // Get Bot Profile details and send
+            UserProfile profile = UserProfile.retrieveProfile(event.getAuthor().getId());
+
+            String[] args = event.getArgs().split(" ");
+            if (args.length < 3) {
+                event.reply("""
+                    You are missing arguments! Must have `set`, `key`, `value`. Possible keys:
+                    ```
+                    lastfm - Your last.fm username for %^lastfm
+                    github - Your GitHub username for %^ghuser
+                    ```""".replaceAll("%\\^", event.getPrefix()));
+                return;
+            }
+            List<String> supported = Arrays.asList("github", "lastfm");
+            if (supported.contains(args[1].toLowerCase())) {
+                profile.saveData(args[1].toLowerCase(), args[2]);
+                event.reply("If you see this message, then it saved successfully... hopefully.");
+            } else {
+                event.reply("Unsupported argument!");
+            }
+        }
+    }
+
+    private static class DeleteProfileSubCommand extends SlashCommand {
+
+        private DeleteProfileSubCommand() {
+            this.name = "delete";
+            this.help = "Deletes all information associated with your bot profile";
+            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+            this.guildOnly = false;
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            UserProfile profile = UserProfile.retrieveProfile(event.getUser().getId());
             profile.delete();
-            commandEvent.reply("Your profile has been deleted from the database!");
-            return;
+            event.reply("Your profile has been deleted from the database!").setEphemeral(true).queue();
         }
-        if(!commandEvent.getArgs().contains("set")) {
-            EmbedBuilder embed = new EmbedBuilder()
-                    .setTitle("Your Chewbotcca Profile")
-                    .setDescription("The profile system is a work in progress! More details will appear soon!")
-                    .setFooter("ID: " + profile.getId());
 
-            embed.addField("Lastfm Username", profile.getLastFm() == null ? "Set with `%^profile set lastfm [name]`" : profile.getLastFm(), true);
-            embed.addField("GitHub Username", profile.getGitHub() == null ? "Set with `%^profile set github [name]`" : profile.getGitHub(), true);
-
-            commandEvent.reply(embed.build());
-            return;
+        @Override
+        protected void execute(CommandEvent event) {
+            UserProfile profile = UserProfile.retrieveProfile(event.getAuthor().getId());
+            profile.delete();
+            event.reply("Your profile has been deleted from the database!");
         }
-        String[] args = commandEvent.getArgs().split(" ");
-        if(args.length < 3) {
-            commandEvent.reply("""
-                You are missing arguments! Must have `set`, `key`, `value`. Possible keys:
-                ```
-                lastfm - Your last.fm username for %^lastfm
-                github - Your GitHub username for %^ghuser
-                ```""");
-            return;
-        }
-        List<String> supported = Arrays.asList("github", "lastfm");
-        if(supported.contains(args[1].toLowerCase())) {
-            profile.saveData(args[1].toLowerCase(), args[2]);
-        }
-        commandEvent.reply("If you see this message, then it saved successfully... hopefully.");
     }
 }

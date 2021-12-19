@@ -16,10 +16,12 @@
  */
 package pw.chew.chewbotcca.commands.minecraft;
 
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.json.JSONArray;
@@ -29,23 +31,33 @@ import pw.chew.chewbotcca.util.RestClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class MCStatusCommand extends Command {
+public class MCStatusCommand extends SlashCommand {
 
     public MCStatusCommand() {
         this.name = "mcstatus";
+        this.help = "Gather Mojang/Minecraft server status";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
     }
 
     @Override
+    protected void execute(SlashCommandEvent event) {
+        event.replyEmbeds(gatherStatus()).queue();
+    }
+
+    @Override
     protected void execute(CommandEvent commandEvent) {
         commandEvent.getChannel().sendTyping().queue();
+        commandEvent.reply(gatherStatus());
+    }
+
+    private MessageEmbed gatherStatus() {
         // Get stats
         JSONArray statusurl = new JSONArray(RestClient.get("https://status.mojang.com/check"));
-        List<String> forbiddenSites = Arrays.asList("minecraft.net", "sessionserver.mojang.com", "mojang.com");
+        List<String> forbiddenSites = Collections.singletonList("sessionserver.mojang.com");
         List<CharSequence> up = new ArrayList<>();
         List<CharSequence> shakey = new ArrayList<>();
         List<CharSequence> red = new ArrayList<>();
@@ -64,12 +76,6 @@ public class MCStatusCommand extends Command {
             }
         }
 
-        if(isUp("https://www.minecraft.net/en-us/")) {
-            up.add("minecraft.net");
-        } else {
-            red.add("minecraft.net");
-        }
-
         if(isUp("https://sessionserver.mojang.com/blockedservers")) {
             up.add("sessionserver.mojang.com");
         } else {
@@ -79,7 +85,7 @@ public class MCStatusCommand extends Command {
         // Return gathered info
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Minecraft/Mojang Statuses");
-        e.setDescription("minecraft.net and sessionserver.mojang.com were manually checked, see [WEB-2303](https://bugs.mojang.com/browse/WEB-2303).");
+        e.setDescription("sessionserver.mojang.com was manually checked, see [WEB-2303](https://bugs.mojang.com/browse/WEB-2303).");
         if(!up.isEmpty()) {
             e.addField("Up", String.join("\n", up), true);
         }
@@ -90,7 +96,7 @@ public class MCStatusCommand extends Command {
             e.addField("Down", String.join("\n", red), true);
         }
 
-        commandEvent.reply(e.build());
+        return e.build();
     }
 
     public boolean isUp(String url) {

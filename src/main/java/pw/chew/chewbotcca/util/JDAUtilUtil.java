@@ -16,6 +16,7 @@
  */
 package pw.chew.chewbotcca.util;
 
+import com.jagrosh.jdautilities.menu.EmbedPaginator;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import pw.chew.chewbotcca.objects.Memory;
@@ -36,6 +37,19 @@ public class JDAUtilUtil {
                 try {
                     m.clearReactions().queue();
                 } catch(PermissionException ignored) { }
+            })
+            .setEventWaiter(Memory.getWaiter())
+            .setTimeout(1, TimeUnit.MINUTES)
+            .clearItems();
+    }
+
+    public static EmbedPaginator.Builder makeEmbedPaginator() {
+        return new EmbedPaginator.Builder()
+            .waitOnSinglePage(false)
+            .setFinalAction(m -> {
+                try {
+                    m.clearReactions().queue();
+                } catch(PermissionException | IllegalStateException ignored) { }
             })
             .setEventWaiter(Memory.getWaiter())
             .setTimeout(1, TimeUnit.MINUTES)
