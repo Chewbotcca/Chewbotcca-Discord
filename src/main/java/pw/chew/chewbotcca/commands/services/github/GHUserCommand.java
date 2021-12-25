@@ -42,7 +42,7 @@ public class GHUserCommand extends Command {
     protected void execute(CommandEvent commandEvent) {
         // Get the input
         String username = commandEvent.getArgs();
-        if (username.isBlank()) {
+        if (username.isEmpty()) {
             UserProfile profile = UserProfile.getProfile(commandEvent.getAuthor().getId());
             if (profile.getGitHub() != null) {
                 username = profile.getGitHub();
