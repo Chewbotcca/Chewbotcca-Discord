@@ -18,6 +18,7 @@ package pw.chew.chewbotcca.util;
 
 import okhttp3.FormBody;
 import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -33,8 +34,18 @@ import java.util.Map;
 
 // Off brand RestClient based on the ruby gem of the same name
 public class RestClient {
+    private static OkHttpClient client = new OkHttpClient();
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final String userAgent = "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095";
+
+    /**
+     * Sets the OkHttp client to use with this RestClient
+     *
+     * @param client the new client
+     */
+    public static void setClient(OkHttpClient client) {
+        RestClient.client = client;
+    }
 
     /**
      * Make a GET request
@@ -153,7 +164,7 @@ public class RestClient {
      * @return a response
      */
     public static String performRequest(Request request) {
-        try (Response response = Memory.getJda().getHttpClient().newCall(request).execute()) {
+        try (Response response = client.newCall(request).execute()) {
             String body;
             ResponseBody responseBody = response.body();
             if(responseBody == null) {
