@@ -47,11 +47,11 @@ import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.objects.ServerSettings;
 import pw.chew.chewbotcca.util.DatabaseHelper;
 import pw.chew.chewbotcca.util.PropertiesManager;
+import pw.chew.chewbotcca.util.RestClient;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -62,7 +62,7 @@ public class Chewbotcca {
     // Instance variables
     private static final Logger logger = LoggerFactory.getLogger(Chewbotcca.class);
 
-    public static void main(String[] args) throws LoginException, IOException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    public static void main(String[] args) throws LoginException, IOException {
         // Load properties into the PropertiesManager
         Properties prop = new Properties();
         prop.load(new FileInputStream("bot.properties"));
@@ -143,6 +143,7 @@ public class Chewbotcca {
                 new ServerJoinLeaveListener() // Listen for server count changes for stats
             ).build();
 
+        RestClient.setClient(jda.getHttpClient());
         Memory.remember(waiter, jda, new ChewAPI(), github, commandClient);
     }
 
@@ -151,7 +152,7 @@ public class Chewbotcca {
      *
      * @return an array of commands
      */
-    private static Command[] getCommands() throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+    private static Command[] getCommands() {
         Reflections reflections = new Reflections("pw.chew.chewbotcca.commands");
         Set<Class<? extends Command>> subTypes = reflections.getSubTypesOf(Command.class);
         // We have to add all SlashCommands as a fallback
@@ -167,8 +168,8 @@ public class Chewbotcca {
             try {
                 commands.add(theClass.getDeclaredConstructor().newInstance());
                 LoggerFactory.getLogger(theClass).debug("Loaded Command Successfully!");
-            } catch (InstantiationException ignored) {
-                // Tried to load a Slash-only command. Safe to ignore!
+            } catch (Throwable throwable) {
+                LoggerFactory.getLogger(theClass).error("Error loading Command!", throwable);
             }
         }
 
@@ -180,7 +181,7 @@ public class Chewbotcca {
      *
      * @return an array of commands
      */
-    private static SlashCommand[] getSlashCommands() throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    private static SlashCommand[] getSlashCommands() {
         Reflections reflections = new Reflections("pw.chew.chewbotcca.commands");
         Set<Class<? extends SlashCommand>> subTypes = reflections.getSubTypesOf(SlashCommand.class);
         List<SlashCommand> commands = new ArrayList<>();
@@ -189,7 +190,11 @@ public class Chewbotcca {
             // Don't load SubCommands
             if (theClass.getName().contains("SubCommand"))
                 continue;
-            commands.add(theClass.getDeclaredConstructor().newInstance());
+            try {
+                commands.add(theClass.getDeclaredConstructor().newInstance());
+            } catch (Throwable throwable) {
+                LoggerFactory.getLogger(theClass).error("Failed to load SlashCommand!", throwable);
+            }
             LoggerFactory.getLogger(theClass).debug("Loaded SlashCommand Successfully!");
         }
 
