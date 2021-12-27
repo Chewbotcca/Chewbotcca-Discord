@@ -36,6 +36,7 @@ import org.json.JSONObject;
 import pw.chew.chewbotcca.objects.services.DBioUser;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.RestClient;
+import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -56,15 +57,15 @@ public class UserInfoCommand extends SlashCommand {
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
         this.options = Collections.singletonList(
-            new OptionData(OptionType.USER, "user", "The user to lookup").setRequired(true)
+            new OptionData(OptionType.USER, "user", "The user to lookup")
         );
     }
 
     @Override
     protected void execute(SlashCommandEvent event) {
         // Attempt to gather Member
-        User user = Objects.requireNonNull(event.getOption("user")).getAsUser();
-        Member member = Objects.requireNonNull(event.getOption("user")).getAsMember();
+        User user = OptionHelper.optUser(event, "user", event.getUser());
+        Member member = OptionHelper.optMember(event, "user", event.getMember());
 
         // Generate and respond
         event.replyEmbeds(gatherMainInfo(member == null ? null : member.getGuild(), user, event.getUser()).build()).queue();

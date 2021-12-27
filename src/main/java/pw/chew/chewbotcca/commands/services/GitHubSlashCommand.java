@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package pw.chew.chewbotcca.commands.services;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
@@ -157,7 +156,7 @@ public class GitHubSlashCommand extends SlashCommand {
             this.name = "user";
             this.help = "Gathers a user from GitHub";
             this.options = Collections.singletonList(
-                new OptionData(OptionType.STRING, "username", "The user to look up (default: yours if set)").setRequired(true)
+                new OptionData(OptionType.STRING, "username", "The user to look up (default: yours if set)")
             );
         }
 
