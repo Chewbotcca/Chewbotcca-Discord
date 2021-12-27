@@ -83,7 +83,7 @@ public class MiscUtil {
             String first = word.substring(0, 1).toUpperCase();
             newword.append(first).append(rest).append(" ");
         }
-        return newword.toString();
+        return newword.toString().trim();
     }
 
     /**
