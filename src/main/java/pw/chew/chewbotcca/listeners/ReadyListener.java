@@ -17,41 +17,15 @@
 
 package pw.chew.chewbotcca.listeners;
 
-import com.jagrosh.jdautilities.command.CommandClient;
-import com.jagrosh.jdautilities.command.SlashCommand;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
-import pw.chew.chewbotcca.objects.Memory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ReadyListener extends ListenerAdapter {
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        // Get all commands
-        List<CommandData> data = new ArrayList<>();
-        CommandClient client = Memory.getClient();
-
-        for (SlashCommand command : client.getSlashCommands()) {
-            data.add(command.buildCommandData());
-        }
-
-        if (client.isManualUpsert()) {
-            if (client.forcedGuildId() != null) {
-                Guild server = event.getJDA().getGuildById(client.forcedGuildId());
-                if (server == null) {
-                    LoggerFactory.getLogger(this.getClass()).error("Server used for slash command testing is null!");
-                    return;
-                }
-                server.updateCommands().addCommands(data).queue(commands -> LoggerFactory.getLogger(this.getClass()).debug("Updated slash commands!"));
-            } else {
-                event.getJDA().updateCommands().addCommands(data).queue(commands -> LoggerFactory.getLogger(this.getClass()).debug("Updated slash commands!"));
-            }
-        }
+        // Not currently in use
+        LoggerFactory.getLogger(ReadyListener.class).info("Ready!");
     }
 }

@@ -118,7 +118,6 @@ public class Chewbotcca {
 
         // Temporary measure to test Slash Commands
         client.forceGuildOnly(PropertiesManager.forceGuildId());
-        client.setManualUpsert(true);
 
         // Listen for commands, errors, and more
         client.setListener(new BotCommandListener());
