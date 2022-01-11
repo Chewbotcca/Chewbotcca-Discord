@@ -208,7 +208,7 @@ public class UserInfoCommand extends SlashCommand {
         // Get pronoun if they have it
         JSONObject pronounData = new JSONObject(RestClient.get("https://pronoundb.org/api/v1/lookup?platform=discord&id=" + user.getId()));
         String pronouns = null;
-        if (pronounData.has("pronouns")) {
+        if (pronounData.has("pronouns") && !pronounData.getString("pronouns").equals("unspecified")) {
             pronouns = Pronoun.valueOf(pronounData.getString("pronouns")).detailed;
         }
 
