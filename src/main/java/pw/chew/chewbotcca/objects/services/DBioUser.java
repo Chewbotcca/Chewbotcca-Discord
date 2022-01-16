@@ -17,6 +17,7 @@
 package pw.chew.chewbotcca.objects.services;
 
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
@@ -41,8 +42,13 @@ public class DBioUser {
      * @return A user
      */
     public static DBioUser getUser(String id) {
-        JSONObject response = new JSONObject(RestClient.get("https://api.discord.bio/user/details/" + id));
-        return response.has("message") ? null : new DBioUser(response);
+        try {
+            JSONObject response = new JSONObject(RestClient.get("https://api.discord.bio/user/details/" + id));
+            return response.has("message") ? null : new DBioUser(response);
+        } catch (JSONException e) {
+            // Could not parse JSON
+            return null;
+        }
     }
 
     /**
