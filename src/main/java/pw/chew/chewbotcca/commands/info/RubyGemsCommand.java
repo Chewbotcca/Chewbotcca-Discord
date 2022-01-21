@@ -106,7 +106,7 @@ public class RubyGemsCommand extends SlashCommand {
             "Total: " + NumberFormat.getNumberInstance(Locale.US).format(data.getInt("downloads")), true);
 
         // Add licenses
-        if (!data.isNull("licenses")) {
+        if (!data.isNull("licenses") && !data.getJSONArray("licenses").isEmpty()) {
             e.addField("License", data.getJSONArray("licenses").getString(0), true);
         }
 
