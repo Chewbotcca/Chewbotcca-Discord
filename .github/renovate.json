@@ -6,6 +6,10 @@
     {
       "matchDatasources": ["maven"],
       "groupName": "Maven"
+    },
+    {
+      "matchDatasources": ["github-actions"],
+      "groupName": "GitHub Actions"
     }
   ]
 }
