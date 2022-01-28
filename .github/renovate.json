@@ -9,7 +9,7 @@
       "groupName": "Maven"
     },
     {
-      "matchDatasources": ["github-actions"],
+      "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions"
     }
   ]
