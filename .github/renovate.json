@@ -2,7 +2,7 @@
   "extends": [
     "config:base"
   ],
-  "ignoreDeps": ["pro.chew.api:ChewAPI"]
+  "ignoreDeps": ["pro.chew.api:ChewAPI"],
   "packageRules": [
     {
       "matchDatasources": ["maven"],
