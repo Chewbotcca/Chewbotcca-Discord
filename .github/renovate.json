@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "ignoreDeps": ["pro.chew.api:ChewAPI"],
+  "packageRules": [
+    {
+      "matchDatasources": ["maven"],
+      "groupName": "Maven"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions"
+    }
+  ]
+}
