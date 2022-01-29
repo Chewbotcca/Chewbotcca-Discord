@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,10 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.TimeFormat;
+import net.dv8tion.jda.internal.utils.Checks;
+import org.knowm.xchart.BitmapEncoder;
+import org.knowm.xchart.QuickChart;
+import org.knowm.xchart.XYChart;
 import pw.chew.chewbotcca.objects.IKnowWhatIAmDoingISwearException;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
@@ -40,11 +44,20 @@ import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.jdachewtils.command.OptionHelper;
 
+import javax.imageio.ImageIO;
+import java.awt.Color;
+import java.awt.Font;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,7 +85,8 @@ public class ServerInfoCommand extends SlashCommand {
             new ServerMemberByJoinSubCommand(),
             new ServerRolesInfoSubCommand(),
             new ServerMemberMilestoneSubCommand(),
-            new ServerMemberStatsSubCommand()
+            new ServerMemberStatsSubCommand(),
+            new ServerJoinGraphSubCommand()
         };
     }
 
@@ -180,6 +194,7 @@ public class ServerInfoCommand extends SlashCommand {
             Channels - `%^sinfo channels`
             Member Milestones - `%^sinfo milestones`
             Member Stats - `%^sinfo memberstats`
+            Join Graph - `%^sinfo joingraph`
             """.replaceAll("%\\^sinfo", prefix), false);
 
         e.setFooter("Server ID: " + server.getId());
@@ -790,6 +805,83 @@ public class ServerInfoCommand extends SlashCommand {
             embed.addField("Largest Slump", "Days: " + slumpDays + "\nRange: " + startSlump + " - " + startSlump.atStartOfDay().plusDays(slumpDays).toLocalDate().toString(), true);
 
             return embed;
+        }
+    }
+
+    public static class ServerJoinGraphSubCommand extends SlashCommand {
+        public ServerJoinGraphSubCommand() {
+            this.name = "joingraph";
+            this.help = "Shows a graph of the server's member count over time.";
+            this.botPermissions = new Permission[]{Permission.MESSAGE_ATTACH_FILES};
+            this.cooldown = 60;
+            this.cooldownScope = CooldownScope.CHANNEL;
+            this.guildOnly = true;
+        }
+
+        @Override
+        protected void execute(CommandEvent event) {
+            event.getChannel().sendMessage("Here's your graph!").addFile(buildChart(event.getGuild()), "chart.png").queue();
+        }
+
+        @Override
+        protected void execute(SlashCommandEvent event) {
+            Checks.notNull(event.getGuild(), "Guild"); // This won't be null, but it's here for the compiler
+            event.reply("Here's your graph!").addFile(buildChart(event.getGuild()), "chart.png").queue();
+        }
+
+        private InputStream buildChart(Guild server) {
+            // Gather a hash map of date to uwu count
+            Map<String, Integer> membersOnDay = new TreeMap<>();
+
+            for (Member member : server.getMemberCache().asList()) {
+                String date = member.getTimeJoined().toLocalDate().toString();
+                // Get the amount of days since 09/05/2020
+                if (membersOnDay.containsKey(date)) {
+                    membersOnDay.put(date, membersOnDay.get(date) + 1);
+                } else {
+                    membersOnDay.put(date, 1);
+                }
+            }
+
+            // Iterate over each entry in the membersOnDay map, and use the cumulative sum to get the total members on that day
+            int total = 0;
+            for (String date : membersOnDay.keySet()) {
+                total += membersOnDay.get(date);
+                membersOnDay.put(date, total);
+            }
+
+            LocalDate start = server.getTimeCreated().toLocalDate();
+
+            double[] x = membersOnDay.keySet().stream()
+                .map(value -> LocalDate.parse(value).until(start, ChronoUnit.DAYS) * -1)
+                .mapToDouble(value -> value)
+                .toArray();
+            double[] y = membersOnDay.values().stream().mapToDouble(value -> value).toArray();
+
+            // Build a line graph using XChart
+            XYChart chart = QuickChart.getChart("Members Join Graph", "Month-Year", "Members", "unused", x, y);
+            chart.getStyler().setChartBackgroundColor(new Color(0x36393f));
+            chart.getStyler().setYAxisTickLabelsColor(Color.WHITE);
+            chart.getStyler().setXAxisTickLabelsColor(Color.WHITE);
+            chart.getStyler().setChartFontColor(Color.WHITE);
+            chart.getStyler().setPlotBackgroundColor(new Color(0x2f3136));
+            chart.getStyler().setSeriesColors(new Color[]{new Color(0x5865F2)});
+            chart.getStyler().setLegendVisible(false);
+            chart.getStyler().setPlotGridLinesColor(new Color(0x8e9297));
+            chart.getStyler().setChartTitleFont(new Font("Whitney", Font.BOLD, 20));
+            chart.getStyler().setBaseFont(new Font("Whitney", Font.PLAIN, 14));
+            chart.getStyler().setxAxisTickLabelsFormattingFunction(val -> start.plusDays(val.intValue()).format(DateTimeFormatter.ofPattern("LLL yyyy")));
+            chart.getStyler().setXAxisLabelRotation(20);
+            chart.getStyler().setXAxisMaxLabelCount(6);
+
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            try {
+                ImageIO.write(BitmapEncoder.getBufferedImage(chart), "png", os);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return new ByteArrayInputStream(os.toByteArray());
         }
     }
 }
