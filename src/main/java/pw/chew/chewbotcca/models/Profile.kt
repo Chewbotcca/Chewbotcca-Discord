@@ -1,5 +1,6 @@
 package pw.chew.chewbotcca.models
 
+import pw.chew.chewbotcca.util.MiscUtil
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -22,7 +23,8 @@ open class Profile {
     open var github: String? = null
 
     fun setString(info: String, newValue: String) {
+        val name = MiscUtil.capitalize(info).replace(" ", "")
         // Dynamically call the method based on the info
-        this.javaClass.getMethod("set${info.capitalize()}", String::class.java).invoke(this, newValue)
+        this.javaClass.getMethod("set${name}", String::class.java).invoke(this, newValue)
     }
 }
