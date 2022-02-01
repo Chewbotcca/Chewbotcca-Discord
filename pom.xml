@@ -128,9 +128,9 @@
 
         <!-- ActiveRecord, almost -->
         <dependency>
-            <groupId>org.javalite</groupId>
-            <artifactId>activejdbc</artifactId>
-            <version>3.0-j11</version>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>5.6.5.Final</version>
         </dependency>
 
         <!-- mysql2 but 8 -->

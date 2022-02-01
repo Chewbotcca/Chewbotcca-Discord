@@ -50,12 +50,16 @@ public class UserProfile {
      * @return a Profile
      */
     public static UserProfile retrieveProfile(String id) {
-        DatabaseHelper.openConnectionIfClosed();
-        Profile user = Profile.findOrCreateIt("userid", id);
-        if (!user.exists()) {
-            user.insert();
+        var session = DatabaseHelper.getSessionFactory().openSession();
+        Profile user = session.find(Profile.class, id);
+        if (user == null) {
+            session.beginTransaction();
+            user = new Profile();
+            user.setId(id);
+            session.save(user);
+            session.getTransaction().commit();
         }
-        DatabaseHelper.closeConnectionIfOpen();
+        session.close();
         UserProfile profile = new UserProfile(user);
         cache.put(id, profile);
         LoggerFactory.getLogger(UserProfile.class).debug("Saving " + id + " to Profile cache");
@@ -63,9 +67,12 @@ public class UserProfile {
     }
 
     public void saveData(String key, String value) {
-        DatabaseHelper.openConnectionIfClosed();
-        data.setString(key, value).saveIt();
-        DatabaseHelper.closeConnectionIfOpen();
+        var session = DatabaseHelper.getSessionFactory().openSession();
+        session.beginTransaction();
+        data.setString(key, value);
+        session.update(data);
+        session.getTransaction().commit();
+        session.close();
         cache.put(getId(), new UserProfile(data));
         LoggerFactory.getLogger(UserProfile.class).debug("Setting " + key + " to " + value + " for " + getId());
     }
@@ -74,7 +81,7 @@ public class UserProfile {
      * @return their ID
      */
     public String getId() {
-        return String.valueOf(data.getLong("userid"));
+        return data.getId();
     }
 
     /**
@@ -82,9 +89,7 @@ public class UserProfile {
      * @return their last.fm username
      */
     public String getLastFm() {
-        if(data.get("lastfm") == null)
-            return null;
-        return data.getString("lastfm");
+        return data.getLastfm();
     }
 
     /**
@@ -92,15 +97,16 @@ public class UserProfile {
      * @return their GitHub username
      */
     public String getGitHub() {
-        if(data.get("github") == null)
-            return null;
-        return data.getString("github");
+        return data.getGithub();
     }
 
     public void delete() {
-        DatabaseHelper.openConnectionIfClosed();
         String id = getId();
-        data.delete();
+        var session = DatabaseHelper.getSessionFactory().openSession();
+        session.beginTransaction();
+        session.delete(data);
+        session.getTransaction().commit();
+        session.close();
         cache.remove(id);
         LoggerFactory.getLogger(UserProfile.class).debug("Removing from profile cache for " + id);
     }

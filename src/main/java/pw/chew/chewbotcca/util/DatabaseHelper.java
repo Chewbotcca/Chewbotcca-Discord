@@ -16,22 +16,38 @@
  */
 package pw.chew.chewbotcca.util;
 
-import org.javalite.activejdbc.Base;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import pw.chew.chewbotcca.models.Profile;
+import pw.chew.chewbotcca.models.Server;
+
+import java.io.File;
 
 public class DatabaseHelper {
+    private static SessionFactory sessionFactory;
+
     public static void openConnection() {
-        Base.open("com.mysql.cj.jdbc.Driver", PropertiesManager.getDatabaseHost(), PropertiesManager.getDatabaseUsername(), PropertiesManager.getDatabasePassword());
-    }
-
-    public static void openConnectionIfClosed() {
-        if (!Base.hasConnection()) {
-            openConnection();
+        // A SessionFactory is set up once for an application!
+        final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
+            .loadProperties(new File("bot.properties"))
+            .build();
+        try {
+            sessionFactory = new MetadataSources(registry)
+                .addAnnotatedClass(Profile.class)
+                .addAnnotatedClass(Server.class)
+                .buildMetadata()
+                .buildSessionFactory();
+        } catch (Exception e) {
+            // The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
+            // so destroy it manually.
+            e.printStackTrace();
+            StandardServiceRegistryBuilder.destroy(registry);
         }
     }
 
-    public static void closeConnectionIfOpen() {
-        if (Base.hasConnection()) {
-            Base.close();
-        }
+    public static SessionFactory getSessionFactory() {
+        return sessionFactory;
     }
 }

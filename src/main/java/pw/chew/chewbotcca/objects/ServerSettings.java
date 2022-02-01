@@ -56,26 +56,34 @@ public class ServerSettings {
 
     /**
      * Retrieve server info
-     * @param id the server id
+     * @param stringId the server id
      * @return a server settings
      */
-    public static ServerSettings retrieveServer(String id) {
-        DatabaseHelper.openConnectionIfClosed();
-        Server server = Server.findOrCreateIt("serverid", id);
-        if (!server.exists()) {
-            server.insert();
+    public static ServerSettings retrieveServer(String stringId) {
+        long id = Long.parseLong(stringId);
+        var session = DatabaseHelper.getSessionFactory().openSession();
+        Server server = session.find(Server.class, id);
+        if (server == null) {
+            session.beginTransaction();
+            server = new Server();
+            server.setId(id);
+            session.save(server);
+            session.getTransaction().commit();
         }
-        DatabaseHelper.closeConnectionIfOpen();
+        session.close();
         ServerSettings settings = new ServerSettings(server);
-        cache.put(id, settings);
+        cache.put(stringId, settings);
         LoggerFactory.getLogger(ServerSettings.class).debug("Saving " + id + " to Server cache");
         return settings;
     }
 
     public void saveData(String key, String value) {
-        DatabaseHelper.openConnectionIfClosed();
-        data.setString(key, value).saveIt();
-        DatabaseHelper.closeConnectionIfOpen();
+        var session = DatabaseHelper.getSessionFactory().openSession();
+        session.beginTransaction();
+        data.setString(key, value);
+        session.update(data);
+        session.getTransaction().commit();
+        session.close();
         cache.put(getId(), new ServerSettings(data));
         LoggerFactory.getLogger(ServerSettings.class).debug("Setting " + key + " to " + value + " for " + getId());
     }
@@ -84,13 +92,13 @@ public class ServerSettings {
      * @return the server's ID
      */
     public String getId() {
-        return String.valueOf(data.getLong("serverid"));
+        return data.getId().toString();
     }
 
     /**
      * @return the server's prefix, if there is one
      */
     public String getPrefix() {
-        return data.get("prefix") == null ? null : data.getString("prefix");
+        return data.getPrefix();
     }
 }
