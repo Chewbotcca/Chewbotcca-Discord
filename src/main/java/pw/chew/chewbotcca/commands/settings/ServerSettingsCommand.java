@@ -139,7 +139,7 @@ public class ServerSettingsCommand extends SlashCommand {
         protected void execute(CommandEvent event) {
             ServerSettings server = ServerSettings.retrieveServer(event.getGuild().getId());
             String[] args = event.getArgs().split(" ");
-            if (args.length < 3) {
+            if (args.length < 2) {
                 event.reply("""
                     You are missing arguments! Must have `set`, `key`, `value`. Possible keys:
                     ```
@@ -148,8 +148,8 @@ public class ServerSettingsCommand extends SlashCommand {
                 return;
             }
             List<String> supported = Arrays.asList("prefix");
-            if (supported.contains(args[1].toLowerCase())) {
-                server.saveData(args[1].toLowerCase(), args[2]);
+            if (supported.contains(args[0].toLowerCase())) {
+                server.saveData(args[0].toLowerCase(), args[1]);
                 event.reply("If you see this message, then it saved successfully... hopefully.");
             } else {
                 event.reply("Invalid argument!");
