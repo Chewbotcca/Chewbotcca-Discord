@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@ package pw.chew.chewbotcca.commands.fun;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -29,7 +29,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import pw.chew.chewbotcca.util.RestClient;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.text.DateFormatSymbols;
 import java.time.OffsetDateTime;
@@ -60,9 +59,9 @@ public class APODCommand extends SlashCommand {
         try {
             // Check for no input
             OffsetDateTime today = OffsetDateTime.now();
-            String month = OptionHelper.optString(event, "month", String.valueOf(today.getMonthValue()));
-            String day = OptionHelper.optString(event, "day", String.valueOf(today.getDayOfMonth()));
-            String year = OptionHelper.optString(event, "year", String.valueOf(today.getYear()));
+            String month = event.optString("month", String.valueOf(today.getMonthValue()));
+            String day = event.optString("day", String.valueOf(today.getDayOfMonth()));
+            String year = event.optString("year", String.valueOf(today.getYear()));
             String date = month + "/" + day + "/" + year;
 
             event.replyEmbeds(gatherPicture(date)).queue();

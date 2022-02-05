@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,22 +18,21 @@ package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.AudioChannel;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.entities.Webhook;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,8 +61,8 @@ public class ChannelInfoCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        GuildChannel channel = OptionHelper.optGuildChannel(event, "channel", event.getGuildChannel());
-        event.replyEmbeds(switch (OptionHelper.optString(event, "type", "general")) {
+        GuildChannel channel = event.optGuildChannel("channel", event.getGuildChannel());
+        event.replyEmbeds(switch (event.optString("type", "general")) {
             case "pins" -> getPinsInfo((TextChannel) channel, event.getJDA()).build();
             default -> gatherMainInfo(channel, null).build();
         }).queue();
@@ -132,14 +131,10 @@ public class ChannelInfoCommand extends SlashCommand {
 
         e.addField("ID", channel.getId(), true);
 
-        // Users in channel if it's a text or voice.
-        // If it's text, it's users who can see the channel.
-        // If it's voice, it's users actually in the channel.
-        if (channel.getType() == ChannelType.TEXT || channel.getType() == ChannelType.VOICE)
-            e.addField("Users in Channel", String.valueOf(channel.getMembers().size()), true);
-
-        if (channel.getType() == ChannelType.VOICE) {
-            VoiceChannel vc = ((VoiceChannel) channel);
+        // Users in channel if it's an audio channel.
+        if (channel.getType().isAudio()) {
+            AudioChannel vc = ((AudioChannel) channel);
+            e.addField("Users in Channel", String.valueOf(vc.getMembers().size()), true);
             e.addField("Voice Region", vc.getRegion().getEmoji() + " " + vc.getRegion().getName(), true);
         }
 
@@ -156,7 +151,7 @@ public class ChannelInfoCommand extends SlashCommand {
                 e.addField("Pins", textChannel.retrievePinnedMessages().complete().size() + " / 50", true);
             }
             List<String> info = new ArrayList<>();
-            if (textChannel.isNews())
+            if (channel.getType() == ChannelType.NEWS)
                 info.add("<:news:725504846937063595> News");
             if (textChannel.isNSFW())
                 info.add("<:channel_nsfw:585783907660857354> NSFW");

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,16 +18,16 @@ package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
-import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
 import net.dv8tion.jda.internal.utils.Checks;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,7 +35,6 @@ import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,10 +57,10 @@ public class InfoCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         try {
-            event.replyEmbeds(gatherData(OptionHelper.optString(event, "command", ""))).queue();
+            event.replyEmbeds(gatherData(event.optString("command", ""))).queue();
         } catch (IllegalArgumentException e) {
             if (e.getMessage().contains("Did you mean? ")) {
-                SelectionMenu menu = buildSuggestionMenu(e.getMessage());
+                SelectMenu menu = buildSuggestionMenu(e.getMessage());
 
                 event.reply("Invalid command! See <https://chew.pw/chewbotcca/discord/commands> for a list of commands.")
                     .addActionRow(menu)
@@ -85,7 +84,7 @@ public class InfoCommand extends SlashCommand {
             event.reply(gatherData(command));
         } catch (IllegalArgumentException e) {
             if (e.getMessage().contains("Did you mean? ")) {
-                SelectionMenu menu = buildSuggestionMenu(e.getMessage());
+                SelectMenu menu = buildSuggestionMenu(e.getMessage());
 
                 event.getChannel().sendMessage("Invalid command! See <https://chew.pw/chewbotcca/discord/commands> for a list of commands.")
                     .setActionRow(menu)
@@ -103,7 +102,7 @@ public class InfoCommand extends SlashCommand {
      *
      * @param event the selection menu event
      */
-    public static void updateInfo(SelectionMenuEvent event) {
+    public static void updateInfo(SelectMenuInteractionEvent event) {
         // Selected options is only null if ephemeral, which it never will be
         Checks.notNull(event.getSelectedOptions(), "Selected options");
         String selected = event.getSelectedOptions().get(0).getValue();
@@ -124,14 +123,14 @@ public class InfoCommand extends SlashCommand {
      * @param message the original message
      * @return a selection menu
      */
-    private SelectionMenu buildSuggestionMenu(String message) {
+    private SelectMenu buildSuggestionMenu(String message) {
         String[] options = message.split("Did you mean\\? ")[1].split(", ");
         List<SelectOption> data = new ArrayList<>();
         for (String option : options) {
             data.add(SelectOption.of(option, option));
         }
         data.add(SelectOption.of("None of these", "NONE").withDescription("Can't find the command? Select to cancel."));
-        return SelectionMenu.create("info:didyoumean")
+        return SelectMenu.create("info:didyoumean")
             .setPlaceholder("Did you mean?")
             .addOptions(data)
             .build();

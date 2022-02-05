@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,14 @@ package pw.chew.chewbotcca.commands.settings;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.objects.UserProfile;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Arrays;
 import java.util.List;
@@ -121,8 +120,8 @@ public class ProfileCommand extends SlashCommand {
             UserProfile profile = UserProfile.retrieveProfile(event.getUser().getId());
 
             profile.saveData(
-                OptionHelper.optString(event, "key", ""),
-                OptionHelper.optString(event, "value", "")
+                event.optString("key", ""),
+                event.optString("value", "")
             );
 
             event.reply("If you see this message, then it saved successfully... hopefully.").setEphemeral(true).queue();

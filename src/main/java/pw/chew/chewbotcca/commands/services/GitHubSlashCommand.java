@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
 package pw.chew.chewbotcca.commands.services;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import me.memerator.api.errors.NotFound;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.kohsuke.github.GHDirection;
@@ -28,7 +28,6 @@ import org.kohsuke.github.GHUser;
 import org.kohsuke.github.PagedIterator;
 import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.objects.UserProfile;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -74,8 +73,8 @@ public class GitHubSlashCommand extends SlashCommand {
         protected void execute(SlashCommandEvent event) {
             GHIssue issue;
 
-            String repo = OptionHelper.optString(event, "repo", "");
-            String term = OptionHelper.optString(event, "issue", "");
+            String repo = event.optString("repo", "");
+            String term = event.optString("issue", "");
             try {
                 issue = parseMessage(repo, term);
             } catch (IOException e) {
@@ -133,7 +132,7 @@ public class GitHubSlashCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             // Get the repo
-            String repoName = OptionHelper.optString(event, "repo", "");
+            String repoName = event.optString("repo", "");
             if (!repoName.contains("/")) {
                 event.reply("Make sure your input contains a UserOrOrg/RepositoryName (e.g. Chewbotcca/Discord).").setEphemeral(true).queue();
                 return;
@@ -163,7 +162,7 @@ public class GitHubSlashCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             // Get the input
-            String username = OptionHelper.optString(event, "username", "");
+            String username = event.optString("username", "");
             if (username.isBlank()) {
                 UserProfile profile = UserProfile.getProfile(event.getUser().getId());
                 if (profile.getGitHub() != null) {

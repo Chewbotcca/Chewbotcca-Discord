@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,11 @@ package pw.chew.chewbotcca.commands.fun;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -46,7 +45,7 @@ public class QRCodeCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         // Get the query string
-        String code = OptionHelper.optString(event, "data", "");
+        String code = event.optString("data", "");
         event.replyEmbeds(new EmbedBuilder()
             // Encode the input and return an image from google chart apis
             .setImage("https://chart.apis.google.com/chart?chl=" + URLEncoder.encode(code, StandardCharsets.UTF_8) + "&chld=H|0&chs=500x500&cht=qr")

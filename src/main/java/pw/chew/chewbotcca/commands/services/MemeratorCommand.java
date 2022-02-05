@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,9 @@
 package pw.chew.chewbotcca.commands.services;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.CooldownScope;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import me.memerator.api.MemeratorAPI;
 import me.memerator.api.entity.Age;
 import me.memerator.api.entity.UserPerk;
@@ -30,12 +32,10 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.ResponseHelper;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,7 +86,7 @@ public class MemeratorCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             try {
-                event.replyEmbeds(buildMemeEmbed(OptionHelper.optString(event, "meme", ""), event.getChannel())).queue();
+                event.replyEmbeds(buildMemeEmbed(event.optString("meme", ""), event.getChannel())).queue();
             } catch (IllegalArgumentException e) {
                 event.replyEmbeds(ResponseHelper.generateFailureEmbed("The meme machine ran dry...", e.getMessage()))
                     .setEphemeral(true)
@@ -191,7 +191,7 @@ public class MemeratorCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             try {
-                User user = api.getUser(OptionHelper.optString(event, "user", ""));
+                User user = api.getUser(event.optString("user", ""));
                 event.replyEmbeds(generateUserEmbed(user).build()).queue();
             } catch (NotFound notFound) {
                 event.reply("User not found!").setEphemeral(true).queue();

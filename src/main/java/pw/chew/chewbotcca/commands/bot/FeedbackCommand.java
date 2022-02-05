@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,17 +17,17 @@
 package pw.chew.chewbotcca.commands.bot;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.CooldownScope;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.ResponseHelper;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.awt.Color;
 import java.time.Instant;
@@ -50,7 +50,7 @@ public class FeedbackCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         try {
-            var feedback = OptionHelper.optString(event, "feedback", "");
+            var feedback = event.optString("feedback", "");
             TextChannel feedbackChannel = retrieveFeedbackChannel(event.getJDA());
             feedbackChannel.sendMessageEmbeds(generateFeedbackEmbed(feedback, event.getUser())).queue(
                 message -> event.reply("I have successfully sent the feedback! Feel free to see it on the help server with `/invite`")

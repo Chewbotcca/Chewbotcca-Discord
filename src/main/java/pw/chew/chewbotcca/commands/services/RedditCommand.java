@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,17 +18,16 @@ package pw.chew.chewbotcca.commands.services;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -51,7 +50,7 @@ public class RedditCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         int num = (int) event.getOptionsByName("number").get(0).getAsLong();
-        String subreddit = OptionHelper.optString(event, "subreddit", "");
+        String subreddit = event.optString("subreddit", "");
         boolean nsfwAllowed = event.getChannelType() == ChannelType.TEXT && !event.getTextChannel().isNSFW();
 
         try {

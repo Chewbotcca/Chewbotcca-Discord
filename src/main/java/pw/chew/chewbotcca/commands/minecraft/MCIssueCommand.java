@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,14 @@ package pw.chew.chewbotcca.commands.minecraft;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -60,7 +59,7 @@ public class MCIssueCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        String args = OptionHelper.optString(event, "issue", "");
+        String args = event.optString("issue", "");
 
         if (args.length() < 4) {
             event.reply("Please specify a project AND issue, for example, 'WEB-2303'").setEphemeral(true).queue();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,14 @@
  */
 package pw.chew.chewbotcca.listeners;
 
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import pw.chew.chewbotcca.objects.ServerSettings;
 
 public class MessageHandler extends ListenerAdapter {
     @Override
-    public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+    public void onMessageReceived(MessageReceivedEvent event) {
+        if (!event.isFromGuild()) return;
         if (event.getChannel().getId().equals("745164378659225651") && event.getAuthor().getDiscriminator().equals("0000") && event.getMessage().getEmbeds().size() > 0) {
             String title = event.getMessage().getEmbeds().get(0).getTitle();
             if (title != null && title.contains("[Discord] Compile success on main")) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@ package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -30,7 +30,6 @@ import pw.chew.chewbotcca.objects.Bot;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.awt.Color;
 import java.time.OffsetDateTime;
@@ -58,11 +57,11 @@ public class BotInfoCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        String botId = OptionHelper.optString(event, "bot", "");
+        String botId = event.optString("bot", "");
 
         // Get it from the specified list if it's valid, and let them know
         try {
-            switch (OptionHelper.optString(event, "list", "dbots")) {
+            switch (event.optString("list", "dbots")) {
                 case "topgg" -> event.replyEmbeds(gatherTopggInfo(botId, event.getJDA()).build()).queue();
                 case "del" -> event.replyEmbeds(gatherDELInfo(botId, event.getJDA()).build()).queue();
                 default -> event.replyEmbeds(gatherDBotsInfo(botId, event.getJDA()).build()).queue();

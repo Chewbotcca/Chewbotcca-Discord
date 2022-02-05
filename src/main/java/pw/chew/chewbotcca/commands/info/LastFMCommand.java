@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@ package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONObject;
@@ -29,7 +29,6 @@ import pw.chew.chewbotcca.objects.UserProfile;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.awt.Color;
 import java.util.Collections;
@@ -50,7 +49,7 @@ public class LastFMCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         // Get args, assume it's a username, and find their stats
-        String args = OptionHelper.optString(event, "username", "");
+        String args = event.optString("username", "");
         if (args.isBlank()) {
             UserProfile profile = UserProfile.getProfile(event.getUser().getId());
             if (profile.getLastFm() != null) {

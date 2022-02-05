@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,14 @@ package pw.chew.chewbotcca.commands.moderation;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.MissingAccessException;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Collections;
 
@@ -47,7 +46,7 @@ public class UnsuppressCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        String args = OptionHelper.optString(event, "message_link", "");
+        String args = event.optString("message_link", "");
         Message message;
         try {
             message = retrieveMessageFromLink(args.split("/"), event.getJDA(), null);

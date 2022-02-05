@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ package pw.chew.chewbotcca.commands.util;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -27,13 +28,11 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.MissingAccessException;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.Mention;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Collections;
 
@@ -53,7 +52,7 @@ public class QuoteCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         Message message;
-        String[] link = OptionHelper.optString(event, "message_link", "").split("/");
+        String[] link = event.optString("message_link", "").split("/");
         try {
             message = retrieveMessageFromLink(link, event.getJDA(), event.getChannelType() == ChannelType.TEXT ? event.getTextChannel() : null);
         } catch (IllegalArgumentException e) {
@@ -111,7 +110,7 @@ public class QuoteCommand extends SlashCommand {
             if (!thisChannel && !thisGuild) {
                 embed.addField("Channel", message.getChannel().getName(), true);
             } else if (!thisChannel) {
-                embed.addField("Channel", ((TextChannel) message.getChannel()).getAsMention(), true);
+                embed.addField("Channel", message.getChannel().getAsMention(), true);
             }
             try {
                 Member member = message.getGuild().retrieveMember(message.getAuthor()).complete();

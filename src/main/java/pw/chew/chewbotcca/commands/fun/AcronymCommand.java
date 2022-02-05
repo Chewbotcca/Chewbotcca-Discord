@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,10 @@ package pw.chew.chewbotcca.commands.fun;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.objects.Memory;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Collections;
 
@@ -42,7 +41,7 @@ public class AcronymCommand extends SlashCommand {
     protected void execute(SlashCommandEvent event) {
         // Get acronym and send if the acronym is valid
         try {
-            String acronym = OptionHelper.optString(event, "acronym", "");
+            String acronym = event.optString("acronym", "");
             String phrase = Memory.getChewAPI().generateAcronym(acronym);
             event.reply("Acronym for " + acronym + " is " + phrase).queue();
         } catch (IllegalArgumentException e) {

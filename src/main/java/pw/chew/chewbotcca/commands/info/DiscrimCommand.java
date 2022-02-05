@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,18 +18,17 @@ package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.cache.SnowflakeCacheView;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.MiscUtil;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -115,7 +114,7 @@ public class DiscrimCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            String discrim = OptionHelper.optString(event, "discriminator", event.getUser().getDiscriminator());
+            String discrim = event.optString("discriminator", event.getUser().getDiscriminator());
             if (!(discrim.length() == 4 && discrim.matches("[0-9]{4}"))) {
                 event.reply("Invalid discriminator provided!").setEphemeral(true).queue();
                 return;

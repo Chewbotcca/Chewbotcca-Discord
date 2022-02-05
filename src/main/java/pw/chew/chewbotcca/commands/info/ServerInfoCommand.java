@@ -17,7 +17,9 @@
 package pw.chew.chewbotcca.commands.info;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.CooldownScope;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -29,7 +31,6 @@ import net.dv8tion.jda.api.entities.StageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.TimeFormat;
@@ -42,7 +43,6 @@ import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.ResponseHelper;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -132,14 +132,7 @@ public class ServerInfoCommand extends SlashCommand {
 
         // Channel counts
         int textchans = server.getTextChannels().size();
-        int newschans = 0;
-
-        for (TextChannel channel : server.getTextChannels()) {
-            if (channel.isNews()) {
-                newschans++;
-                textchans--;
-            }
-        }
+        int newschans = server.getNewsChannels().size();
 
         List<CharSequence> counts = new ArrayList<>();
         counts.add("Total: " + server.getTextChannels().size());
@@ -385,8 +378,8 @@ public class ServerInfoCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            boolean displayMode = OptionHelper.optBoolean(event, "display_role", false);
-            boolean onlineMode = OptionHelper.optBoolean(event, "online", false);
+            boolean displayMode = event.optBoolean("display_role", false);
+            boolean onlineMode = event.optBoolean("online", false);
 
             event.replyEmbeds(new EmbedBuilder().setDescription("Gathering the details...").build()).queue(interactionHook -> {
                 interactionHook.retrieveOriginal().queue(message -> {
@@ -504,7 +497,7 @@ public class ServerInfoCommand extends SlashCommand {
         protected void execute(SlashCommandEvent event) {
             event.replyEmbeds(new EmbedBuilder().setDescription("Gathering the details...").build()).queue(interactionHook -> {
                 interactionHook.retrieveOriginal().queue(message -> {
-                    gatherData(guaranteeGuild(event), event.getUser(), event.getTextChannel(), OptionHelper.optBoolean(event, "render_mention", false))
+                    gatherData(guaranteeGuild(event), event.getUser(), event.getTextChannel(), event.optBoolean("render_mention", false))
                         .paginate(message, 1);
                 });
             });
@@ -563,7 +556,7 @@ public class ServerInfoCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             try {
-                event.replyEmbeds(UserInfoCommand.gatherMainInfo(guaranteeGuild(event), gatherMember(guaranteeGuild(event), (int) OptionHelper.optLong(event, "position", 0)).getUser(), event.getUser()).build()).queue();
+                event.replyEmbeds(UserInfoCommand.gatherMainInfo(guaranteeGuild(event), gatherMember(guaranteeGuild(event), (int) event.optLong("position", 0)).getUser(), event.getUser()).build()).queue();
             } catch (IllegalArgumentException e) {
                 event.replyEmbeds(ResponseHelper.generateFailureEmbed(null, e.getMessage())).queue();
             }
@@ -640,16 +633,12 @@ public class ServerInfoCommand extends SlashCommand {
             int stageChannels = server.getStageChannels().size();
             int categories = server.getCategories().size();
             int storeChannels = server.getStoreChannels().size();
-            int newsChannels = 0;
+            int newsChannels = server.getNewsChannels().size();
             int nsfw = 0;
             int inVoice = 0;
             int inStage = 0;
 
             for (TextChannel channel : server.getTextChannels()) {
-                if (channel.isNews()) {
-                    newsChannels++;
-                    textChannels--;
-                }
                 if (channel.isNSFW()) {
                     nsfw++;
                 }

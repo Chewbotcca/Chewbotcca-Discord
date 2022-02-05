@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import me.memerator.api.errors.NotFound;
 import me.memerator.api.object.Meme;
 import me.memerator.api.object.User;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.json.JSONObject;
 import org.kohsuke.github.GHIssue;
@@ -49,14 +49,15 @@ public class ReactListener extends ListenerAdapter {
 
     // Listen for all reactions
     @Override
-    public void onGuildMessageReactionAdd(@Nonnull GuildMessageReactionAddEvent event) {
+    public void onMessageReactionAdd(@Nonnull MessageReactionAddEvent event) {
+        if (!event.isFromGuild()) return;
         // Handle if it's a 🔍 reaction
         if(event.getReactionEmote().getName().equals("\uD83D\uDD0D") || event.getReactionEmote().getName().equals("\uD83D\uDD0E")) {
             handleMagReaction(event);
         }
     }
 
-    public void handleMagReaction(@Nonnull GuildMessageReactionAddEvent event) {
+    public void handleMagReaction(@Nonnull MessageReactionAddEvent event) {
         // Get the message id
         String id = event.getMessageId();
         // Ignore if already described to avoid spam

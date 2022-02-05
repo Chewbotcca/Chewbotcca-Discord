@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,19 +17,20 @@
 package pw.chew.chewbotcca.commands.fun;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.CooldownScope;
 import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.NewsChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.WebhookType;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
-import pw.chew.jdachewtils.command.OptionHelper;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -87,7 +88,7 @@ public class RoryCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            JSONObject rory = new JSONObject(RestClient.get("https://rory.cat/purr/" + OptionHelper.optString(event, "id", "")));
+            JSONObject rory = new JSONObject(RestClient.get("https://rory.cat/purr/" + event.optString("id", "")));
             if (rory.has("error")) {
                 event.reply(rory.getString("error")).setEphemeral(true).queue();
                 return;
@@ -116,7 +117,7 @@ public class RoryCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             TextChannel destination = event.getTextChannel();
-            if (destination.isNews()) {
+            if (event.getChannelType() == ChannelType.NEWS) {
                 event.reply("News channels cannot be followed to other news channels!").setEphemeral(true).queue();
                 return;
             }
@@ -124,7 +125,7 @@ public class RoryCommand extends SlashCommand {
                 event.reply("This channel already has a Rory Images feed! (If not, an error occurred, oopsie)").setEphemeral(true).queue();
                 return;
             }
-            TextChannel rory = event.getJDA().getTextChannelById("752063016425619487");
+            NewsChannel rory = event.getJDA().getNewsChannelById("752063016425619487");
             if (rory == null) {
                 event.reply("Rory channel not found! :(").setEphemeral(true).queue();
                 return;
@@ -135,22 +136,7 @@ public class RoryCommand extends SlashCommand {
         @Override
         protected void execute(CommandEvent event) {
             TextChannel destination = event.getTextChannel();
-            // Not sure if I want to implement selecting another channel yet.
-            /*
-            if (!event.getArgs().isEmpty()) {
-                Object parse = Mention.parseMention(event.getArgs(), event.getGuild(), event.getJDA());
-                if (!(parse instanceof GuildChannel)) {
-                    destination = event.getGuild().getTextChannelById(event.getArgs());
-                } else {
-                    destination = (TextChannel) parse;
-                }
-            }
-            if (destination == null) {
-                event.reply("Please provide a valid destination!");
-                return;
-            }
-            */
-            if (destination.isNews()) {
+            if (event.isFromType(ChannelType.NEWS)) {
                 event.reply("News channels cannot be followed to other news channels!");
                 return;
             }
@@ -158,7 +144,7 @@ public class RoryCommand extends SlashCommand {
                 event.reply("This channel already has a Rory Images feed! (If not, an error occurred, oopsie)");
                 return;
             }
-            TextChannel rory = event.getJDA().getTextChannelById("752063016425619487");
+            NewsChannel rory = event.getJDA().getNewsChannelById("752063016425619487");
             if (rory == null) {
                 event.reply("Rory channel not found! :(");
                 return;
