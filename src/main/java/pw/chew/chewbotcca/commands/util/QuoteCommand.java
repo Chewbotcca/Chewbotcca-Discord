@@ -83,7 +83,16 @@ public class QuoteCommand extends SlashCommand {
         event.reply(gatherData(message, thisGuild, thisChannel, false));
     }
 
-    private MessageEmbed gatherData(Message message, boolean thisGuild, boolean thisChannel, boolean isFromSlash) {
+    /**
+     * Builds a quote embed based on the message
+     *
+     * @param message The message to build the embed from
+     * @param thisGuild Whether the message is from the same guild as the command
+     * @param thisChannel Whether the message is from the same channel as the command
+     * @param isFromSlash Whether the command is from a slash command
+     * @return The embed
+     */
+    public static MessageEmbed gatherData(Message message, boolean thisGuild, boolean thisChannel, boolean isFromSlash) {
         // Get message details and send
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Quote");
