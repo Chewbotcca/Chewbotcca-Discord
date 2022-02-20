@@ -18,7 +18,7 @@ package pw.chew.chewbotcca.commands.services;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import me.memerator.api.errors.NotFound;
+import me.memerator.api.client.errors.NotFound;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.kohsuke.github.GHDirection;

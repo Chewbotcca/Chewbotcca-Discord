@@ -58,7 +58,7 @@ dependencies {
     implementation("org.jsoup", "jsoup", "1.14.3")
     implementation("pro.chew.api", "ChewAPI", "1.0-b5")
     implementation("org.reflections", "reflections", "0.10.2")
-    implementation("me.memerator.api", "MemeratorAPI", "1.1.0_70")
+    implementation("me.memerator.api", "MemeratorAPI", "2.0.0_74")
     implementation("org.hibernate", "hibernate-core", "5.6.5.Final")
     implementation("mysql", "mysql-connector-java", "8.0.28")
     implementation("org.codehaus.groovy", "groovy", "3.0.9")

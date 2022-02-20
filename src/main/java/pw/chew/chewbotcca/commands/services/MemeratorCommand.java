@@ -20,12 +20,14 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.CooldownScope;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import me.memerator.api.MemeratorAPI;
-import me.memerator.api.entity.Age;
-import me.memerator.api.entity.UserPerk;
-import me.memerator.api.errors.NotFound;
-import me.memerator.api.object.Meme;
-import me.memerator.api.object.User;
+import me.memerator.api.client.MemeratorAPI;
+import me.memerator.api.client.MemeratorAPIBuilder;
+import me.memerator.api.client.entities.Age;
+import me.memerator.api.client.entities.Meme;
+import me.memerator.api.client.entities.User;
+import me.memerator.api.client.entities.UserPerk;
+import me.memerator.api.client.errors.NotFound;
+import me.memerator.api.internal.requests.Requester;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -42,7 +44,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class MemeratorCommand extends SlashCommand {
-    private static final MemeratorAPI api = new MemeratorAPI(PropertiesManager.getMemeratorKey());
+    private static final MemeratorAPI api = MemeratorAPIBuilder.create(PropertiesManager.getMemeratorKey()).build();
 
     public MemeratorCommand() {
         this.name = "memerator";
@@ -106,15 +108,8 @@ public class MemeratorCommand extends SlashCommand {
 
         private MessageEmbed buildMemeEmbed(String args, MessageChannel channel) {
             boolean id = args.toLowerCase().matches("([a-f]|[0-9]){6,7}");
-            Meme meme;
-            if (args.equalsIgnoreCase("random")) {
-                meme = api.getRandomMeme();
-            } else {
-                meme = getMeme(args, id);
-            }
-            if (meme == null) {
-                throw new IllegalArgumentException("No memes found for query.");
-            }
+
+            Meme meme = getMeme(args, id);
 
             EmbedBuilder eb = generateMemeEmbed(meme);
             if (channel.getType() == ChannelType.TEXT) {
@@ -132,20 +127,39 @@ public class MemeratorCommand extends SlashCommand {
         }
 
         public static Meme getMeme(String args, boolean id) {
-            if (id) {
-                try {
-                    return api.getMeme(args);
-                } catch (NotFound notFound) {
-                    return null;
-                }
+            Requester<?> memeRequest;
+            if (args.equalsIgnoreCase("random")) {
+                memeRequest = api.retrieveRandomMeme();
+            } else if (id) {
+                memeRequest = api.retrieveMeme(args);
             } else {
-                List<Meme> response = api.searchMemes(args);
-                if (response.isEmpty()) {
-                    return null;
-                } else {
-                    return response.get(0);
-                }
+                memeRequest = api.searchMemes(args);
             }
+
+            Meme meme;
+
+            try {
+                Object memeResponse = memeRequest.complete();
+
+                if (memeResponse instanceof List<?>) {
+                    @SuppressWarnings("unchecked")
+                    List<Meme> memes = (List<Meme>) memeResponse;
+
+                    if (memes.isEmpty()) {
+                        throw new NotFound("");
+                    }
+
+                    meme = memes.get(0);
+                } else if (memeResponse instanceof Meme) {
+                    meme = (Meme) memeResponse;
+                } else {
+                    throw new IllegalArgumentException("Unknown response type");
+                }
+            } catch (NotFound e) {
+                throw new IllegalArgumentException("No memes found for query.");
+            }
+
+            return meme;
         }
 
         public static EmbedBuilder generateMemeEmbed(Meme meme) {
@@ -191,8 +205,8 @@ public class MemeratorCommand extends SlashCommand {
         @Override
         protected void execute(SlashCommandEvent event) {
             try {
-                User user = api.getUser(event.optString("user", ""));
-                event.replyEmbeds(generateUserEmbed(user).build()).queue();
+                api.retrieveUser(event.optString("user", ""))
+                    .queue(user -> event.replyEmbeds(generateUserEmbed(user).build()).queue());
             } catch (NotFound notFound) {
                 event.reply("User not found!").setEphemeral(true).queue();
             }
@@ -201,14 +215,11 @@ public class MemeratorCommand extends SlashCommand {
         @Override
         protected void execute(CommandEvent commandEvent) {
             commandEvent.getChannel().sendTyping().queue();
-            User user;
             try {
-                user = api.getUser(commandEvent.getArgs());
+                api.retrieveUser(commandEvent.getArgs()).queue(user -> commandEvent.reply(generateUserEmbed(user).build()));
             } catch (NotFound notFound) {
                 commandEvent.reply("User not found!");
-                return;
             }
-            commandEvent.reply(generateUserEmbed(user).build());
         }
 
         public static EmbedBuilder generateUserEmbed(User user) {

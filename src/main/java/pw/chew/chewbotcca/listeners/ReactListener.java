@@ -16,9 +16,7 @@
  */
 package pw.chew.chewbotcca.listeners;
 
-import me.memerator.api.errors.NotFound;
-import me.memerator.api.object.Meme;
-import me.memerator.api.object.User;
+import me.memerator.api.client.entities.Meme;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -192,14 +190,10 @@ public class ReactListener extends ListenerAdapter {
         // Ignore if described
         described(msg.getId());
         // Get the user
-        User user;
-        try {
-            user = MemeratorCommand.getAPI().getUser(name);
-        } catch (NotFound notFound) {
-            return;
-        }
-        msg.replyEmbeds(generateUserEmbed(user).build()).mentionRepliedUser(false).queue();
-        msg.suppressEmbeds(true).queue();
+        MemeratorCommand.getAPI().retrieveUser(name).queue(user -> {
+            msg.replyEmbeds(generateUserEmbed(user).build()).mentionRepliedUser(false).queue();
+            msg.suppressEmbeds(true).queue();
+        });
     }
 
     /**
