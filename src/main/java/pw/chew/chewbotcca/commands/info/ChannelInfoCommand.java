@@ -154,7 +154,7 @@ public class ChannelInfoCommand extends SlashCommand {
             if (channel.getType() == ChannelType.NEWS)
                 info.add("<:news:725504846937063595> News");
             if (textChannel.isNSFW())
-                info.add("<:channel_nsfw:585783907660857354> NSFW");
+                info.add("<:channel_nsfw:585783907660857354> Age-Restricted");
             if (!info.isEmpty())
                 e.addField("Information", String.join("\n", info), true);
         }
