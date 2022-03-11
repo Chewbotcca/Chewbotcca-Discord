@@ -140,8 +140,6 @@ public class ServerInfoCommand extends SlashCommand {
         counts.add("Voice: " + server.getVoiceChannels().size());
         counts.add("Stages: " + server.getStageChannels().size());
         counts.add("Categories: " + server.getCategories().size());
-        if (server.getFeatures().contains("COMMERCE"))
-            counts.add("Store Pages: " + server.getStoreChannels().size());
         if (server.getFeatures().contains("NEWS"))
             counts.add("News: " + newschans);
 
@@ -206,7 +204,6 @@ public class ServerInfoCommand extends SlashCommand {
         return switch (feature) {
             default -> MiscUtil.capitalize(feature);
             case "BANNER" -> "[Banner](" + server.getBannerUrl() + "?size=2048)";
-            case "COMMERCE" -> "<:store_tag:725504846924611584> Store Channels";
             case "NEWS" -> "<:news:725504846937063595> News Channels";
             case "INVITE_SPLASH" -> "[Invite Splash](" + server.getSplashUrl() + "?size=2048)";
             case "PARTNERED" -> "<:partner:753433398005071872> Partnered Server";
@@ -632,7 +629,6 @@ public class ServerInfoCommand extends SlashCommand {
             int voiceChannels = server.getVoiceChannels().size();
             int stageChannels = server.getStageChannels().size();
             int categories = server.getCategories().size();
-            int storeChannels = server.getStoreChannels().size();
             int newsChannels = server.getNewsChannels().size();
             int nsfw = 0;
             int inVoice = 0;
@@ -656,10 +652,6 @@ public class ServerInfoCommand extends SlashCommand {
             embed.addField("Voice Channels", String.format("Total: %s (%s)\nMembers in Voice: %s", voiceChannels, generatePercent(voiceChannels, totalChannels), inVoice), true);
             embed.addField("Stage Channels", String.format("Total: %s (%s)\nMembers in Stages: %s", stageChannels, generatePercent(stageChannels, totalChannels), inStage), true);
             embed.addField("Categories", String.format("Total: %s (%s)", categories, generatePercent(categories, totalChannels)), true);
-
-            if (server.getFeatures().contains("COMMERCE")) {
-                embed.addField("Store", String.format("Total: %s (%s)", storeChannels, generatePercent(storeChannels, totalChannels)), true);
-            }
 
             if (server.getFeatures().contains("NEWS")) {
                 embed.addField("News Channels", String.format("Total: %s (%s)", newsChannels, generatePercent(newsChannels, totalChannels)), true);
