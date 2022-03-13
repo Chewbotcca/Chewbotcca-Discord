@@ -154,6 +154,14 @@ public class PropertiesManager {
         return properties.getProperty("database_pass");
     }
 
+    public static String getAzureInstanceURL() {
+        return properties.getProperty("azure_url");
+    }
+
+    public static String getAzureKey() {
+        return properties.getProperty("azure_key");
+    }
+
     /**
      * This determines whether we should only upsert in a single server, or globally.
      * In development, this is usually per-server.

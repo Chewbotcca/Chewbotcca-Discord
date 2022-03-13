@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package pw.chew.chewbotcca.util;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -139,5 +142,25 @@ public class MiscUtil {
     public static String formatPercent(float value) {
         DecimalFormat df = new DecimalFormat("#.##");
         return df.format(value * 100) + "%";
+    }
+
+    /**
+     * Converts a JSONArray to a list of {@code <T>}.
+     *
+     * @param array The JSONArray
+     * @param cast The class to cast to
+     * @param <T> The type to cast to
+     * @return A list of {@code <T>}
+     */
+    public static <T> List<T> toList(JSONArray array, Class<T> cast) {
+        List<T> results = new ArrayList<>(array.length());
+        for (Object element : array) {
+            if (element == null || JSONObject.NULL.equals(element)) {
+                results.add(null);
+            } else {
+                results.add(cast.cast(element));
+            }
+        }
+        return results;
     }
 }
