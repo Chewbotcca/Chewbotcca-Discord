@@ -48,20 +48,20 @@ repositories {
 }
 
 dependencies {
-    implementation("net.dv8tion", "JDA", "5.0.0-alpha.5")
+    implementation("net.dv8tion", "JDA", "5.0.0-alpha.9")
     implementation("pw.chew", "jda-chewtils", "2.0-SNAPSHOT")
-    implementation("ch.qos.logback", "logback-classic", "1.2.10")
+    implementation("ch.qos.logback", "logback-classic", "1.2.11")
     implementation("com.squareup.okhttp3", "okhttp", "4.9.3")
     implementation("org.json", "json", "20211205")
-    implementation("io.sentry", "sentry", "5.6.0")
-    implementation("org.kohsuke", "github-api", "1.301")
+    implementation("io.sentry", "sentry", "5.6.3")
+    implementation("org.kohsuke", "github-api", "1.303")
     implementation("org.jsoup", "jsoup", "1.14.3")
     implementation("pro.chew.api", "ChewAPI", "1.0-b5")
     implementation("org.reflections", "reflections", "0.10.2")
     implementation("me.memerator.api", "MemeratorAPI", "2.0.0_74")
     implementation("org.hibernate", "hibernate-core", "5.6.5.Final")
     implementation("mysql", "mysql-connector-java", "8.0.28")
-    implementation("org.codehaus.groovy", "groovy", "3.0.9")
+    implementation("org.codehaus.groovy", "groovy", "3.0.10")
     implementation("org.knowm.xchart", "xchart", "3.8.1")
 }
 
