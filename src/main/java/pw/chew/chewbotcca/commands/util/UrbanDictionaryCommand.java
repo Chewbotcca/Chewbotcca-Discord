@@ -19,10 +19,9 @@ package pw.chew.chewbotcca.commands.util;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import com.jagrosh.jdautilities.menu.EmbedPaginator;
+import com.jagrosh.jdautilities.menu.ButtonEmbedPaginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -43,41 +42,30 @@ public class UrbanDictionaryCommand extends SlashCommand {
         this.help = "Checks a word on Urban Dictionary. Only works in NSFW channels";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
+        this.nsfwOnly = true;
         this.options = Collections.singletonList(
-            new OptionData(OptionType.STRING, "word", "The word to define").setRequired(true)
+            new OptionData(OptionType.STRING, "word", "The word to define", true)
         );
     }
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        // Top.gg requires %^urban to be NSFW only. I hate them but I gotta agree, it can be a bit edgy at times
-        if (event.getChannelType() == ChannelType.TEXT && !event.getTextChannel().isNSFW()) {
-            event.reply("This command is a little bit too edgy and may only be ran in NSFW channels or DMs. Sorry!").setEphemeral(true).queue();
-            return;
-        }
-
         String word = event.optString("word", "");
 
         // Send message then edit it
-        try {
-            event.replyEmbeds(new EmbedBuilder().setDescription("Checking the dictionary...").build()).queue(interactionHook -> {
-                interactionHook.retrieveOriginal().queue(message -> {
+        event.replyEmbeds(new EmbedBuilder().setDescription("Checking the dictionary...").build()).queue(interactionHook -> {
+            interactionHook.retrieveOriginal().queue(message -> {
+                try {
                     gatherDefinition(word, event.getUser()).paginate(message, 1);
-                });
+                } catch (IllegalArgumentException e) {
+                    message.editMessage(e.getMessage()).setEmbeds().queue();
+                }
             });
-        } catch (IllegalArgumentException e) {
-            event.reply(e.getMessage()).setEphemeral(true).queue();
-        }
+        });
     }
 
     @Override
     protected void execute(CommandEvent event) {
-        // Top.gg requires %^urban to be NSFW only. I hate them but I gotta agree, it can be a bit edgy at times
-        if (event.getChannelType() == ChannelType.TEXT && !event.getTextChannel().isNSFW()) {
-            event.reply("This command is a little bit too edgy and may only be ran in NSFW channels or DMs. Sorry!");
-            return;
-        }
-
         // Get the word from Urban Dictionary and if it doesn't exist, let them know.
         String word = event.getArgs();
 
@@ -89,19 +77,19 @@ public class UrbanDictionaryCommand extends SlashCommand {
         }
     }
 
-    private EmbedPaginator gatherDefinition(String word, User user) {
+    private ButtonEmbedPaginator gatherDefinition(String word, User user) {
         JSONObject parse = new JSONObject(RestClient.get("https://api.urbandictionary.com/v0/define?term=" + URLEncoder.encode(word, StandardCharsets.UTF_8)));
         JSONArray list = parse.getJSONArray("list");
         if (list.isEmpty()) {
             throw new IllegalArgumentException("No results found for term `" + word + "`!");
         }
 
-        EmbedPaginator.Builder paginator = JDAUtilUtil.makeEmbedPaginator();
+        ButtonEmbedPaginator.Builder paginator = JDAUtilUtil.makeButtonEmbedPaginator();
         paginator.setUsers(user);
 
         int definitions = list.length();
 
-        for(int i = 0; i < definitions; i++) {
+        for (int i = 0; i < definitions; i++) {
             // Gather information about the word
             JSONObject info = list.getJSONObject(i);
             String definition = info.getString("definition").replaceAll("\n", " ")
@@ -125,7 +113,7 @@ public class UrbanDictionaryCommand extends SlashCommand {
                 .addField("Author", author, true)
                 .addField("Rating", "**" + up + "** 👍 - **" + down + "** 👎 (**" + ratio + "%**)", true)
                 .addField("Example", example, false)
-                .setFooter("Definition " + (i+1) + "/" + definitions)
+                .setFooter("Definition " + (i + 1) + "/" + definitions)
                 .build()
             );
         }
