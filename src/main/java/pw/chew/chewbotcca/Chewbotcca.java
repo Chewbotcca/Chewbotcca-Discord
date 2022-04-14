@@ -43,6 +43,7 @@ import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ReactListener;
 import pw.chew.chewbotcca.listeners.ReadyListener;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
+import pw.chew.chewbotcca.menus.message.UnfurlMessageContextMenu;
 import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.objects.ServerSettings;
 import pw.chew.chewbotcca.util.DatabaseHelper;
@@ -115,6 +116,9 @@ public class Chewbotcca {
         // Add commands to bot
         client.addCommands(getCommands());
         client.addSlashCommands(getSlashCommands());
+
+        // Add menus to bot
+        client.addContextMenu(new UnfurlMessageContextMenu());
 
         // Temporary measure to test Slash Commands
         client.forceGuildOnly(PropertiesManager.forceGuildId());
