@@ -19,7 +19,7 @@ package pw.chew.chewbotcca.commands.util;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import com.jagrosh.jdautilities.menu.EmbedPaginator;
+import com.jagrosh.jdautilities.menu.ButtonEmbedPaginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
@@ -53,7 +53,7 @@ public class DefineCommand extends SlashCommand {
         String word = event.optString("word", "");
 
         // Send message then edit it
-        EmbedPaginator paginator;
+        ButtonEmbedPaginator paginator;
         try {
             paginator = buildPaginator(word, event.getUser());
         } catch (IllegalArgumentException e) {
@@ -81,7 +81,7 @@ public class DefineCommand extends SlashCommand {
         }
     }
 
-    private EmbedPaginator buildPaginator(String word, User author) {
+    private ButtonEmbedPaginator buildPaginator(String word, User author) {
         // Attempt to grab the word, if it doesn't exist let them know
         JSONArray grabbedword;
         try {
@@ -90,7 +90,7 @@ public class DefineCommand extends SlashCommand {
             throw new IllegalArgumentException("Word not found! Check your local spell-checker!");
         }
 
-        EmbedPaginator.Builder paginator = JDAUtilUtil.makeEmbedPaginator();
+        ButtonEmbedPaginator.Builder paginator = JDAUtilUtil.makeButtonEmbedPaginator();
         paginator.setUsers(author);
 
         int definitions = 0;

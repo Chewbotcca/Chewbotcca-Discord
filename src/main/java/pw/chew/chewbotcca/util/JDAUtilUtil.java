@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  */
 package pw.chew.chewbotcca.util;
 
+import com.jagrosh.jdautilities.menu.ButtonEmbedPaginator;
 import com.jagrosh.jdautilities.menu.EmbedPaginator;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.exceptions.PermissionException;
@@ -51,6 +52,15 @@ public class JDAUtilUtil {
                     m.clearReactions().queue();
                 } catch(PermissionException | IllegalStateException ignored) { }
             })
+            .setEventWaiter(Memory.getWaiter())
+            .setTimeout(1, TimeUnit.MINUTES)
+            .clearItems();
+    }
+
+    public static ButtonEmbedPaginator.Builder makeButtonEmbedPaginator() {
+        return new ButtonEmbedPaginator.Builder()
+            .waitOnSinglePage(false)
+            .setFinalAction(m -> m.editMessageComponents().queue())
             .setEventWaiter(Memory.getWaiter())
             .setTimeout(1, TimeUnit.MINUTES)
             .clearItems();
