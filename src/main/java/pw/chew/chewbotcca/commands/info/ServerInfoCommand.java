@@ -375,12 +375,13 @@ public class ServerInfoCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
+            Checks.notNull(event.getGuild(), "Guild"); // This command is server-only
             boolean displayMode = event.optBoolean("display_role", false);
             boolean onlineMode = event.optBoolean("online", false);
 
             event.replyEmbeds(new EmbedBuilder().setDescription("Gathering the details...").build()).queue(interactionHook -> {
                 interactionHook.retrieveOriginal().queue(message -> {
-                    run(guaranteeGuild(event), event.getTextChannel(), displayMode, onlineMode);
+                    buildRolesPaginator(event.getGuild(), displayMode, onlineMode).paginate(message, 1);
                 });
             });
         }
@@ -390,10 +391,10 @@ public class ServerInfoCommand extends SlashCommand {
             boolean displayMode = event.getArgs().contains("--display");
             boolean onlineMode = event.getArgs().contains("--online");
 
-            run(event.getGuild(), event.getTextChannel(), displayMode, onlineMode);
+            buildRolesPaginator(event.getGuild(), displayMode, onlineMode).paginate(event.getTextChannel(), 1);
         }
 
-        public void run(Guild server, TextChannel channel, boolean displayMode, boolean onlineMode) {
+        public Paginator buildRolesPaginator(Guild server, boolean displayMode, boolean onlineMode) {
             Paginator.Builder pbuilder = JDAUtilUtil.makePaginator().clearItems();
 
             List<CharSequence> roleNames = new ArrayList<>();
@@ -444,7 +445,7 @@ public class ServerInfoCommand extends SlashCommand {
                     }
 
                     if (displayMode) {
-                        List<Role> userRoles = member.getRoles().stream().filter(Role::isHoisted).collect(Collectors.toList());
+                        List<Role> userRoles = member.getRoles().stream().filter(Role::isHoisted).toList();
                         if (!userRoles.isEmpty() && userRoles.get(0).equals(role)) {
                             display++;
                         }
@@ -467,9 +468,7 @@ public class ServerInfoCommand extends SlashCommand {
                 pbuilder.addItems(rowFormat);
             }
 
-            Paginator p = pbuilder.setText(String.join("\n", roleNames)).build();
-
-            p.paginate(channel, 1);
+            return pbuilder.setText(String.join("\n", roleNames)).build();
         }
     }
 
