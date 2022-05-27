@@ -83,8 +83,8 @@ public class BotInfoCommand extends SlashCommand {
         }
         // Parse the bot mention or just use the ID they provided an ID
         String botId;
-        if (!commandEvent.getMessage().getMentionedUsers().isEmpty()) {
-            botId = commandEvent.getMessage().getMentionedUsers().get(0).getId();
+        if (!commandEvent.getMessage().getMentions().getUsers().isEmpty()) {
+            botId = commandEvent.getMessage().getMentions().getUsers().get(0).getId();
         } else {
             botId = args[0];
         }

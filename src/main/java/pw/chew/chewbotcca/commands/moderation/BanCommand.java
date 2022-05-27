@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public class BanCommand extends Command {
 
         User user;
         // Get mentioned users
-        List<User> mentioned = event.getMessage().getMentionedUsers();
+        List<User> mentioned = event.getMessage().getMentions().getUsers();
         if (mentioned.isEmpty()) {
             try {
                 user = event.getJDA().retrieveUserById(args[0]).complete();

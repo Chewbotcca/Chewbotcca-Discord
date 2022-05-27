@@ -112,7 +112,7 @@ public class RoleInfoCommand extends SlashCommand {
             id = false;
         }
         if(arg.contains("<")) {
-            role = event.getMessage().getMentionedRoles().get(0);
+            role = event.getMessage().getMentions().getRoles().get(0);
         } else if(id) {
             role = event.getGuild().getRoleById(arg);
         } else {

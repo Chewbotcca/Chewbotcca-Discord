@@ -80,7 +80,7 @@ public class UserInfoCommand extends SlashCommand {
         if (args.isBlank()) {
             user = commandEvent.getAuthor();
         } else {
-            List<User> mentions = commandEvent.getMessage().getMentionedUsers();
+            List<User> mentions = commandEvent.getMessage().getMentions().getUsers();
             if (!mentions.isEmpty()) {
                 user = mentions.get(0);
             } else {
