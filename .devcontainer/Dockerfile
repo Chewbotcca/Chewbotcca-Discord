@@ -1,5 +1,5 @@
 # [Choice] Java version: 11, 14
-ARG VARIANT=15
+ARG VARIANT=17
 FROM mcr.microsoft.com/vscode/devcontainers/java:${VARIANT}
 
 # [Option] Install Maven
