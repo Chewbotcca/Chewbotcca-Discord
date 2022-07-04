@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -193,8 +194,8 @@ public class UserInfoCommand extends SlashCommand {
             for (int i = 0; i < member.getActivities().size(); i++) {
                 Activity activity = member.getActivities().get(i);
                 if (activity.getType() == Activity.ActivityType.CUSTOM_STATUS) {
-                    Activity.Emoji emoji = activity.getEmoji();
-                    activities.add((emoji == null ? "" : emoji.getAsMention() + " ") + activity.getName());
+                    Emoji emoji = activity.getEmoji();
+                    activities.add((emoji == null ? "" : emoji.getFormatted() + " ") + activity.getName());
                 } else
                     activities.add(activity.getName());
             }

@@ -124,7 +124,7 @@ public class QuoteCommand extends SlashCommand {
             try {
                 Member member = message.getGuild().retrieveMember(message.getAuthor()).complete();
                 embed.setColor(member.getColor());
-            } catch (ErrorResponseException ignored) {
+            } catch (ErrorResponseException | NoSuchMethodError ignored) {
             }
             embed.addField("Jump", "[Link](" + message.getJumpUrl() + ")", true);
         } else {

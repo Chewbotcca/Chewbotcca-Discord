@@ -55,7 +55,7 @@ public class ReactListener extends ListenerAdapter {
         if (!event.isFromGuild()) return;
 
         // Handle if it's a 🔍 reaction
-        if (event.getReactionEmote().getName().equals("\uD83D\uDD0D") || event.getReactionEmote().getName().equals("\uD83D\uDD0E")) {
+        if (event.getEmoji().getName().equals("\uD83D\uDD0D") || event.getEmoji().getName().equals("\uD83D\uDD0E")) {
             handleMagReaction(event);
         }
     }
