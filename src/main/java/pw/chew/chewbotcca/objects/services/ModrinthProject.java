@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,12 @@ import pw.chew.chewbotcca.util.MiscUtil;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public record ModrinthMod(JSONObject data) {
+/**
+ * Represents a Modrinth project (mod/plugin, etc).
+ *
+ * @param data The JSON data of the project.
+ */
+public record ModrinthProject(JSONObject data) {
     public String getTitle() {
         return data.getString("title");
     }
@@ -32,12 +37,20 @@ public record ModrinthMod(JSONObject data) {
         return data.getString("description");
     }
 
+    public String getSlug() {
+        return data.getString("slug");
+    }
+
+    public String getProjectType() {
+        return data.getString("project_type");
+    }
+
     public String getAuthor() {
         return data.getString("author");
     }
 
     public String getAuthorURL() {
-        return data.getString("author_url");
+        return String.format("https://www.modrinth.com/user/%s", getAuthor());
     }
 
     public OffsetDateTime getDateCreated() {
@@ -46,10 +59,6 @@ public record ModrinthMod(JSONObject data) {
 
     public OffsetDateTime getDateModified() {
         return OffsetDateTime.parse(data.getString("date_modified"));
-    }
-
-    public String getStatus() {
-        return data.getString("status");
     }
 
     public String getClientSide() {
@@ -65,7 +74,7 @@ public record ModrinthMod(JSONObject data) {
     }
 
     public String getPageURL() {
-        return data.getString("page_url");
+        return String.format("https://modrinth.com/%s/%s", this.getProjectType(), this.getSlug());
     }
 
     @Nullable

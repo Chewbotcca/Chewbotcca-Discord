@@ -25,7 +25,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.objects.services.ModrinthMod;
+import pw.chew.chewbotcca.objects.services.ModrinthProject;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.net.URLEncoder;
@@ -35,10 +35,10 @@ import java.util.Collections;
 public class ModrinthCommand extends SlashCommand {
     public ModrinthCommand() {
         this.name = "modrinth";
-        this.help = "Searches modrinth.com for a specified mod";
+        this.help = "Searches modrinth.com for a specified project";
 
         this.options = Collections.singletonList(
-            new OptionData(OptionType.STRING, "query", "The mod to search for", true)
+            new OptionData(OptionType.STRING, "query", "The project to search for", true)
         );
     }
 
@@ -69,18 +69,18 @@ public class ModrinthCommand extends SlashCommand {
         query = URLEncoder.encode(query, StandardCharsets.UTF_8);
 
         // Search for the mod via the API subdomain
-        JSONObject data = new JSONObject(RestClient.get("https://api.modrinth.com/api/v1/mod?limit=1&query=" + query));
+        JSONObject data = new JSONObject(RestClient.get("https://api.modrinth.com/v2/search?limit=1&query=" + query));
 
         // If the mod doesn't exist, throw an error
         if (data.getInt("total_hits") == 0) {
-            throw new IllegalArgumentException("No mod found for " + query);
+            throw new IllegalArgumentException("No project found for " + query);
         }
 
         // Store the first JSONObject from the hits jsonarray
-        ModrinthMod mod = new ModrinthMod(data.getJSONArray("hits").getJSONObject(0));
+        ModrinthProject mod = new ModrinthProject(data.getJSONArray("hits").getJSONObject(0));
 
         // Add support field
-        MessageEmbed.Field support = new MessageEmbed.Field("Support",
+        MessageEmbed.Field support = new MessageEmbed.Field("Platform Support",
             "Client: " + mod.getClientSide() + "\n" + "Server: " + mod.getServerSide(), true);
 
         // Add tags
