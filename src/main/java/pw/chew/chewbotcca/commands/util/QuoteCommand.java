@@ -128,7 +128,7 @@ public class QuoteCommand extends SlashCommand {
             }
             embed.addField("Jump", "[Link](" + message.getJumpUrl() + ")", true);
         } else {
-            embed.addField("Channel", "DMs with " + message.getPrivateChannel().getUser().getAsTag(), true);
+            embed.addField("Channel", "DMs with " + message.getChannel().asPrivateChannel().getUser().getAsTag(), true);
         }
 
         return embed.build();
@@ -206,7 +206,7 @@ public class QuoteCommand extends SlashCommand {
             Message message = channel.retrieveMessageById(messageId).complete();
             // NSFW check
             if (source != null && message.isFromType(ChannelType.TEXT)) {
-                if (!source.isNSFW() && message.getTextChannel().isNSFW()) {
+                if (!source.isNSFW() && message.getChannel().asTextChannel().isNSFW()) {
                     throw new IllegalArgumentException("Messages from NSFW channels cannot be quoted in non-NSFW channels!");
                 }
             }

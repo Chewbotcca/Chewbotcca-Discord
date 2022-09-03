@@ -85,7 +85,7 @@ public class Chewbotcca {
         CommandClientBuilder client = new CommandClientBuilder();
 
         // Set the client settings
-        client.useDefaultGame();
+        client.setActivity(Activity.listening("to /help"));
         client.setOwnerId(PropertiesManager.getOwnerId());
         client.setPrefix(PropertiesManager.getPrefix());
         client.setPrefixes(new String[]{"<@!" + PropertiesManager.getClientId() + "> "});

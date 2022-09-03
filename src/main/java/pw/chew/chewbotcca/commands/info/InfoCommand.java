@@ -113,7 +113,7 @@ public class InfoCommand extends SlashCommand {
 
         event.editMessageEmbeds(gatherData(event.getSelectedOptions().get(0).getValue()))
             .setContent(null)
-            .setActionRows(new ArrayList<>())
+            .setComponents(new ArrayList<>())
             .queue();
     }
 

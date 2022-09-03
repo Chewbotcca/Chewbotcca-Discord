@@ -33,6 +33,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import net.dv8tion.jda.internal.utils.Checks;
 import org.knowm.xchart.BitmapEncoder;
@@ -111,9 +112,9 @@ public class ServerInfoCommand extends SlashCommand {
             e.setThumbnail(server.getIconUrl() + "?size=2048");
 
         // Retrieve server info
-        e.addField("Server Owner", server.retrieveOwner(true).complete().getAsMention(), true);
+        e.addField("Server Owner", server.retrieveOwner().complete().getAsMention(), true);
         e.addField("Created", TimeFormat.DATE_TIME_SHORT.format(server.getTimeCreated()), true);
-        e.addField("Locale", server.getLocale().getDisplayName(), true);
+        e.addField("Locale", server.getLocale().getLanguageName(), true);
 
         // Get bot / member count
         List<Member> members = server.getMembers();
@@ -800,13 +801,13 @@ public class ServerInfoCommand extends SlashCommand {
 
         @Override
         protected void execute(CommandEvent event) {
-            event.getChannel().sendMessage("Here's your graph!").addFile(buildChart(event.getGuild()), "chart.png").queue();
+            event.getChannel().sendMessage("Here's your graph!").addFiles(FileUpload.fromData(buildChart(event.getGuild()), "chart.png")).queue();
         }
 
         @Override
         protected void execute(SlashCommandEvent event) {
             Checks.notNull(event.getGuild(), "Guild"); // This won't be null, but it's here for the compiler
-            event.reply("Here's your graph!").addFile(buildChart(event.getGuild()), "chart.png").queue();
+            event.reply("Here's your graph!").addFiles(FileUpload.fromData(buildChart(event.getGuild()), "chart.png")).queue();
         }
 
         private InputStream buildChart(Guild server) {

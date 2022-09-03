@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.awt.Color;
 import java.io.ByteArrayInputStream;
@@ -75,7 +76,7 @@ public class EvalCommand extends Command {
             InputStream stream = new ByteArrayInputStream(stackTrace.getBytes(StandardCharsets.UTF_8));
 
             // Send the file to the discord channel
-            event.getChannel().sendMessage("Error occurred!").addFile(stream, "error.txt").queue();
+            event.getChannel().sendMessage("Error occurred!").addFiles(FileUpload.fromData(stream, "error.txt")).queue();
         }
     }
 }
