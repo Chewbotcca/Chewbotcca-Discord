@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ReactListener;
 import pw.chew.chewbotcca.listeners.ReadyListener;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
+import pw.chew.chewbotcca.menus.message.PasteMessageContextMenu;
 import pw.chew.chewbotcca.menus.message.UnfurlMessageContextMenu;
 import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.objects.ServerSettings;
@@ -118,7 +119,7 @@ public class Chewbotcca {
         client.addSlashCommands(getSlashCommands());
 
         // Add menus to bot
-        client.addContextMenu(new UnfurlMessageContextMenu());
+        client.addContextMenus(new UnfurlMessageContextMenu(), new PasteMessageContextMenu());
 
         // Temporary measure to test Slash Commands
         client.forceGuildOnly(PropertiesManager.forceGuildId());
