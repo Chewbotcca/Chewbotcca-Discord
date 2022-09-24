@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2022 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import org.kohsuke.github.GHDirection;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueState;

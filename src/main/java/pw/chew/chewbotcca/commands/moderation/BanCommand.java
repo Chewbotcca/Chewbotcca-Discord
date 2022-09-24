@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.exceptions.HierarchyException;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class BanCommand extends Command {
     public BanCommand() {
@@ -72,7 +73,7 @@ public class BanCommand extends Command {
         User finalUser = user;
         int finalDays = days;
         try {
-            event.getGuild().ban(user, days).queue(yay -> {
+            event.getGuild().ban(user, days, TimeUnit.DAYS).queue(yay -> {
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.setTitle("Somebody order a ban hammer?");
                 embed.setColor(0x7d5eba);
