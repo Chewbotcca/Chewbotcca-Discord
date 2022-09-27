@@ -46,13 +46,10 @@ public class CoinFlipCommand extends SlashCommand {
     }
 
     private MessageEmbed flipCoin() {
-        String first = getRandom(new String[]{
-            "I flipped a coin, and it landed on",
+        String first = getRandom("I flipped a coin, and it landed on",
             "I threw the coin into the air and it finally landed on",
-            "I dropped the coin, it landed on"});
-        String headsOrTails = getRandom(new String[]{
-            "heads",
-            "tails"});
+            "I dropped the coin, it landed on");
+        String headsOrTails = getRandom("heads", "tails");
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("Coin Flip");
         e.setDescription(first + " **" + headsOrTails + "**!");

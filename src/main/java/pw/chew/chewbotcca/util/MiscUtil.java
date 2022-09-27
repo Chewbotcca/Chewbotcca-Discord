@@ -29,21 +29,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 /**
  * A collection of misc utilities used throughout the bot
  */
 public class MiscUtil {
+    private static final RandomGenerator RANDOM = RandomGenerator.getDefault();
+
     /**
-     * Gets a random string from an array of strings
+     * Gets a random item from an array
      *
      * @param array the array
      * @return a random value from the array
      */
-    public static String getRandom(String[] array) {
-        int rnd = new Random().nextInt(array.length);
-        return array[rnd];
+    @SafeVarargs
+    public static <T> T getRandom(T... array) {
+        return array[RANDOM.nextInt(array.length)];
     }
 
     /**
