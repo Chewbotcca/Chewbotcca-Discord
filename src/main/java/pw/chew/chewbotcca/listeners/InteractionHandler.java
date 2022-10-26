@@ -17,7 +17,7 @@
 package pw.chew.chewbotcca.listeners;
 
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import pw.chew.chewbotcca.commands.info.InfoCommand;
@@ -32,7 +32,7 @@ public class InteractionHandler extends ListenerAdapter {
     }
 
     @Override
-    public void onSelectMenuInteraction(@NotNull SelectMenuInteractionEvent event) {
+    public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         // Handle selection menu choices here
         switch (event.getComponentId()) {
             case "info:didyoumean" -> InfoCommand.updateInfo(event);

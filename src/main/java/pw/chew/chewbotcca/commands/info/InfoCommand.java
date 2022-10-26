@@ -22,12 +22,13 @@ import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.internal.utils.Checks;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -102,7 +103,7 @@ public class InfoCommand extends SlashCommand {
      *
      * @param event the selection menu event
      */
-    public static void updateInfo(SelectMenuInteractionEvent event) {
+    public static void updateInfo(StringSelectInteractionEvent event) {
         // Selected options is only null if ephemeral, which it never will be
         Checks.notNull(event.getSelectedOptions(), "Selected options");
         String selected = event.getSelectedOptions().get(0).getValue();
@@ -130,7 +131,7 @@ public class InfoCommand extends SlashCommand {
             data.add(SelectOption.of(option, option));
         }
         data.add(SelectOption.of("None of these", "NONE").withDescription("Can't find the command? Select to cancel."));
-        return SelectMenu.create("info:didyoumean")
+        return StringSelectMenu.create("info:didyoumean")
             .setPlaceholder("Did you mean?")
             .addOptions(data)
             .build();
