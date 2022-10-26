@@ -63,6 +63,7 @@ dependencies {
     implementation("mysql", "mysql-connector-java", "8.0.28")
     implementation("org.codehaus.groovy", "groovy", "3.0.10")
     implementation("org.knowm.xchart", "xchart", "3.8.1")
+    implementation("org.mapdb", "mapdb", "3.0.8")
 }
 
 group = "pw.chew.chewbotcca"
