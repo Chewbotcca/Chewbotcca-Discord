@@ -37,12 +37,7 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.chew.api.ChewAPI;
-import pw.chew.chewbotcca.listeners.BotCommandListener;
-import pw.chew.chewbotcca.listeners.InteractionHandler;
-import pw.chew.chewbotcca.listeners.MessageHandler;
-import pw.chew.chewbotcca.listeners.ReactListener;
-import pw.chew.chewbotcca.listeners.ReadyListener;
-import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
+import pw.chew.chewbotcca.listeners.*;
 import pw.chew.chewbotcca.menus.message.PasteMessageContextMenu;
 import pw.chew.chewbotcca.menus.message.UnfurlMessageContextMenu;
 import pw.chew.chewbotcca.objects.Memory;
@@ -51,7 +46,6 @@ import pw.chew.chewbotcca.util.DatabaseHelper;
 import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.RestClient;
 
-import javax.security.auth.login.LoginException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,7 +58,7 @@ public class Chewbotcca {
     // Instance variables
     private static final Logger logger = LoggerFactory.getLogger(Chewbotcca.class);
 
-    public static void main(String[] args) throws LoginException, IOException {
+    public static void main(String[] args) throws IOException {
         // Load properties into the PropertiesManager
         Properties prop = new Properties();
         prop.load(new FileInputStream("bot.properties"));
@@ -86,7 +80,7 @@ public class Chewbotcca {
         CommandClientBuilder client = new CommandClientBuilder();
 
         // Set the client settings
-        client.setActivity(Activity.listening("to /help"));
+        client.setActivity(Activity.listening("/help"));
         client.setOwnerId(PropertiesManager.getOwnerId());
         client.setPrefix(PropertiesManager.getPrefix());
         client.setPrefixes(new String[]{"<@!" + PropertiesManager.getClientId() + "> "});
