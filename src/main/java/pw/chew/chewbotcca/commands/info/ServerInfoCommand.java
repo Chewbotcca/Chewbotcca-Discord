@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,6 +69,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import static pw.chew.chewbotcca.util.CommandMentionHelper.mention;
+
 // %^sinfo command
 public class ServerInfoCommand extends SlashCommand {
 
@@ -136,7 +138,7 @@ public class ServerInfoCommand extends SlashCommand {
         int newschans = server.getNewsChannels().size();
 
         List<CharSequence> counts = new ArrayList<>();
-        counts.add("Total: " + server.getTextChannels().size());
+        counts.add("Total: " + server.getChannels().size());
         counts.add("Text: " + textchans);
         counts.add("Voice: " + server.getVoiceChannels().size());
         counts.add("Stages: " + server.getStageChannels().size());
@@ -172,22 +174,22 @@ public class ServerInfoCommand extends SlashCommand {
         if (e.getFields().size() == 5) {
             e.addBlankField(true);
         }
-        if (perks.size() > 0) {
+        if (!perks.isEmpty()) {
             e.addField("Perks", String.join("\n", perks), true);
         }
-        if (feats.size() > 0) {
+        if (!feats.isEmpty()) {
             e.addField("Features", String.join("\n", feats), true);
         }
 
-        e.addField("View More Info", """
-            Roles - `%^sinfo roles`
-            Boosts - `%^sinfo boosts`
-            Bots - `%^sinfo bots`
-            Channels - `%^sinfo channels`
-            Member Milestones - `%^sinfo milestones`
-            Member Stats - `%^sinfo memberstats`
-            Join Graph - `%^sinfo joingraph`
-            """.replaceAll("%\\^sinfo", prefix), false);
+        e.addField("View More Info", String.join("\n", Arrays.asList(
+            "Roles - %s".formatted(mention("serverinfo roles")),
+            "Boosts - %s".formatted(mention("serverinfo boosts")),
+            "Bots - %s".formatted(mention("serverinfo bots")),
+            "Channels - %s".formatted(mention("serverinfo channels")),
+            "Member Milestones - %s".formatted(mention("serverinfo milestones")),
+            "Member Stats - %s".formatted(mention("serverinfo memberstats")),
+            "Join Graph - %s".formatted(mention("serverinfo joingraph"))
+        )), false);
 
         e.setFooter("Server ID: " + server.getId());
 

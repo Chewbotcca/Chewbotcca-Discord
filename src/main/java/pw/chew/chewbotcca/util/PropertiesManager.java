@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -167,7 +167,7 @@ public class PropertiesManager {
      * In development, this is usually per-server.
      * In production, this should be null
      *
-     * @return the forced guild id
+     * @return the forced guild id, or null if not set
      */
     @Nullable
     public static String forceGuildId() {
