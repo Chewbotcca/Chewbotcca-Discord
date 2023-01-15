@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ public class EvalCommand extends Command {
     public EvalCommand() {
         this.name = "eval";
         this.ownerCommand = true;
+        this.guildOnly = false;
     }
 
     @Override
