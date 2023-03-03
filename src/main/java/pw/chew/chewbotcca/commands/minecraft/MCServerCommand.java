@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,16 +24,12 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.Color;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 // %^mcserver command
 public class MCServerCommand extends SlashCommand {
@@ -63,13 +59,13 @@ public class MCServerCommand extends SlashCommand {
 
     private MessageEmbed gatherServerData(String ip) {
         // Get info from API
-        JSONObject data = new JSONObject(RestClient.get("https://api.mcsrvstat.us/2/" + ip));
+        JSONObject data = new JSONObject(RestClient.get("https://api.mcstatus.io/v2/status/java/" + ip));
         ServerInfo info = new ServerInfo(data);
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("**Server Info For** `" + ip + "`");
 
         // Set thumbnail to favicon
-        // e.setThumbnail(info.getFavicon());
+        e.setThumbnail("https://api.mcstatus.io/v2/icon/" + ip);
 
         // If online, show stats, else don't.
         if (info.isOnline()) {
@@ -98,11 +94,12 @@ public class MCServerCommand extends SlashCommand {
     }
 
     /**
-     * Parsed object from a mcsrvstat.us response
+     * Parsed object from a mcstatus.io response
      */
     private record ServerInfo(JSONObject data) {
 
         /**
+         * Determines whether the server is online or offline.
          * @return if the server is online
          */
         public boolean isOnline() {
@@ -113,29 +110,24 @@ public class MCServerCommand extends SlashCommand {
          * @return a "clean" version of the MOTD.
          */
         public String getCleanMOTD() {
-            JSONArray motdLines = data.getJSONObject("motd").getJSONArray("clean");
-            List<String> motd = new ArrayList<>();
-            for (Object line : motdLines) {
-                motd.add(String.valueOf(line));
-            }
-            return String.join("\n", motd);
+            return data.getJSONObject("motd").getString("clean");
         }
 
         /**
          * @return the "Version" string
          */
         public String getVersion() {
-            return data.getString("version");
+            return data.getJSONObject("version").getString("name_clean");
         }
 
         /**
          * A "Geyser" server is a server running Geyser. A specific version is checked.
          * Only works if Geyser version is build 513 or above
          *
-         * @return whether or not this is a Geyser
+         * @return whether this is a Geyser server
          */
         public boolean isGeyser() {
-            return data.getString("version").startsWith("Geyser");
+            return getVersion().startsWith("Geyser");
         }
 
         /**
@@ -153,24 +145,12 @@ public class MCServerCommand extends SlashCommand {
         }
 
         /**
-         * @return the favicon
-         */
-        @Nullable
-        public String getFavicon() {
-            return data.has("icon") ? data.getString("icon") : null;
-        }
-
-        /**
          * UNIX timestamp of the time the result was cached. Returns 0 when the result was not fetched from cache.
          *
          * @return the last cache time
          */
         public Instant getCacheTime() {
-            long cacheTime = data.getJSONObject("debug").getLong("cachetime");
-            if (cacheTime == 0) {
-                return Instant.now();
-            }
-            return Instant.ofEpochSecond(cacheTime);
+            return Instant.ofEpochMilli(data.getLong("retrieved_at"));
         }
     }
 }
