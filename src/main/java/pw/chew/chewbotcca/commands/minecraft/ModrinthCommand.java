@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ public class ModrinthCommand extends SlashCommand {
     public ModrinthCommand() {
         this.name = "modrinth";
         this.help = "Searches modrinth.com for a specified project";
+        this.guildOnly = false;
 
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "query", "The project to search for", true)
@@ -81,30 +82,34 @@ public class ModrinthCommand extends SlashCommand {
 
         // Add support field
         MessageEmbed.Field support = new MessageEmbed.Field("Platform Support",
-            "Client: " + mod.getClientSide() + "\n" + "Server: " + mod.getServerSide(), true);
+            "Client: " + mod.clientSide() + "\n" + "Server: " + mod.serverSide(), true);
 
         // Add tags
-        MessageEmbed.Field tags = new MessageEmbed.Field("Tags", String.join(", ", mod.getCategories()), true);
+        MessageEmbed.Field tags = new MessageEmbed.Field("Tags", String.join(", ", mod.categories()), true);
 
         // Add downloads
-        MessageEmbed.Field downloads = new MessageEmbed.Field("Downloads", mod.getDownloads() + "", true);
+        MessageEmbed.Field stats = new MessageEmbed.Field("Stats", """
+                Downloads: %s
+                Followers: %s
+                """.formatted(mod.downloads(), mod.followers()), true);
 
         // Add field for timestamps
         MessageEmbed.Field timestamps = new MessageEmbed.Field("Timestamps",
             // Add one for publish date and publish date
-            "Created: " + TimeFormat.DATE_TIME_SHORT.format(mod.getDateCreated()) + "\n" +
-                "Updated: " + TimeFormat.DATE_TIME_SHORT.format(mod.getDateModified()), true);
+            "Created: " + TimeFormat.DATE_TIME_SHORT.format(mod.createdDate()) + "\n" +
+                "Updated: " + TimeFormat.DATE_TIME_SHORT.format(mod.modifiedDate()), true);
 
         // Add field for latest version
-        MessageEmbed.Field latestVersion = new MessageEmbed.Field("Latest Version", mod.getLatestVersion(), true);
+        MessageEmbed.Field latestVersion = new MessageEmbed.Field("Latest Version", mod.latestVersion(), true);
 
         // Build and return the embed
         return new EmbedBuilder()
-            .setAuthor(mod.getAuthor(), mod.getAuthorURL())
-            .setThumbnail(mod.getIconURL())
-            .setTitle(mod.getTitle(), mod.getPageURL())
-            .setDescription(mod.getDescription())
-            .addField(support).addField(tags).addField(downloads).addField(latestVersion).addField(timestamps)
+            .setAuthor(mod.author(), mod.authorURL())
+            .setThumbnail(mod.iconURL())
+            .setTitle(mod.title(), mod.pageURL())
+            .setDescription(mod.description())
+            .addField(support).addField(tags).addField(stats).addField(latestVersion).addField(timestamps)
+            .setColor(mod.color())
             .setFooter("Modrinth.com", "https://avatars.githubusercontent.com/u/67560307").build();
     }
 }

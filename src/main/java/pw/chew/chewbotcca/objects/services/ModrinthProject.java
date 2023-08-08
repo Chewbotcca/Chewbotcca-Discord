@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.MiscUtil;
 
+import java.awt.Color;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -29,64 +30,72 @@ import java.util.List;
  * @param data The JSON data of the project.
  */
 public record ModrinthProject(JSONObject data) {
-    public String getTitle() {
+    public String title() {
         return data.getString("title");
     }
 
-    public String getDescription() {
+    public String description() {
         return data.getString("description");
     }
 
-    public String getSlug() {
+    public String slug() {
         return data.getString("slug");
     }
 
-    public String getProjectType() {
+    public String projectType() {
         return data.getString("project_type");
     }
 
-    public String getAuthor() {
+    public String author() {
         return data.getString("author");
     }
 
-    public String getAuthorURL() {
-        return String.format("https://www.modrinth.com/user/%s", getAuthor());
+    public String authorURL() {
+        return String.format("https://www.modrinth.com/user/%s", author());
     }
 
-    public OffsetDateTime getDateCreated() {
+    public OffsetDateTime createdDate() {
         return OffsetDateTime.parse(data.getString("date_created"));
     }
 
-    public OffsetDateTime getDateModified() {
+    public OffsetDateTime modifiedDate() {
         return OffsetDateTime.parse(data.getString("date_modified"));
     }
 
-    public String getClientSide() {
+    public String clientSide() {
         return MiscUtil.capitalize(data.getString("client_side"));
     }
 
-    public String getServerSide() {
+    public String serverSide() {
         return MiscUtil.capitalize(data.getString("server_side"));
     }
 
-    public long getDownloads() {
+    public long downloads() {
         return data.getLong("downloads");
     }
 
-    public String getPageURL() {
-        return String.format("https://modrinth.com/%s/%s", this.getProjectType(), this.getSlug());
+    public long followers() {
+        return data.getLong("follows");
+    }
+
+    public Color color() {
+        return new Color(data.getInt("color"));
+    }
+
+    public String pageURL() {
+        return String.format("https://modrinth.com/%s/%s", this.projectType(), this.slug());
     }
 
     @Nullable
-    public String getIconURL() {
+    public String iconURL() {
         return data.getString("icon_url").isBlank() ? null : data.getString("icon_url");
     }
 
-    public List<String> getCategories() {
+    public List<String> categories() {
         return data.getJSONArray("categories").toList().stream().map(Object::toString).map(MiscUtil::capitalize).toList();
     }
 
-    public String getLatestVersion() {
+    public String latestVersion() {
         return data.getString("latest_version");
     }
 }
