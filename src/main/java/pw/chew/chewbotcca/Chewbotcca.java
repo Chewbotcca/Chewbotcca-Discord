@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,7 +136,6 @@ public class Chewbotcca {
                 waiter, commandClient, // JDA-Chewtils stuff
                 new InteractionHandler(), // Handle interactions
                 new MessageHandler(), // Handle messages
-                new ReactListener(), // Handle reactions
                 new ReadyListener(), // Ran on boot
                 new ServerJoinLeaveListener() // Listen for server count changes for stats
             ).build();
