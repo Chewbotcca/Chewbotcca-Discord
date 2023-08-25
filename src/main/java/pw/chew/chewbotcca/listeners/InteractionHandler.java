@@ -20,6 +20,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import pw.chew.chewbotcca.commands.fun.APODCommand;
 import pw.chew.chewbotcca.commands.fun.PollCommand;
 import pw.chew.chewbotcca.commands.info.InfoCommand;
 import pw.chew.chewbotcca.commands.minecraft.WynncraftCommand;
@@ -81,6 +82,12 @@ public class InteractionHandler extends ListenerAdapter {
                     }
                 }
             }
+        } else if (id.startsWith("apod:explanation")) {
+            // apod:explanation:month:day:year
+            String[] parts = id.split(":");
+            String date = parts[2] + "/" + parts[3] + "/" + parts[4];
+
+            APODCommand.replyExplanation(event, date);
         }
     }
 

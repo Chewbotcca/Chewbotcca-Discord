@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,16 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -34,9 +35,12 @@ import java.text.DateFormatSymbols;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class APODCommand extends SlashCommand {
+    private static final Map<String, Astropix> cache = new HashMap<>();
 
     public APODCommand() {
         this.name = "apod";
@@ -64,23 +68,21 @@ public class APODCommand extends SlashCommand {
             String year = event.optString("year", String.valueOf(today.getYear()));
             String date = month + "/" + day + "/" + year;
 
-            event.replyEmbeds(gatherPicture(date)).queue();
+            Astropix pic = cache.get(date);
+            if (pic == null) {
+                pic = gatherPicture(date);
+                cache.put(date, pic);
+            }
+
+            event.replyEmbeds(pic.buildEmbed())
+                .addActionRow(Button.secondary("apod:explanation:%s:%s:%s".formatted(month, day, year), "View Explanation"))
+                .queue();
         } catch (IllegalArgumentException e) {
             event.reply(e.getMessage()).setEphemeral(true).queue();
         }
     }
 
-    @Override
-    protected void execute(CommandEvent event) {
-        event.getChannel().sendTyping().queue();
-        try {
-            event.reply(gatherPicture(event.getArgs()));
-        } catch (IllegalArgumentException e) {
-            event.reply(e.getMessage());
-        }
-    }
-
-    private MessageEmbed gatherPicture(String date) {
+    private static Astropix gatherPicture(String date) {
         if (!date.equals("astropix") || date.isBlank()) {
             String[] input = date.split("/");
             if (input.length < 3) {
@@ -106,22 +108,17 @@ public class APODCommand extends SlashCommand {
         Elements image = doc.select("body > center:nth-child(1) > p:nth-child(3) > a > img");
         String description = image.attr("alt").replaceAll("\n", " ");
         String img = "https://apod.nasa.gov/apod/" + image.attr("src");
+        String explanation = doc.select("body > p:nth-child(3)").text();
         // Ensure img is a valid image
         if (!EmbedBuilder.URL_PATTERN.matcher(img).matches() || img.equals("https://apod.nasa.gov/apod/")) {
             // debug output the image url for debugging
             description = "Could not find an image for this date! You will need to visit the page to enjoy today's \"picture\".";
         }
 
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setImage(img)
-            .setAuthor("NASA Astronomy Picture of the Day")
-            .setTitle(title, url)
-            .setDescription(description)
-            .setFooter(friendlyDate);
-        return embed.build();
+        return new Astropix(friendlyDate, title, description, img, url, explanation);
     }
 
-    private String getDateURL(String[] date) {
+    private static String getDateURL(String[] date) {
         // Get current time in CST
         OffsetDateTime current = OffsetDateTime.now();
         // Parse int from date input
@@ -164,6 +161,16 @@ public class APODCommand extends SlashCommand {
         return "ap" + yearString + monthString + dayString;
     }
 
+    public static void replyExplanation(ButtonInteractionEvent event, String date) {
+        Astropix pic = cache.get(date);
+        if (pic == null) {
+            pic = gatherPicture(date);
+            cache.put(date, pic);
+        }
+
+        event.reply(pic.explanation()).setEphemeral(true).queue();
+    }
+
     private List<Command.Choice> buildMonthChoices() {
         List<Command.Choice> responses = new ArrayList<>();
         for (int i = 1; i <= 12; i++) {
@@ -171,5 +178,22 @@ public class APODCommand extends SlashCommand {
             responses.add(new Command.Choice(month, i));
         }
         return responses;
+    }
+
+    private record Astropix(String friendlyDate, String title, String description, String img, String url, String explanation) {
+        // clean description when instantiating
+        public Astropix {
+            description = description.replaceAll("Clicking on the picture will download the highest resolution version available.", "");
+        }
+
+        private MessageEmbed buildEmbed() {
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.setImage(img)
+                .setAuthor("NASA Astronomy Picture of the Day")
+                .setTitle(title, url)
+                .setDescription(description)
+                .setFooter(friendlyDate);
+            return embed.build();
+        }
     }
 }
