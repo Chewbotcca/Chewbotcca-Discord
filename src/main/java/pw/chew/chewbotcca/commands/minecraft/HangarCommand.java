@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,22 +16,23 @@
  */
 package pw.chew.chewbotcca.commands.minecraft;
 
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.CooldownScope;
+import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONObject;
-import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.util.Collections;
 
-public class HangarCommand extends Command {
-    private static final String baseUrl = "https://hangar.benndorf.dev/";
+public class HangarCommand extends SlashCommand {
+    private static final String baseUrl = "https://hangar.papermc.io/";
     private static final String apiUrl = baseUrl + "api/v1/";
 
     public HangarCommand() {
@@ -40,14 +41,19 @@ public class HangarCommand extends Command {
         this.cooldown = 5;
         this.cooldownScope = CooldownScope.USER;
         this.guildOnly = false;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "plugin", "The plugin to search for").setRequired(true)
+        );
     }
 
     @Override
-    protected void execute(CommandEvent event) {
+    protected void execute(SlashCommandEvent event) {
+        String plugin = event.optString("plugin", "");
+
         try {
-            event.reply(buildPluginEmbed(event.getArgs()));
+            event.replyEmbeds(buildPluginEmbed(plugin)).queue();
         } catch (IllegalArgumentException e) {
-            event.replyError(e.getMessage());
+            event.reply(e.getMessage()).setEphemeral(true).queue();
         }
     }
 
@@ -72,10 +78,7 @@ public class HangarCommand extends Command {
 
         embed.setTitle(plugin.getString("name"), projectURL);
         embed.setDescription(plugin.getString("description"));
-        embed.setThumbnail(projectURL + "/icon?nocache" + Instant.now());
-        if (plugin.getJSONArray("promotedVersions").length() > 0) {
-            embed.addField("Latest", plugin.getJSONArray("promotedVersions").getJSONObject(0).getString("version"), true);
-        }
+        embed.setThumbnail(plugin.getString("avatarUrl"));
 
         JSONObject stats = plugin.getJSONObject("stats");
         embed.addField("Views", String.valueOf(stats.getInt("views")), true);
