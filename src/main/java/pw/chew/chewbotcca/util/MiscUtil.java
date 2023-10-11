@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,8 +120,18 @@ public class MiscUtil {
      * @return the parsed date
      */
     public static OffsetDateTime dateParser(String date, String format) {
-        DateTimeFormatter inputFormat = DateTimeFormatter.ofPattern(format);
-        return OffsetDateTime.parse(date, inputFormat);
+        return OffsetDateTime.parse(date, DateTimeFormatter.ofPattern(format));
+    }
+
+    /**
+     * Parse a given date with a given format
+     *
+     * @param date   The date string to parse
+     * @param format The format to parse
+     * @return the parsed date
+     */
+    public static OffsetDateTime dateParser(String date, DateTimeFormatter format) {
+        return OffsetDateTime.parse(date, format);
     }
 
     /**

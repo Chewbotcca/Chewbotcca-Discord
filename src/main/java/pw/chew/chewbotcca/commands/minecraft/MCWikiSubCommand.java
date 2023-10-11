@@ -19,6 +19,7 @@ package pw.chew.chewbotcca.commands.minecraft;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
+import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -28,6 +29,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.net.URLEncoder;
@@ -68,8 +71,8 @@ public class MCWikiCommand extends SlashCommand {
     }
 
     private MessageEmbed gatherData(String query) {
-        String apiUrl = "https://minecraft.gamepedia.com/api.php?action=opensearch&search=";
-        String mcUrl = "https://minecraft.gamepedia.com/";
+        String apiUrl = "https://minecraft.wiki/api.php?action=opensearch&search=";
+        String mcUrl = "https://minecraft.wiki/";
 
         JSONArray j;
 
@@ -77,7 +80,6 @@ public class MCWikiCommand extends SlashCommand {
         try {
             j = new JSONArray(RestClient.get(apiUrl + URLEncoder.encode(query, StandardCharsets.UTF_8))).getJSONArray(1);
         } catch (JSONException e) {
-            e.printStackTrace();
             throw new IllegalArgumentException("Error reading search results!");
         }
         if(j.isEmpty()) {
@@ -89,7 +91,7 @@ public class MCWikiCommand extends SlashCommand {
         List<String> noSlash = new ArrayList<>();
         for(Object item : j) {
             String str = (String)item;
-            String name = str.replace("https://minecraft.gamepedia.com/", "");
+            String name = str.replace("https://minecraft.wiki/", "");
             if(!name.contains("/")) {
                 noSlash.add((String) item);
             }
@@ -109,18 +111,32 @@ public class MCWikiCommand extends SlashCommand {
         Document doc = Jsoup.parse(page);
 
         // Get summary
-        String summary = doc.select("#mw-content-text > div.mw-parser-output > p:nth-child(3)").text();
-        String img = doc.select("#mw-content-text > div.mw-parser-output > div.notaninfobox > div.infobox-imagearea.animated-container > div:nth-child(1) > a > img").attr("data-src");
-        // Ensure img is a valid image
-        if (!EmbedBuilder.URL_PATTERN.matcher(img).matches()) {
-            img = null;
+        String summar1 = doc.select("#mw-content-text > div.mw-parser-output > p:nth-child(3)").html();
+        String summar2 = doc.select("#mw-content-text > div.mw-parser-output > p:nth-child(4)").html();
+
+        String summary = summar1.isBlank() ? summar2 : summar1;
+
+        String img = null;
+        Element infobox = doc.select("#mw-content-text > div.mw-parser-output > div.notaninfobox > div.infobox-imagearea.animated-container").first();
+        if (infobox != null) {
+            Element imgEle = infobox.select("img").first();
+            if (imgEle != null) {
+                img = "https://minecraft.wiki" + imgEle.attr("src");
+                // Ensure img is a valid image
+
+                LoggerFactory.getLogger(this.getClass()).debug("image is " + img);
+                if (!EmbedBuilder.URL_PATTERN.matcher(img).matches()) {
+                    img = null;
+                }
+            }
         }
 
         // Return the results
         return (new EmbedBuilder()
             .setAuthor("Minecraft Wiki Search Results")
             .setTitle(articleName.replace("_", " "), url)
-            .setDescription(summary)
+            .setDescription(FlexmarkHtmlConverter.builder().build().convert(summary)
+                .replaceAll("/w/", "https://minecraft.wiki/w/"))
             .setThumbnail(img)
             .build()
         );

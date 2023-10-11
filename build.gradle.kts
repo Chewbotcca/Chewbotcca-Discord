@@ -64,6 +64,7 @@ dependencies {
     implementation("org.codehaus.groovy", "groovy", "3.0.10")
     implementation("org.knowm.xchart", "xchart", "3.8.1")
     implementation("org.mapdb", "mapdb", "3.0.8")
+    implementation("com.vladsch.flexmark", "flexmark-html2md-converter", "0.64.0")
 }
 
 group = "pw.chew.chewbotcca"
