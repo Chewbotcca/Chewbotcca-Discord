@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ public class HelpCommand extends SlashCommand {
                     Chewbotcca is a multi-purpose, semi-functional, almost always online, Discord bot!
 
                     This bot is powered by [SkySilk Cloud Services](https://www.skysilk.com/ref/4PRQpuQraD)!""")
-            .addField("Commands", "You can find all my commands [here](https://chew.pw/chewbotcca/discord/commands)", true)
+            .addField("Commands", "You can find all my commands [here](https:/help.chew.pro/bots/discord/chewbotcca/commands)", true)
             .addField("Invite me!", "You can invite me to your server with [this link](https://discord.com/oauth2/authorize?client_id=604362556668248095&scope=bot&permissions=0).", true)
             .addField("Help Server", "Click [me](https://discord.gg/UjxQ3Bh) to join the help server.", true)
             .addField("More Bot Stats", "Run `" + prefix + "stats` to see more stats!", true)

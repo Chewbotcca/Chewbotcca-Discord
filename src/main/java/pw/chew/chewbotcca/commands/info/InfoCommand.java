@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
  */
 package pw.chew.chewbotcca.commands.info;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -33,7 +32,6 @@ import net.dv8tion.jda.internal.utils.Checks;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.objects.Memory;
-import pw.chew.chewbotcca.util.PropertiesManager;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
@@ -63,38 +61,12 @@ public class InfoCommand extends SlashCommand {
             if (e.getMessage().contains("Did you mean? ")) {
                 SelectMenu menu = buildSuggestionMenu(e.getMessage());
 
-                event.reply("Invalid command! See <https://chew.pw/chewbotcca/discord/commands> for a list of commands.")
+                event.reply("Invalid command! See <https://help.chew.pro/bots/discord/chewbotcca/commands> for a list of commands.")
                     .addActionRow(menu)
                     .queue();
             } else {
                 event.replyEmbeds(ResponseHelper.generateFailureEmbed(null, e.getMessage())).setEphemeral(true).queue();
             }
-        }
-    }
-
-    @Override
-    protected void execute(CommandEvent event) {
-        // Make sure there's an arg
-        String command = event.getArgs();
-        if (command.isBlank()) {
-            event.reply("Please specify a command to find info for!");
-            return;
-        }
-
-        try {
-            event.reply(gatherData(command));
-        } catch (IllegalArgumentException e) {
-            if (e.getMessage().contains("Did you mean? ")) {
-                SelectMenu menu = buildSuggestionMenu(e.getMessage());
-
-                event.getChannel().sendMessage("Invalid command! See <https://chew.pw/chewbotcca/discord/commands> for a list of commands.")
-                    .setActionRow(menu)
-                    .queue();
-
-                return;
-            }
-
-            event.replyWarning(e.getMessage());
         }
     }
 
@@ -154,16 +126,17 @@ public class InfoCommand extends SlashCommand {
             for (int i = 0; i < didYouMean.length(); i++) {
                 predictions.add(didYouMean.getString(i));
             }
-            if (predictions.size() > 0) {
-                throw new IllegalArgumentException("Invalid command! See <https://chew.pw/chewbotcca/discord/commands> for a list of commands. Did you mean? " + String.join(", ", predictions));
+            if (!predictions.isEmpty()) {
+                throw new IllegalArgumentException("Invalid command! See <https://help.chew.pro/bots/discord/chewbotcca/commands> for a list of commands. Did you mean? " + String.join(", ", predictions));
             } else {
-                throw new IllegalArgumentException("Invalid command! See <https://chew.pw/chewbotcca/discord/commands> for a list of commands.");
+                throw new IllegalArgumentException("Invalid command! See <https://help.chew.pro/bots/discord/chewbotcca/commands> for a list of commands.");
             }
         }
 
         // Gather the data and make an embed with it
         EmbedBuilder e = new EmbedBuilder()
-            .setTitle("**Info For**: `" + PropertiesManager.getPrefix() + data.getString("command") + "`")
+            .setTitle("**Info For**: `/" + data.getString("command") + "`",
+                "https://help.chew.pro/bots/discord/chewbotcca/commands/" + data.getString("command"))
             .setDescription(data.getString("description"));
 
         e.addField("Arguments", data.optString("args", "No Arguments"), true);
