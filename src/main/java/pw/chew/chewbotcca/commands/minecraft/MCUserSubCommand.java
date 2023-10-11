@@ -28,11 +28,11 @@ import net.dv8tion.jda.api.utils.TimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.RestClient;
 
-import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 // %^mcuser command
@@ -53,7 +53,7 @@ public class MCUserCommand extends SlashCommand {
     protected void execute(SlashCommandEvent event) {
         String name = event.optString("user", "");
         try {
-            event.replyEmbeds(gatherData(name)).queue();
+            event.deferReply().queue(interactionHook -> interactionHook.editOriginalEmbeds(gatherData(name)).queue());
         } catch (IllegalArgumentException e) {
             event.reply(e.getMessage()).setEphemeral(true).queue();
         }
@@ -71,13 +71,11 @@ public class MCUserCommand extends SlashCommand {
     }
 
     private MessageEmbed gatherData(String name) {
-        JSONArray history;
         String uuid;
         // Get profile info
-        if (name.length() == 32) {
+        if (name.length() == 32 || name.length() == 36) {
             // If it's a UUID
             try {
-                history = new JSONArray(RestClient.get("https://api.mojang.com/user/profiles/" + name + "/names"));
                 uuid = name;
             } catch (JSONException e) {
                 throw new IllegalArgumentException("Not a valid input! Please enter a valid UUID!");
@@ -86,27 +84,28 @@ public class MCUserCommand extends SlashCommand {
             // If it's a username
             try {
                 JSONObject profile = new JSONObject(RestClient.get("https://api.mojang.com/users/profiles/minecraft/" + name));
-                history = new JSONArray(RestClient.get("https://api.mojang.com/user/profiles/" + profile.getString("id") + "/names"));
                 uuid = profile.getString("id");
             } catch (JSONException e) {
-                throw new IllegalArgumentException("Not a valid input! Please enter a valid UUID!");
+                throw new IllegalArgumentException("Not a valid input! Please enter a valid username!");
             }
         } else {
             throw new IllegalArgumentException("Not a valid input! Please enter a valid username or a valid UUID!");
         }
+        JSONObject profile = new JSONObject(RestClient.get("https://laby.net/api/v2/user/" + uuid + "/get-profile"));
+        JSONArray history = profile.getJSONArray("username_history");
         // Find recent names and when they were changed
         StringBuilder names = new StringBuilder();
         for(int i = history.length() - 1; i >= 0; i--) {
             JSONObject data = history.getJSONObject(i);
             String time;
-            if(data.has("changedToAt")) {
-                OffsetDateTime at = Instant.ofEpochMilli(data.getLong("changedToAt")).atOffset(ZoneOffset.UTC);
+            if(!data.isNull("changed_at")) {
+                OffsetDateTime at = MiscUtil.dateParser(data.getString("changed_at"), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                 time = TimeFormat.DATE_TIME_SHORT.format(at);
             } else {
                 time = "Original";
             }
             String username = data.getString("name");
-            names.append(time).append(" - `").append(username).append("`\n");
+            names.append("`").append(username).append("` - ").append(time).append("\n");
         }
         // Return info
         return (new EmbedBuilder()
