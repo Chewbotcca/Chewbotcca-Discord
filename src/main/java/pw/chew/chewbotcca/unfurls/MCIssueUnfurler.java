@@ -20,7 +20,7 @@ package pw.chew.chewbotcca.unfurls;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.commands.minecraft.MCIssueCommand;
+import pw.chew.chewbotcca.commands.minecraft.MCIssueSubCommand;
 import pw.chew.chewbotcca.util.RestClient;
 
 public class MCIssueUnfurler implements GenericUnfurler {
@@ -36,12 +36,12 @@ public class MCIssueUnfurler implements GenericUnfurler {
         String issue = url[url.length - 1];
 
         // Ensure we actually track this
-        String apiUrl = MCIssueCommand.getApiUrl(issue.split("-")[0]);
+        String apiUrl = MCIssueSubCommand.getApiUrl(issue.split("-")[0]);
         if (apiUrl == null)
             return null;
         // Get response
         JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
         // Initialize GitHub and the response
-        return MCIssueCommand.generateEmbed(data, issue, apiUrl).build();
+        return MCIssueSubCommand.generateEmbed(data, issue, apiUrl).build();
     }
 }

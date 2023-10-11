@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
  */
 package pw.chew.chewbotcca.commands.minecraft;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -34,11 +33,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class MCIssueCommand extends SlashCommand {
+public class MCIssueSubCommand extends SlashCommand {
     private static final HashMap<String, List<String>> projects = new HashMap<>();
 
-    public MCIssueCommand() {
-        this.name = "mcissue";
+    public MCIssueSubCommand() {
+        this.name = "issue";
         this.help = "Searches Mojira or Spigot MC Jira for a specified issue. Requires PROJ-NUM or link";
         this.aliases = new String[]{"mojira", "mcbug"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
@@ -85,39 +84,6 @@ public class MCIssueCommand extends SlashCommand {
             event.replyEmbeds(generateEmbed(data, issue, apiUrl).build()).queue();
         } catch (IllegalArgumentException e) {
             event.reply(e.getMessage()).setEphemeral(true).queue();
-        }
-    }
-
-    @Override
-    protected void execute(CommandEvent event) {
-        if (event.getArgs().length() < 4) {
-            event.reply("Please specify a project AND issue, for example, 'WEB-2303'");
-            return;
-        }
-
-        String issue;
-
-        if(event.getArgs().contains("http")) {
-            String[] breakdown = event.getArgs().split("/");
-            issue = breakdown[breakdown.length - 1];
-        } else {
-            issue = event.getArgs();
-        }
-
-        String apiUrl = getApiUrl(issue.split("-")[0]);
-        if (apiUrl == null) {
-            event.reply("Invalid Project Specified. Supported projects are any from Mojang Studios or SpigotMC Jira");
-            return;
-        }
-
-        event.getChannel().sendTyping().queue();
-
-        JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
-
-        try {
-            event.reply(generateEmbed(data, issue, apiUrl).build());
-        } catch (IllegalArgumentException e) {
-            event.replyWarning(e.getMessage());
         }
     }
 

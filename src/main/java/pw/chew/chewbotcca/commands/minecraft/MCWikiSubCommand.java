@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
  */
 package pw.chew.chewbotcca.commands.minecraft;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
@@ -40,10 +39,9 @@ import java.util.Collections;
 import java.util.List;
 
 // %^mcwiki command
-public class MCWikiCommand extends SlashCommand {
-
-    public MCWikiCommand() {
-        this.name = "mcwiki";
+public class MCWikiSubCommand extends SlashCommand {
+    public MCWikiSubCommand() {
+        this.name = "wiki";
         this.help = "Search the Minecraft Wiki";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
@@ -58,15 +56,6 @@ public class MCWikiCommand extends SlashCommand {
             event.replyEmbeds(gatherData(event.optString("query", ""))).queue();
         } catch (IllegalArgumentException e) {
             event.reply(e.getMessage()).setEphemeral(true).queue();
-        }
-    }
-
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        try {
-            commandEvent.reply(gatherData(commandEvent.getArgs().strip()));
-        } catch (IllegalArgumentException e) {
-            commandEvent.replyWarning(e.getMessage());
         }
     }
 

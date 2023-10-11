@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2023 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
  */
 package pw.chew.chewbotcca.commands.minecraft;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -36,10 +35,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 // %^mcuser command
-public class MCUserCommand extends SlashCommand {
+public class MCUserSubCommand extends SlashCommand {
 
-    public MCUserCommand() {
-        this.name = "mcuser";
+    public MCUserSubCommand() {
+        this.name = "user";
         this.help = "Looks up a Minecraft user and returns their profile";
         this.aliases = new String[]{"namemc"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
@@ -56,17 +55,6 @@ public class MCUserCommand extends SlashCommand {
             event.deferReply().queue(interactionHook -> interactionHook.editOriginalEmbeds(gatherData(name)).queue());
         } catch (IllegalArgumentException e) {
             event.reply(e.getMessage()).setEphemeral(true).queue();
-        }
-    }
-
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        // Get username/uuid from args
-        String name = commandEvent.getArgs().split(" ")[0].replace("-", "");
-        try {
-            commandEvent.reply(gatherData(name));
-        } catch (IllegalArgumentException e) {
-            commandEvent.replyWarning(e.getMessage());
         }
     }
 

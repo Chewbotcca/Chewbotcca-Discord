@@ -16,7 +16,6 @@
  */
 package pw.chew.chewbotcca.commands.minecraft;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -32,10 +31,9 @@ import java.time.Instant;
 import java.util.Collections;
 
 // %^mcserver command
-public class MCServerCommand extends SlashCommand {
-
-    public MCServerCommand() {
-        this.name = "mcserver";
+public class MCServerSubCommand extends SlashCommand {
+    public MCServerSubCommand() {
+        this.name = "server";
         this.help = "Find some information about a specified server";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
@@ -48,13 +46,6 @@ public class MCServerCommand extends SlashCommand {
     protected void execute(SlashCommandEvent event) {
         String ip = event.optString("ip", "");
         event.replyEmbeds(gatherServerData(ip)).queue();
-    }
-
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        // Start typing, this may take a while
-        commandEvent.getChannel().sendTyping().queue();
-        commandEvent.reply(gatherServerData(commandEvent.getArgs()));
     }
 
     private MessageEmbed gatherServerData(String ip) {
