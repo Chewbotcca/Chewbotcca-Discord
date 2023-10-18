@@ -25,7 +25,7 @@ plugins {
     java
     `maven-publish`
     application
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.9.10"
 }
 
 repositories {
@@ -48,23 +48,23 @@ repositories {
 }
 
 dependencies {
-    implementation("net.dv8tion", "JDA", "5.0.0-beta.13")
+    implementation("net.dv8tion", "JDA", "5.0.0-beta.15")
     implementation("pw.chew", "jda-chewtils", "2.0-SNAPSHOT")
-    implementation("ch.qos.logback", "logback-classic", "1.2.11")
-    implementation("com.squareup.okhttp3", "okhttp", "4.9.3")
-    implementation("org.json", "json", "20230227")
-    implementation("io.sentry", "sentry", "5.6.3")
-    implementation("org.kohsuke", "github-api", "1.303")
-    implementation("org.jsoup", "jsoup", "1.14.3")
+    implementation("ch.qos.logback", "logback-classic", "1.4.11")
+    implementation("com.squareup.okhttp3", "okhttp", "4.12.0")
+    implementation("org.json", "json", "20231013")
+    implementation("io.sentry", "sentry", "5.7.4")
+    implementation("org.kohsuke", "github-api", "1.316")
+    implementation("org.jsoup", "jsoup", "1.16.1")
     implementation("pro.chew.api", "ChewAPI", "1.0-b5")
     implementation("org.reflections", "reflections", "0.10.2")
     implementation("me.memerator.api", "MemeratorAPI", "2.0.0_74")
-    implementation("org.hibernate", "hibernate-core", "5.6.5.Final")
-    implementation("mysql", "mysql-connector-java", "8.0.28")
-    implementation("org.codehaus.groovy", "groovy", "3.0.10")
-    implementation("org.knowm.xchart", "xchart", "3.8.1")
-    implementation("org.mapdb", "mapdb", "3.0.8")
-    implementation("com.vladsch.flexmark", "flexmark-html2md-converter", "0.64.0")
+    implementation("org.hibernate", "hibernate-core", "5.6.15.Final")
+    implementation("mysql", "mysql-connector-java", "8.0.33")
+    implementation("org.codehaus.groovy", "groovy", "3.0.19")
+    implementation("org.knowm.xchart", "xchart", "3.8.5")
+    implementation("org.mapdb", "mapdb", "3.0.10")
+    implementation("com.vladsch.flexmark", "flexmark-html2md-converter", "0.64.8")
 }
 
 group = "pw.chew.chewbotcca"
