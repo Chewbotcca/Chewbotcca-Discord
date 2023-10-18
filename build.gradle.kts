@@ -52,7 +52,7 @@ dependencies {
     implementation("pw.chew", "jda-chewtils", "2.0-SNAPSHOT")
     implementation("ch.qos.logback", "logback-classic", "1.4.11")
     implementation("com.squareup.okhttp3", "okhttp", "4.12.0")
-    implementation("org.json", "json", "20230227")
+    implementation("org.json", "json", "20231013")
     implementation("io.sentry", "sentry", "5.7.4")
     implementation("org.kohsuke", "github-api", "1.316")
     implementation("org.jsoup", "jsoup", "1.16.1")
