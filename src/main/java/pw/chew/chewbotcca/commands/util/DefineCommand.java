@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ public class DefineCommand extends SlashCommand {
         // Attempt to grab the word, if it doesn't exist let them know
         JSONArray grabbedword;
         try {
-            grabbedword = new JSONArray(RestClient.get("https://api.wordnik.com/v4/word.json/" + word + "/definitions?includeRelated=true&useCanonical=false&includeTags=false&api_key=" + PropertiesManager.getWordnikToken()));
+            grabbedword = RestClient.get("https://api.wordnik.com/v4/word.json/" + word + "/definitions?includeRelated=true&useCanonical=false&includeTags=false&api_key=" + PropertiesManager.getWordnikToken()).asJSONArray();
         } catch (JSONException e) {
             throw new IllegalArgumentException("Word not found! Check your local spell-checker!");
         }

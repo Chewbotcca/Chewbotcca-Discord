@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,8 +78,8 @@ public class ServerJoinLeaveListener extends ListenerAdapter {
             .put("shard_count", 1)
             .put("guildCount", servers)
             .put("server_count", servers);
-        RestClient.post("https://discord.bots.gg/api/v1/bots/" + PropertiesManager.getClientId() + "/stats", PropertiesManager.getDbotsToken(), stats);
-        RestClient.post("https://top.gg/api/bots/" + PropertiesManager.getClientId() + "/stats", PropertiesManager.getTopggToken(), stats);
-        RestClient.post("https://api.discordextremelist.xyz/v2/bot/" + PropertiesManager.getClientId() + "/stats", PropertiesManager.getDELToken(), stats);
+        RestClient.post("https://discord.bots.gg/api/v1/bots/" + PropertiesManager.getClientId() + "/stats", stats, PropertiesManager.getDbotsToken());
+        RestClient.post("https://top.gg/api/bots/" + PropertiesManager.getClientId() + "/stats", stats, PropertiesManager.getTopggToken());
+        RestClient.post("https://api.discordextremelist.xyz/v2/bot/" + PropertiesManager.getClientId() + "/stats", stats, PropertiesManager.getDELToken());
     }
 }

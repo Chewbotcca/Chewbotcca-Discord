@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.json.JSONException;
-import org.json.JSONObject;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
@@ -50,7 +49,7 @@ public class CatCommand extends SlashCommand {
     private MessageEmbed generateCatEmbed() {
         // Try to gather a cat from the Cat API
         try {
-            String showcat = new JSONObject(RestClient.get("https://aws.random.cat/meow")).getString("file");
+            String showcat = RestClient.get("https://aws.random.cat/meow").asJSONObject().getString("file");
 
             return (new EmbedBuilder()
                 .setTitle("Adorable.", showcat)

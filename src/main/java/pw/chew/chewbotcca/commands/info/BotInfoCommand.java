@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,7 +120,7 @@ public class BotInfoCommand extends SlashCommand {
      */
     private EmbedBuilder gatherTopggInfo(String id, JDA jda) {
         // Get data from top.gg
-        JSONObject botData = new JSONObject(RestClient.get("https://top.gg/api/bots/" + id, PropertiesManager.getTopggToken()));
+        JSONObject botData = RestClient.get("https://top.gg/api/bots/" + id, PropertiesManager.getTopggToken()).asJSONObject();
 
         // If there's an error let them know
         if (botData.has("error")) {
@@ -170,7 +170,7 @@ public class BotInfoCommand extends SlashCommand {
      */
     private EmbedBuilder gatherDBotsInfo(String id, JDA jda) {
         // Gather info from the site
-        JSONObject botData = new JSONObject(RestClient.get("https://discord.bots.gg/api/v1/bots/" + id, PropertiesManager.getDbotsToken()));
+        JSONObject botData = RestClient.get("https://discord.bots.gg/api/v1/bots/" + id, PropertiesManager.getDbotsToken()).asJSONObject();
 
         // If there's a message
         if (botData.has("message")) {
@@ -214,7 +214,7 @@ public class BotInfoCommand extends SlashCommand {
      */
     public EmbedBuilder gatherDELInfo(String id, JDA jda) {
         // Gather info from the site
-        JSONObject response = new JSONObject(RestClient.get("https://api.discordextremelist.xyz/v2/bot/" + id, PropertiesManager.getDELToken()));
+        JSONObject response = RestClient.get("https://api.discordextremelist.xyz/v2/bot/" + id, PropertiesManager.getDELToken()).asJSONObject();
 
         // If there's an error let them know
         if (response.getBoolean("error")) {

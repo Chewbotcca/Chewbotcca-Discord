@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,7 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.text.DateFormatSymbols;
@@ -95,22 +93,17 @@ public class APODCommand extends SlashCommand {
             }
         }
 
-        String url = String.format("https://apod.nasa.gov/apod/%s.html", date);
-
-        String page = RestClient.get(url);
-
-        // Parse the page content
-        Document doc = Jsoup.parse(page);
+        JSONObject data = RestClient.get("https://api.chew.pro/apod?date=%s".formatted(date)).asJSONObject();
 
         // Get title and img
-        String friendlyDate = "Date: " + doc.select("body > center:nth-child(1) > p:nth-child(3)").text();
-        String title = doc.select("body > center:nth-child(2) > b:nth-child(1)").text();
-        Elements image = doc.select("body > center:nth-child(1) > p:nth-child(3) > a > img");
-        String description = image.attr("alt").replaceAll("\n", " ");
-        String img = "https://apod.nasa.gov/apod/" + image.attr("src");
-        String explanation = doc.select("body > p:nth-child(3)").text();
+        String url = String.format("https://apod.nasa.gov/apod/ap%s.html", date);
+        String friendlyDate = data.getString("friendlyDate");
+        String title = data.getString("title");
+        String description = data.getString("description");
+        String img = data.getString("img");
+        String explanation = data.getString("explanation");
         // Ensure img is a valid image
-        if (!EmbedBuilder.URL_PATTERN.matcher(img).matches() || img.equals("https://apod.nasa.gov/apod/")) {
+        if (img == null) {
             // debug output the image url for debugging
             description = "Could not find an image for this date! You will need to visit the page to enjoy today's \"picture\".";
         }
@@ -158,7 +151,7 @@ public class APODCommand extends SlashCommand {
         if (dayString.length() == 1) {
             dayString = "0" + dayString;
         }
-        return "ap" + yearString + monthString + dayString;
+        return yearString + monthString + dayString;
     }
 
     public static void replyExplanation(ButtonInteractionEvent event, String date) {

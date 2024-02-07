@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ public class MCWikiSubCommand extends SlashCommand {
 
         // Try and find a result
         try {
-            j = new JSONArray(RestClient.get(apiUrl + URLEncoder.encode(query, StandardCharsets.UTF_8))).getJSONArray(1);
+            j = RestClient.get(apiUrl + URLEncoder.encode(query, StandardCharsets.UTF_8)).asJSONArray().getJSONArray(1);
         } catch (JSONException e) {
             throw new IllegalArgumentException("Error reading search results!");
         }
@@ -94,7 +94,7 @@ public class MCWikiSubCommand extends SlashCommand {
         String url = mcUrl + articleName.replaceAll(" ", "_");
 
         // Actually get the page
-        String page = RestClient.get(url);
+        String page = RestClient.get(url).asString();
 
         // Parse the page content
         Document doc = Jsoup.parse(page);

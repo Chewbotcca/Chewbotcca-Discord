@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.MiscUtil;
@@ -82,14 +81,14 @@ public class RubyGemsCommand extends SlashCommand {
         JSONObject data;
         // Get gem if it exists
         try {
-            data = new JSONObject(RestClient.get("https://rubygems.org/api/v1/gems/" + name + ".json"));
+            data = RestClient.get("https://rubygems.org/api/v1/gems/" + name + ".json").asJSONObject();
         } catch (JSONException e) {
             throw new IllegalArgumentException("Invalid ruby gem!");
         }
         // Get ranking from best gems
         int rank = -1;
         try {
-            rank = new JSONArray(RestClient.get("https://bestgems.org/api/v1/gems/" + name + "/total_ranking.json")).getJSONObject(0).getInt("total_ranking");
+            rank = RestClient.get("https://bestgems.org/api/v1/gems/" + name + "/total_ranking.json").asJSONArray().getJSONObject(0).getInt("total_ranking");
         } catch (JSONException ignored) {
         }
 

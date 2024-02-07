@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ public class DBioUser {
      */
     public static DBioUser getUser(String id) {
         try {
-            JSONObject response = new JSONObject(RestClient.get("https://api.discord.bio/user/details/" + id));
+            JSONObject response = RestClient.get("https://api.discord.bio/user/details/" + id).asJSONObject();
             return response.has("message") ? null : new DBioUser(response);
         } catch (JSONException e) {
             // Could not parse JSON

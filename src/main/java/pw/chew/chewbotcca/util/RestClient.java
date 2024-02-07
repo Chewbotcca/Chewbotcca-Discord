@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,146 +16,130 @@
  */
 package pw.chew.chewbotcca.util;
 
-import okhttp3.FormBody;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
-import pw.chew.chewbotcca.objects.Memory;
 
-import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 
-// Off brand RestClient based on the ruby gem of the same name
+/**
+ * Off brand RestClient based on the ruby gem of the same name
+ */
 public class RestClient {
-    private static OkHttpClient client = new OkHttpClient();
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    public static final String userAgent = "Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095";
+    public static final String JSON = "application/json; charset=utf-8";
+    private static String userAgent = "Java Discord Bot";
+    private static final HttpClient client = HttpClient.newBuilder()
+        .followRedirects(HttpClient.Redirect.NORMAL)
+        .build();
+    private static Duration timeout = Duration.ofSeconds(30);
+    private static boolean debug = true;
 
     /**
-     * Sets the OkHttp client to use with this RestClient
+     * Gets the user agent used for this session.
      *
-     * @param client the new client
+     * @return The user agent.
      */
-    public static void setClient(OkHttpClient client) {
-        RestClient.client = client;
+    public static String getUserAgent() {
+        return userAgent;
+    }
+
+    /**
+     * Sets the user agent used for this session.
+     *
+     * @param userAgent The new user agent.
+     */
+    public static void setUserAgent(String userAgent) {
+        RestClient.userAgent = userAgent;
+    }
+
+    /**
+     * Gets the HTTP client used for this session
+     *
+     * @return The HTTP Client
+     */
+    public static HttpClient getHttpClient() {
+        return client;
+    }
+
+    /**
+     * Sets the timeout used for this session.
+     *
+     * @param timeout The new timeout.
+     */
+    public static void setTimeout(Duration timeout) {
+        RestClient.timeout = timeout;
+    }
+
+    /**
+     * Sets debug logging for this session.
+     *
+     * @param debug The new debug option.
+     */
+    public static void setDebug(boolean debug) {
+        RestClient.debug = debug;
     }
 
     /**
      * Make a GET request
+     *
      * @param url the url to get
-     * @return a response
+     * @param headers Optional set of headers as "Header: Value" like "Authorization: Bearer bob"
+     * @throws IllegalArgumentException If an invalid header is passed
+     * @throws RuntimeException If the request fails
+     * @return a String response
      */
-    public static String get(String url) {
-        Request request = new Request.Builder()
-                .url(url)
-                .get()
-                .addHeader("User-Agent", userAgent)
-                .build();
+    public static Response get(String url, String ...headers) {
+        HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(url))
+            .header("User-Agent", userAgent)
+            .timeout(timeout);
 
-        LoggerFactory.getLogger(RestClient.class).debug("Making call to GET " + url);
-        return performRequest(request);
+        for (String header : headers) {
+            String[] details = header.split(":");
+            if (details.length != 2) {
+                throw new IllegalArgumentException("Invalid header syntax provided: " + header);
+            }
+            request.header(details[0].trim(), details[1].trim());
+        }
+
+        if (debug) LoggerFactory.getLogger(RestClient.class).debug("Making call to GET " + url);
+        return performRequest(request.build());
     }
 
     /**
-     * Make an Authenticated GET Request
+     * Make a POST Request
+     *
      * @param url the url
-     * @param key the auth key
+     * @param data the body to send (will run through toString())
+     * @param headers vararg of headers in "Key: Value" format
+     * @throws IllegalArgumentException If an invalid header is passed
+     * @throws RuntimeException If the request fails
      * @return a response
      */
-    public static String get(String url, String key) {
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", key)
-                .addHeader("User-Agent", userAgent)
-                .get()
-                .build();
+    public static Response post(String url, Object data, String... headers) {
+        HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(url))
+            .POST(HttpRequest.BodyPublishers.ofString(data.toString()))
+            .header("User-Agent", userAgent)
+            .timeout(timeout);
 
-        LoggerFactory.getLogger(RestClient.class).debug("Making call to GET " + url);
-        return performRequest(request);
-    }
+        for (String header : headers) {
+            String[] details = header.split(":");
+            if (details.length != 2) {
+                throw new IllegalArgumentException("Invalid header syntax provided: " + header);
+            }
+            request.header(details[0].trim(), details[1].trim());
+        }
 
-    /**
-     * Make an Authenticated POST Request
-     * @param url the url
-     * @param args the arguments to pass
-     * @param key the auth key
-     * @return a response
-     */
-    public static String post(String url, HashMap<String, Object> args, String key) {
-        Request request = new Request.Builder()
-                .url(url)
-                .post(bodyFromHash(args))
-                .addHeader("Authorization", key)
-                .addHeader("User-Agent", userAgent)
-                .build();
+        if (data instanceof JSONObject || data instanceof JSONArray) {
+            request.header("Content-Type", JSON);
+        }
 
-        LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
-        return performRequest(request);
-    }
-
-    /**
-     * Make an Unauthenticated POST Request with JSON Body
-     * @param url the url
-     * @param json the json body to send
-     * @return a response
-     */
-    public static String post(String url, JSONObject json) {
-        RequestBody body = RequestBody.create(json.toString(), JSON);
-
-        Request request = new Request.Builder()
-            .url(url)
-            .post(body)
-            .addHeader("User-Agent", userAgent)
-            .build();
-
-        LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
-        return performRequest(request);
-    }
-
-    /**
-     * Make an Authenticated POST Request with JSON Body
-     * @param url the url
-     * @param key the auth key
-     * @param json the json body to send
-     * @return a response
-     */
-    public static String post(String url, String key, JSONObject json) {
-        RequestBody body = RequestBody.create(json.toString(), JSON);
-
-        Request request = new Request.Builder()
-            .url(url)
-            .post(body)
-            .addHeader("Authorization", key)
-            .addHeader("User-Agent", userAgent)
-            .build();
-
-        LoggerFactory.getLogger(RestClient.class).debug("Making call to POST " + url);
-        return performRequest(request);
-    }
-
-    /**
-     * Make an Authenticated DELETE Request
-     * @param url the url
-     * @param key the auth key
-     * @return a response
-     */
-    public static String delete(String url, String key) {
-        Request request = new Request.Builder()
-            .url(url)
-            .delete()
-            .addHeader("Authorization", key)
-            .addHeader("User-Agent", userAgent)
-            .build();
-
-        LoggerFactory.getLogger(RestClient.class).debug("Making call to DELETE " + url);
-        return performRequest(request);
+        if (debug) LoggerFactory.getLogger(RestClient.class).debug("Making call to POST {}", url);
+        return performRequest(request.build());
     }
 
     /**
@@ -163,33 +147,65 @@ public class RestClient {
      * @param request a request
      * @return a response
      */
-    public static String performRequest(Request request) {
-        try (Response response = client.newCall(request).execute()) {
-            String body;
-            ResponseBody responseBody = response.body();
-            if(responseBody == null) {
-                body = "{}";
-            } else {
-                body = responseBody.string();
+    public static Response performRequest(HttpRequest request) {
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            int code = response.statusCode();
+            String body = response.body();
+            if (debug) {
+                LoggerFactory.getLogger(RestClient.class).debug("Response is " + body);
             }
-            LoggerFactory.getLogger(RestClient.class).debug("Response is " + body);
-            return body;
-        } catch (SSLHandshakeException e) {
-            LoggerFactory.getLogger(RestClient.class).warn("Call to " + request.url() + " failed with SSLHandshakeException!");
-            return "{error: 'SSLHandshakeException'}";
-        } catch (IOException e) {
-            LoggerFactory.getLogger(RestClient.class).warn("Call to " + request.url() + " failed with IOException!");
-            return "{error: 'IOException'}";
+            return new Response(code, body);
+        } catch (IOException | InterruptedException e) {
+            // Rethrow exceptions as runtime
+            throw new RuntimeException(e.getMessage());
         }
     }
 
-    public static RequestBody bodyFromHash(HashMap<String, Object> args) {
-        FormBody.Builder bodyArgs = new FormBody.Builder();
-        if (args == null)
-            return bodyArgs.build();
-        for(Map.Entry<String, Object> entry : args.entrySet()) {
-            bodyArgs.add(entry.getKey(), String.valueOf(entry.getValue()));
+    /**
+     * A response from a REST call
+     */
+    public record Response(int code, String response) {
+        /**
+         * Check to see if the request was successful.
+         * Codes 200-299 are considered successful.
+         * @return true if successful
+         */
+        public boolean success() {
+            return code >= 200 && code < 300;
         }
-        return bodyArgs.build();
+
+        /**
+         * Get the response as a String
+         * @return a String
+         */
+        public String asString() {
+            return response;
+        }
+
+        /**
+         * Get the response as a JSONObject
+         * @return a JSONObject
+         */
+        public JSONObject asJSONObject() {
+            return new JSONObject(response);
+        }
+
+        /**
+         * Get the response as a JSONArray
+         * @return a JSONArray
+         */
+        public JSONArray asJSONArray() {
+            return new JSONArray(response);
+        }
+
+        /**
+         * Get the response as a String
+         * @return a String
+         */
+        @Override
+        public String toString() {
+            return asString();
+        }
     }
 }

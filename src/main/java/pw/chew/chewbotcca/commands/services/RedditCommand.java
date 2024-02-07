@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,7 +102,7 @@ public class RedditCommand extends SlashCommand {
         }
 
         // Get data from reddit
-        JSONObject reddit = new JSONObject(RestClient.get(url));
+        JSONObject reddit = RestClient.get(url).asJSONObject();
         JSONArray data = reddit.getJSONObject("data").getJSONArray("children");
 
         if (data.length() == 0) {

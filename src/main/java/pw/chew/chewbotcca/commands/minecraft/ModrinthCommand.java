@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ public class ModrinthCommand extends SlashCommand {
         query = URLEncoder.encode(query, StandardCharsets.UTF_8);
 
         // Search for the mod via the API subdomain
-        JSONObject data = new JSONObject(RestClient.get("https://api.modrinth.com/v2/search?limit=1&query=" + query));
+        JSONObject data = RestClient.get("https://api.modrinth.com/v2/search?limit=1&query=" + query).asJSONObject();
 
         // If the mod doesn't exist, throw an error
         if (data.getInt("total_hits") == 0) {

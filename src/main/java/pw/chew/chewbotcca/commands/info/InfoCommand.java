@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ public class InfoCommand extends SlashCommand {
      */
     private static MessageEmbed gatherData(String command) {
         // Get the command from the chew api
-        JSONObject data = new JSONObject(RestClient.get("https://chew.pw/chewbotcca/discord/api/command/" + command));
+        JSONObject data = RestClient.get("https://chew.pw/chewbotcca/discord/api/command/" + command).asJSONObject();
         // If there's an error
         if (data.has("error")) {
             JSONArray didYouMean = data.getJSONArray("didYouMean");

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@ public class WynncraftCommand extends SlashCommand {
         query = URLEncoder.encode(query, StandardCharsets.UTF_8);
 
         // Make the data request
-        JSONObject data = new JSONObject(RestClient.get("https://web-api.wynncraft.com/api/v3/" + type + "/" + query));
+        JSONObject data = RestClient.get("https://web-api.wynncraft.com/api/v3/" + type + "/" + query).asJSONObject();
 
         if (type.equals("player")) {
             playerCache.put(query, data);
@@ -171,7 +171,7 @@ public class WynncraftCommand extends SlashCommand {
      * @param player the player's name
      */
     public static void handleCharactersButton(ButtonInteractionEvent event, String player) {
-        JSONObject data = new JSONObject(RestClient.get("https://web-api.wynncraft.com/api/v3/player/" + player + "/characters"));
+        JSONObject data = RestClient.get("https://web-api.wynncraft.com/api/v3/player/" + player + "/characters").asJSONObject();
 
         EmbedBuilder embed = new EmbedBuilder()
             .setTitle(player + "'s Characters")
@@ -214,7 +214,7 @@ public class WynncraftCommand extends SlashCommand {
     public static void handleCharacterSelection(StringSelectInteractionEvent event, String player) {
         SelectOption option = event.getSelectedOptions().get(0);
 
-        JSONObject data = new JSONObject(RestClient.get("https://web-api.wynncraft.com/api/v3/player/%s/characters/%s".formatted(player, option.getValue())));
+        JSONObject data = RestClient.get("https://web-api.wynncraft.com/api/v3/player/%s/characters/%s".formatted(player, option.getValue())).asJSONObject();
         characterCache.put(option.getValue(), data);
 
         EmbedBuilder embed = buildCharacterEmbed(data, player);
@@ -349,7 +349,7 @@ public class WynncraftCommand extends SlashCommand {
         query = URLEncoder.encode(query, StandardCharsets.UTF_8);
 
         // Make the search request
-        JSONObject res = new JSONObject(RestClient.get("https://web-api.wynncraft.com/api/v3/search/" + query));
+        JSONObject res = RestClient.get("https://web-api.wynncraft.com/api/v3/search/" + query).asJSONObject();
 
         JSONArray players = res.optJSONArray("players");
         JSONArray guilds = res.optJSONArray("guilds");
@@ -438,21 +438,21 @@ public class WynncraftCommand extends SlashCommand {
         if (type.equals("player")) {
             JSONObject pl = playerCache.get(key[0]);
             if (pl == null) {
-                pl = new JSONObject(RestClient.get("https://web-api.wynncraft.com/api/v3/player/%s".formatted((Object[]) key)));
+                pl = RestClient.get("https://web-api.wynncraft.com/api/v3/player/%s".formatted((Object[]) key)).asJSONObject();
                 playerCache.put(key[0], pl);
             }
             return pl;
         } else if (type.equals("guild")) {
             JSONObject gu = guildCache.get(key[0]);
             if (gu == null) {
-                gu = new JSONObject(RestClient.get("https://web-api.wynncraft.com/api/v3/guild/%s".formatted((Object[]) key)));
+                gu = RestClient.get("https://web-api.wynncraft.com/api/v3/guild/%s".formatted((Object[]) key)).asJSONObject();
                 guildCache.put(key[0], gu);
             }
             return gu;
         } else {
             JSONObject ch = characterCache.get(key[1]);
             if (ch == null) {
-                ch = new JSONObject(RestClient.get("https://web-api.wynncraft.com/api/v3/player/%s/characters/%s".formatted((Object[]) key)));
+                ch = RestClient.get("https://web-api.wynncraft.com/api/v3/player/%s/characters/%s".formatted((Object[]) key)).asJSONObject();
                 characterCache.put(key[1], ch);
             }
             return ch;

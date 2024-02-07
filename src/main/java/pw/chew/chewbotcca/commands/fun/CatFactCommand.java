@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ public class CatFactCommand extends SlashCommand {
 
     private String getFact() {
         // Get a fact and respond with it
-        JSONObject data = new JSONObject(RestClient.get("https://catfact.ninja/fact"));
+        JSONObject data = RestClient.get("https://catfact.ninja/fact").asJSONObject();
         if (data.has("error")) {
             return "Could not get cat fact :cry: Error: " + data.getString("error");
         }

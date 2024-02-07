@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -205,7 +205,7 @@ public class UserInfoCommand extends SlashCommand {
         }
 
         // Get pronoun if they have it
-        JSONObject pronounData = new JSONObject(RestClient.get("https://pronoundb.org/api/v1/lookup?platform=discord&id=" + user.getId()));
+        JSONObject pronounData = RestClient.get("https://pronoundb.org/api/v1/lookup?platform=discord&id=" + user.getId()).asJSONObject();
         String pronouns = null;
         if (pronounData.has("pronouns") && !pronounData.getString("pronouns").equals("unspecified")) {
             pronouns = Pronoun.valueOf(pronounData.getString("pronouns")).detailed;

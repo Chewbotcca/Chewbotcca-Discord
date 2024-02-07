@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ public class HangarCommand extends SlashCommand {
      */
     private MessageEmbed buildPluginEmbed(String args) {
         args = URLEncoder.encode(args, StandardCharsets.UTF_8);
-        JSONObject response = new JSONObject(RestClient.get(apiUrl + "projects?q=" + args + "&limit=1"));
+        JSONObject response = RestClient.get(apiUrl + "projects?q=" + args + "&limit=1").asJSONObject();
         EmbedBuilder embed = new EmbedBuilder();
         embed.setAuthor("Hangar Plugin Repository Search Results", baseUrl);
         if (response.getJSONObject("pagination").getInt("count") == 0) {

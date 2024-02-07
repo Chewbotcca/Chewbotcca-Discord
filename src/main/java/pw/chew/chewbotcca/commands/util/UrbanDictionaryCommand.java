@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ public class UrbanDictionaryCommand extends SlashCommand {
     }
 
     private ButtonEmbedPaginator gatherDefinition(String word, User user) {
-        JSONObject parse = new JSONObject(RestClient.get("https://api.urbandictionary.com/v0/define?term=" + URLEncoder.encode(word, StandardCharsets.UTF_8)));
+        JSONObject parse = RestClient.get("https://api.urbandictionary.com/v0/define?term=" + URLEncoder.encode(word, StandardCharsets.UTF_8)).asJSONObject();
         JSONArray list = parse.getJSONArray("list");
         if (list.isEmpty()) {
             throw new IllegalArgumentException("No results found for term `" + word + "`!");

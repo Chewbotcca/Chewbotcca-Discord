@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
 // %^dog command
@@ -37,7 +36,7 @@ public class DogCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         // Get a dog and bark it, i mean send it, am not furry i swear
-        String dog = new JSONObject(RestClient.get("https://random.dog/woof.json")).getString("url");
+        String dog = RestClient.get("https://random.dog/woof.json").asJSONObject().getString("url");
 
         event.replyEmbeds(new EmbedBuilder()
             .setTitle("Adorable.", dog)
@@ -49,7 +48,7 @@ public class DogCommand extends SlashCommand {
     @Override
     protected void execute(CommandEvent commandEvent) {
         // Get a dog and woof it, i mean send it, am not furry i swear
-        String dog = new JSONObject(RestClient.get("https://random.dog/woof.json")).getString("url");
+        String dog = RestClient.get("https://random.dog/woof.json").asJSONObject().getString("url");
 
         commandEvent.reply(new EmbedBuilder()
             .setTitle("Adorable.", dog)

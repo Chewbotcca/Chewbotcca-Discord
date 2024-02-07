@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ public class PasteMessageContextMenu extends MessageContextMenu {
         }
 
         // Get the contents of the file
-        String contents = RestClient.get(file);
+        String contents = RestClient.get(file).asString();
 
         // Create the payload
         JSONObject payload = new JSONObject()
@@ -85,7 +85,7 @@ public class PasteMessageContextMenu extends MessageContextMenu {
             ));
 
         // Upload to paste.gg
-        JSONObject response = new JSONObject(RestClient.post("https://api.paste.gg/v1/pastes", "Key " + PropertiesManager.getPasteGgKey(), payload));
+        JSONObject response = RestClient.post("https://api.paste.gg/v1/pastes", payload, PropertiesManager.getPasteGgKey()).asJSONObject();
 
         // Return response
         if (response.getString("status").equals("success")) {

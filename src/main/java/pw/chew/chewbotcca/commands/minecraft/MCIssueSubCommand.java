@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ public class MCIssueSubCommand extends SlashCommand {
             return;
         }
 
-        JSONObject data = new JSONObject(RestClient.get(apiUrl + issue));
+        JSONObject data = RestClient.get(apiUrl + issue).asJSONObject();
         try {
             event.replyEmbeds(generateEmbed(data, issue, apiUrl).build()).queue();
         } catch (IllegalArgumentException e) {

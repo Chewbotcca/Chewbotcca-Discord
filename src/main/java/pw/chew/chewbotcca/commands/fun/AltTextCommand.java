@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@ import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.PropertiesManager;
@@ -48,15 +46,13 @@ public class AltTextCommand extends SlashCommand {
     protected void execute(SlashCommandEvent event) {
         String imageUrl = event.optAttachment("image", null).getUrl();
 
-        Request request = new Request.Builder()
-            .url(PropertiesManager.getAzureInstanceURL() + "/vision/v1.0/describe?maxCandidates=5&language=en")
-            .post(RequestBody.create(new JSONObject().put("url", imageUrl).toString(), RestClient.JSON))
-            .addHeader("User-Agent", RestClient.userAgent)
-            .addHeader("Content-Type", "application/json")
-            .addHeader("Ocp-Apim-Subscription-Key", PropertiesManager.getAzureKey())
-            .build();
-
-        JSONObject response = new JSONObject(RestClient.performRequest(request));
+        JSONObject response = RestClient.post(
+            PropertiesManager.getAzureInstanceURL() + "/vision/v1.0/describe?maxCandidates=5&language=en",
+            new JSONObject().put("url", imageUrl),
+            "User-Agent: " + RestClient.getUserAgent(),
+            "Content-Type: application/json",
+            "Ocp-Apim-Subscription-Key: " + PropertiesManager.getAzureKey()
+        ).asJSONObject();
         if (response.has("code")) {
             event.reply(response.getString("message")).setEphemeral(true).queue();
             return;

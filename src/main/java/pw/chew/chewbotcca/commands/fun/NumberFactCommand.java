@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,10 +92,10 @@ public class NumberFactCommand extends SlashCommand {
         EmbedBuilder embed = new EmbedBuilder();
 
         // Attempt to get a fact
-        String facto = RestClient.get(url + "floor");
+        String facto = RestClient.get(url + "floor").asString();
         // If the number is too low, get a higher number
         if(facto.equals("-Infinity is negative infinity."))
-            facto = RestClient.get(url + "ceil");
+            facto = RestClient.get(url + "ceil").asString();
 
         // Set and return the fact embed
         embed.setTitle("Did you know?");

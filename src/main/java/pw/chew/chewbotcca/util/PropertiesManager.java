@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,14 +46,14 @@ public class PropertiesManager {
      * @return discord.bots.gg token for info command
      */
     public static String getDbotsToken() {
-        return properties.getProperty("dbots");
+        return "Authorization:" + properties.getProperty("dbots");
     }
 
     /**
      * @return Top.gg token for DBL/Top.gg bot info command
      */
     public static String getTopggToken() {
-        return properties.getProperty("dbl");
+        return "Authorization:" + properties.getProperty("dbl");
     }
 
     /**
@@ -116,14 +116,14 @@ public class PropertiesManager {
      * @return a DiscordExtremeList api token
      */
     public static String getDELToken() {
-        return properties.getProperty("del");
+        return "Authorization:" + properties.getProperty("del");
     }
 
     /**
      * @return the key for paste.gg
      */
     public static String getPasteGgKey() {
-        return properties.getProperty("pastegg");
+        return "Authorization:" + properties.getProperty("pastegg");
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public class RoryCommand extends SlashCommand {
     @Override
     protected void execute(CommandEvent event) {
         event.getChannel().sendTyping().queue();
-        JSONObject rory = new JSONObject(RestClient.get("https://rory.cat/purr/" + event.getArgs()));
+        JSONObject rory = RestClient.get("https://rory.cat/purr/" + event.getArgs()).asJSONObject();
         if (rory.has("error")) {
             event.reply(rory.getString("error"));
             return;
@@ -88,7 +88,7 @@ public class RoryCommand extends SlashCommand {
 
         @Override
         protected void execute(SlashCommandEvent event) {
-            JSONObject rory = new JSONObject(RestClient.get("https://rory.cat/purr/" + event.optString("id", "")));
+            JSONObject rory = RestClient.get("https://rory.cat/purr/" + event.optString("id", "")).asJSONObject();
             if (rory.has("error")) {
                 event.reply(rory.getString("error")).setEphemeral(true).queue();
                 return;

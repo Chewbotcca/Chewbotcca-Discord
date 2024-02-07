@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,13 +52,13 @@ public class ToSDRCommand extends Command {
         query = query.replaceAll("[^0-9a-z_]", "");
         JSONObject data;
         try {
-            data = new JSONObject(RestClient.get("https://api.tosdr.org/v1/service/" + query + ".json"));
+            data = RestClient.get("https://api.tosdr.org/v1/service/" + query + ".json").asJSONObject();
         } catch (JSONException e) {
             throw new IllegalArgumentException("JSON wasn't returned. Please fix your input before I send out another AMBER alert...");
         }
 
         if (data.has("error") && data.getJSONArray("error").get(0).equals("INVALID_SERVICE")) {
-            data = new JSONObject(RestClient.get("https://search.tosdr.org/" + query));
+            data = RestClient.get("https://search.tosdr.org/" + query).asJSONObject();
             if (data.getJSONObject("parameters").isNull("service")) {
                 throw new IllegalArgumentException("Service doesn't exist!");
             }

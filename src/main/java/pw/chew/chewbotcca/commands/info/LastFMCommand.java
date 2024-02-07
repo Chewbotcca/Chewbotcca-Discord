@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ public class LastFMCommand extends SlashCommand {
     }
 
     private MessageEmbed gatherData(String args, String key) {
-        JSONObject parse = new JSONObject(RestClient.get("https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&limit=1&user=" + args + "&api_key=" + key + "&format=json"));
+        JSONObject parse = RestClient.get("https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&limit=1&user=" + args + "&api_key=" + key + "&format=json").asJSONObject();
         // But if I got bamboozled
         if (parse.has("message") && parse.getString("message").equals("User not found")) {
             throw new IllegalArgumentException("No user found for the provided input!");

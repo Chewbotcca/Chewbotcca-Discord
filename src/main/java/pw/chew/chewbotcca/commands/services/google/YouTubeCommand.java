@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,13 +113,13 @@ public class YouTubeCommand extends SlashCommand {
         // Find a video if there is one
         if (id == null) {
             try {
-                id = new JSONObject(RestClient.get(findidurl)).getJSONArray("items").getJSONObject(0).getJSONObject("id").getString("videoId");
+                id = RestClient.get(findidurl).asJSONObject().getJSONArray("items").getJSONObject(0).getJSONObject("id").getString("videoId");
             } catch (JSONException e) {
                 throw new IllegalArgumentException("No videos found for query!");
             }
         }
         // Get the video
-        JSONObject url = new JSONObject(RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + id + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics"));
+        JSONObject url = RestClient.get("https://www.googleapis.com/youtube/v3/videos?id=" + id + "&key=" + PropertiesManager.getGoogleKey() + "&part=snippet,contentDetails,statistics").asJSONObject();
         if (url.getJSONObject("pageInfo").getInt("totalResults") == 0) {
             throw new IllegalArgumentException("No results found for query!");
         }

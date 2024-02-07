@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,11 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.chew.api.ChewAPI;
-import pw.chew.chewbotcca.listeners.*;
+import pw.chew.chewbotcca.listeners.BotCommandListener;
+import pw.chew.chewbotcca.listeners.InteractionHandler;
+import pw.chew.chewbotcca.listeners.MessageHandler;
+import pw.chew.chewbotcca.listeners.ReadyListener;
+import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
 import pw.chew.chewbotcca.menus.message.PasteMessageContextMenu;
 import pw.chew.chewbotcca.menus.message.UnfurlMessageContextMenu;
 import pw.chew.chewbotcca.objects.Memory;
@@ -140,7 +144,7 @@ public class Chewbotcca {
                 new ServerJoinLeaveListener() // Listen for server count changes for stats
             ).build();
 
-        RestClient.setClient(jda.getHttpClient());
+        RestClient.setUserAgent("Chewbotcca-5331/1.0 (JDA; +https://chew.pw/chewbotcca) DBots/604362556668248095");
         Memory.remember(waiter, jda, new ChewAPI(), github, commandClient);
     }
 

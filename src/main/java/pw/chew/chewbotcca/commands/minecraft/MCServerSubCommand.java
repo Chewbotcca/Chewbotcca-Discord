@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public class MCServerSubCommand extends SlashCommand {
 
     private MessageEmbed gatherServerData(String ip) {
         // Get info from API
-        JSONObject data = new JSONObject(RestClient.get("https://api.mcstatus.io/v2/status/java/" + ip));
+        JSONObject data = RestClient.get("https://api.mcstatus.io/v2/status/java/" + ip).asJSONObject();
         ServerInfo info = new ServerInfo(data);
         EmbedBuilder e = new EmbedBuilder();
         e.setTitle("**Server Info For** `" + ip + "`");

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,9 +91,7 @@ public class OCRCommand extends SlashCommand {
     private MessageEmbed gatherData(String url) {
         JSONObject body = new JSONObject("{\"requests\":[{\"image\":{\"source\":{\"imageUri\": \"" + url + "\"}},\"features\":[{\"type\":\"TEXT_DETECTION\"}]}]}");
 
-        JSONObject response = new JSONObject(
-            RestClient.post("https://vision.googleapis.com/v1/images:annotate?key=" + PropertiesManager.getGoogleKey(), body)
-        );
+        JSONObject response = RestClient.post("https://vision.googleapis.com/v1/images:annotate?key=" + PropertiesManager.getGoogleKey(), body).asJSONObject();
 
         try {
             JSONObject data = response.getJSONArray("responses").getJSONObject(0);

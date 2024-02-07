@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ public class MCUserSubCommand extends SlashCommand {
         } else if (name.length() >= 1 && name.length() <= 16) {
             // If it's a username
             try {
-                JSONObject profile = new JSONObject(RestClient.get("https://api.mojang.com/users/profiles/minecraft/" + name));
+                JSONObject profile = RestClient.get("https://api.mojang.com/users/profiles/minecraft/" + name).asJSONObject();
                 uuid = profile.getString("id");
             } catch (JSONException e) {
                 throw new IllegalArgumentException("Not a valid input! Please enter a valid username!");
@@ -79,7 +79,7 @@ public class MCUserSubCommand extends SlashCommand {
         } else {
             throw new IllegalArgumentException("Not a valid input! Please enter a valid username or a valid UUID!");
         }
-        JSONObject profile = new JSONObject(RestClient.get("https://laby.net/api/v2/user/" + uuid + "/get-profile"));
+        JSONObject profile = RestClient.get("https://laby.net/api/v2/user/" + uuid + "/get-profile").asJSONObject();
         JSONArray history = profile.getJSONArray("username_history");
         // Find recent names and when they were changed
         StringBuilder names = new StringBuilder();
