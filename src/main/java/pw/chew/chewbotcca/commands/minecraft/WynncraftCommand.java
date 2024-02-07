@@ -88,9 +88,10 @@ public class WynncraftCommand extends SlashCommand {
 
         // URL Encode the query
         query = URLEncoder.encode(query, StandardCharsets.UTF_8);
+        query = query.replace("+", "%20");
 
         // Make the data request
-        JSONObject data = RestClient.get("https://web-api.wynncraft.com/api/v3/" + type + "/" + query).asJSONObject();
+        JSONObject data = RestClient.get("https://api.wynncraft.com/v3/" + type + "/" + query).asJSONObject();
 
         if (type.equals("player")) {
             playerCache.put(query, data);
@@ -119,6 +120,10 @@ public class WynncraftCommand extends SlashCommand {
             .setTitle("[%s] %s's Members".formatted(data.getString("prefix"), data.getString("name")));
 
         for (String rank : members.keySet()) {
+            if (rank.equals("total")) {
+                continue;
+            }
+
             JSONObject rankMembers = members.getJSONObject(rank);
 
             List<String> memberNames = new ArrayList<>();
@@ -171,7 +176,7 @@ public class WynncraftCommand extends SlashCommand {
      * @param player the player's name
      */
     public static void handleCharactersButton(ButtonInteractionEvent event, String player) {
-        JSONObject data = RestClient.get("https://web-api.wynncraft.com/api/v3/player/" + player + "/characters").asJSONObject();
+        JSONObject data = RestClient.get("https://api.wynncraft.com/v3/player/" + player + "/characters").asJSONObject();
 
         EmbedBuilder embed = new EmbedBuilder()
             .setTitle(player + "'s Characters")
@@ -184,8 +189,8 @@ public class WynncraftCommand extends SlashCommand {
         for (String key : data.keySet()) {
             JSONObject charData = data.getJSONObject(key);
 
-            String name = "%s [Lvl. %s]".formatted(MiscUtil.capitalize(charData.getString("type")), charData.getInt("combat"));
-            String description = "Total Levels: %s".formatted(charData.getInt("totalLevels"));
+            String name = "%s [Lvl. %s]".formatted(MiscUtil.capitalize(charData.getString("type")), charData.getInt("level"));
+            String description = "Total Levels: %s".formatted(charData.getInt("totalLevel"));
 
             menu.addOption(name, key, description);
         }
@@ -214,7 +219,7 @@ public class WynncraftCommand extends SlashCommand {
     public static void handleCharacterSelection(StringSelectInteractionEvent event, String player) {
         SelectOption option = event.getSelectedOptions().get(0);
 
-        JSONObject data = RestClient.get("https://web-api.wynncraft.com/api/v3/player/%s/characters/%s".formatted(player, option.getValue())).asJSONObject();
+        JSONObject data = RestClient.get("https://api.wynncraft.com/v3/player/%s/characters/%s".formatted(player, option.getValue())).asJSONObject();
         characterCache.put(option.getValue(), data);
 
         EmbedBuilder embed = buildCharacterEmbed(data, player);
@@ -272,7 +277,7 @@ public class WynncraftCommand extends SlashCommand {
                 continue;
             }
 
-            embed.addField(MiscUtil.capitalize(key), "Level: %s\nExp: %s".formatted(prof.getInt("level"), prof.getInt("xp")) + "%", true);
+            embed.addField(MiscUtil.capitalize(key), "Level: %s\nExp: %s".formatted(prof.getInt("level"), prof.getInt("xpPercent")) + "%", true);
         }
 
         // Sort fields by level
@@ -307,9 +312,9 @@ public class WynncraftCommand extends SlashCommand {
             .setTitle(player + "'s Dungeon Stats");
 
         for (String key : list.keySet()) {
-            JSONObject dungeon = list.getJSONObject(key);
+            int completed = list.getInt(key);
 
-            embed.addField(MiscUtil.capitalize(key), "Completed: %s".formatted(dungeon.getInt("completed")), true);
+            embed.addField(key, "Completed: %s".formatted(completed), true);
         }
 
         event.editMessageEmbeds(embed.build()).queue();
@@ -345,28 +350,25 @@ public class WynncraftCommand extends SlashCommand {
         // Strip any Player: or Guild:
         query = query.replaceFirst("^(Player|Guild):\\s*", "");
 
-        // URL Encode the query
+        // URL Encode the query. E,g, a space turns into %20
         query = URLEncoder.encode(query, StandardCharsets.UTF_8);
+        query = query.replace("+", "%20");
 
         // Make the search request
-        JSONObject res = RestClient.get("https://web-api.wynncraft.com/api/v3/search/" + query).asJSONObject();
+        JSONObject res = RestClient.get("https://api.wynncraft.com/v3/search/" + query).asJSONObject();
 
-        JSONArray players = res.optJSONArray("players");
-        JSONArray guilds = res.optJSONArray("guilds");
-
-        // if null, replace with empty array
-        if (players == null) players = new JSONArray();
-        if (guilds == null) guilds = new JSONArray();
+        JSONObject players = res.optJSONObject("players", new JSONObject());
+        JSONObject guilds = res.optJSONObject("guilds", new JSONObject());
 
         List<Command.Choice> choices = new ArrayList<>();
 
-        for (int i = 0; i < players.length(); i++) {
-            String player = players.getString(i);
+        for (String key : players.keySet()) {
+            String player = players.getString(key);
             choices.add(new Command.Choice("Player: " + player, "p:" + player));
         }
 
-        for (int i = 0; i < guilds.length(); i++) {
-            String guild = guilds.getString(i);
+        for (String key : guilds.keySet()) {
+            String guild = guilds.getJSONObject(key).getString("name");
             choices.add(new Command.Choice("Guild: " + guild, "g:" + guild));
         }
 
@@ -376,23 +378,24 @@ public class WynncraftCommand extends SlashCommand {
         event.replyChoices(choices).queue();
     }
 
-    private static EmbedBuilder buildPlayerEmbed(JSONObject data) {
-        JSONObject meta = data.getJSONObject("meta");
-
-        String lastSeen = TimeFormat.DATE_TIME_LONG.format(MiscUtil.dateParser(meta.getString("lastJoin"), "uuuu-MM-dd'T'HH:mm:ss.SSSX"));
-        if (meta.getJSONObject("location").getBoolean("online")) {
+    private static EmbedBuilder buildPlayerEmbed(JSONObject meta) {
+        String lastSeen = TimeFormat.DATE_TIME_LONG.format(MiscUtil.dateParser(meta.getString("lastJoin"), "uuuu-MM-dd'T'HH:mm:ss.SSSSSSX"));
+        if (meta.getBoolean("online")) {
             lastSeen = "Online on " + meta.getJSONObject("location").getString("server");
         }
 
+        JSONObject globalData = meta.getJSONObject("globalData");
+
         return new EmbedBuilder()
-            .setTitle(data.getString("username") + "'s Wynncraft Stats")
-            .setColor(Color.decode(meta.getJSONObject("rankColor").getString("main")))
-            .setThumbnail("https://visage.surgeplay.com/bust/350/%s".formatted(data.getString("uuid")))
-            .addField("Total Level", meta.getInt("totalLevels") + "", true)
-            .addField("Mobs Killed", meta.getInt("killedMobs") + "", true)
-            .addField("Playtime", meta.getInt("playtime") + " hours", true)
+            .setTitle(meta.getString("username") + "'s Wynncraft Stats")
+            .setDescription("Viewing global stats for %s".formatted(meta.getString("username")))
+            .setColor(Color.decode(meta.getJSONObject("legacyRankColour").getString("main")))
+            .setThumbnail("https://visage.surgeplay.com/bust/350/%s".formatted(meta.getString("uuid")))
+            .addField("Total Level", globalData.getInt("totalLevel") + "", true)
+            .addField("Mobs Killed", globalData.getInt("killedMobs") + "", true)
+            .addField("Playtime", meta.getDouble("playtime") + " hours", true)
             .addField("Dates",
-                "First Joined: " + TimeFormat.DATE_TIME_LONG.format(MiscUtil.dateParser(meta.getString("firstJoin"), "uuuu-MM-dd'T'HH:mm:ss.SSSX"))
+                "First Joined: " + TimeFormat.DATE_TIME_LONG.format(MiscUtil.dateParser(meta.getString("firstJoin"), "uuuu-MM-dd'T'HH:mm:ssX"))
                     + "\n" +
                     "Last Seen: " + lastSeen,
                 true);
@@ -400,7 +403,7 @@ public class WynncraftCommand extends SlashCommand {
 
     private static EmbedBuilder buildCharacterEmbed(JSONObject data, String character) {
         List<String> skills = new ArrayList<>();
-        JSONObject skillObj = data.getJSONObject("skills");
+        JSONObject skillObj = data.getJSONObject("skillPoints");
         for (String skill : skillObj.keySet()) {
             if (skill.equals("defence")) continue;
 
@@ -411,15 +414,15 @@ public class WynncraftCommand extends SlashCommand {
             .setTitle(character + "'s " + MiscUtil.capitalize(data.getString("type") + " class"))
             .setThumbnail("https://cdn.wynncraft.com/nextgen/classes/picture/%s.webp".formatted(data.getString("type").toLowerCase(Locale.ROOT)))
             .setDescription("# General Statistics\n" +
-                "Total Levels: %s\n".formatted(data.getInt("totalLevels")) +
-                "Combat Level: %s\n".formatted(data.getJSONObject("professions").getJSONObject("combat").getInt("level")) +
-                "Time Played: %s hours\n".formatted(data.getInt("playtime")) +
+                "Total Levels: %s\n".formatted(data.getInt("totalLevel")) +
+                "Combat Level: %s\n".formatted(data.getInt("level")) +
+                "Time Played: %s hours\n".formatted(data.getDouble("playtime")) +
                 "Discoveries: %s\n".formatted(data.getInt("discoveries")) +
                 "Logins: %s\n".formatted(data.getInt("logins")) +
                 "Deaths: %s\n".formatted(data.getInt("deaths")) +
                 "Mobs Killed: %s\n".formatted(data.getInt("mobsKilled")) +
-                "Completed Dungeons: %s\n".formatted(data.getJSONObject("dungeons").getInt("completed")) +
-                "Completed Raids: %s".formatted(data.getJSONObject("raids").getInt("completed"))
+                "Completed Dungeons: %s\n".formatted(data.optJSONObject("dungeons", new JSONObject().put("total", 0)).getInt("total")) +
+                "Completed Raids: %s".formatted(data.optJSONObject("raids", new JSONObject().put("total", 0)).getInt("total"))
             ).addField("Skills", String.join("\n", skills), true);
     }
 
@@ -427,10 +430,10 @@ public class WynncraftCommand extends SlashCommand {
         return new EmbedBuilder()
             .setTitle("[%s] %s".formatted(data.getString("prefix"), data.getString("name")))
             // field for level, showing "Lvl. 5 (45%)" <-- we need to add the percent sign ourselves
-            .addField("Level", "Lvl. %s (%s%s)".formatted(data.getInt("level"), data.getInt("xp"), "%"), true)
-            .addField("Online Members", "%s / %s".formatted(data.getInt("onlineMembers"), data.getInt("totalMembers")), true)
+            .addField("Level", "Lvl. %s (%s%s)".formatted(data.getInt("level"), data.getInt("xpPercent"), "%"), true)
+            .addField("Online Members", "%s / %s".formatted(data.getInt("online"), data.getJSONObject("members").getInt("total")), true)
             .addField("Territories", data.getInt("territories") + "", true)
-            .addField("Created", TimeFormat.DATE_TIME_LONG.format(MiscUtil.dateParser(data.getString("created"), "uuuu-MM-dd'T'HH:mm:ss.SSSX")), false)
+            .addField("Created", TimeFormat.DATE_TIME_LONG.format(MiscUtil.dateParser(data.getString("created"), "uuuu-MM-dd'T'HH:mm:ss.SSSSSSX")), false)
             ;
     }
 
@@ -438,21 +441,21 @@ public class WynncraftCommand extends SlashCommand {
         if (type.equals("player")) {
             JSONObject pl = playerCache.get(key[0]);
             if (pl == null) {
-                pl = RestClient.get("https://web-api.wynncraft.com/api/v3/player/%s".formatted((Object[]) key)).asJSONObject();
+                pl = RestClient.get("https://api.wynncraft.com/v3/player/%s".formatted((Object[]) key)).asJSONObject();
                 playerCache.put(key[0], pl);
             }
             return pl;
         } else if (type.equals("guild")) {
             JSONObject gu = guildCache.get(key[0]);
             if (gu == null) {
-                gu = RestClient.get("https://web-api.wynncraft.com/api/v3/guild/%s".formatted((Object[]) key)).asJSONObject();
+                gu = RestClient.get("https://api.wynncraft.com/v3/guild/%s".formatted((Object[]) key)).asJSONObject();
                 guildCache.put(key[0], gu);
             }
             return gu;
         } else {
             JSONObject ch = characterCache.get(key[1]);
             if (ch == null) {
-                ch = RestClient.get("https://web-api.wynncraft.com/api/v3/player/%s/characters/%s".formatted((Object[]) key)).asJSONObject();
+                ch = RestClient.get("https://api.wynncraft.com/v3/player/%s/characters/%s".formatted((Object[]) key)).asJSONObject();
                 characterCache.put(key[1], ch);
             }
             return ch;
