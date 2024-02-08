@@ -36,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.objects.services.DBioUser;
 import pw.chew.chewbotcca.util.DateTime;
+import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.awt.Color;
@@ -137,22 +138,27 @@ public class UserInfoCommand extends SlashCommand {
 
         EmbedBuilder e = new EmbedBuilder();
         // If executor == member
-        e.setTitle(self ? "User info for you!" : "User info for " + user.getAsTag());
+        e.setTitle(self ? "User info for you!" : "User info for " + MiscUtil.getTag(user));
 
         // Set server/user avatar
         if (user.getAvatarUrl() != null) {
             e.setThumbnail(user.getAvatarUrl() + "?size=2048");
-            e.setAuthor(user.getAsTag(), null, user.getAvatarUrl());
+            e.setAuthor(MiscUtil.getTag(user), null, user.getAvatarUrl());
         }
         if (onServer && member.getAvatarUrl() != null) {
             e.setThumbnail(member.getAvatarUrl() + "?size=2048");
         }
 
         List<String> nameInfo = new ArrayList<>(Arrays.asList(
-            "Tag: " + user.getAsTag(),
             "ID: " + user.getId(),
             "Mention: " + user.getAsMention()
         ));
+        if (user.getDiscriminator().equals("0000")) {
+            nameInfo.add(0, "Username: " + user.getName());
+        } else {
+            nameInfo.add(0, "Tag: " + user.getAsTag());
+        }
+
         if (onServer && !member.getEffectiveName().equals(user.getName())) {
             nameInfo.add("Nickname: " + member.getEffectiveName());
         }

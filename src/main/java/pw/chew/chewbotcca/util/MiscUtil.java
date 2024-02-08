@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  */
 package pw.chew.chewbotcca.util;
 
+import net.dv8tion.jda.api.entities.User;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -174,6 +175,20 @@ public class MiscUtil {
             }
         }
         return results;
+    }
+
+    /**
+     * Returns the tag of a user. If they have a discriminator, it'll be username#0000, otherwise, it'll be their username.
+     *
+     * @param user the user
+     * @return the user's tag
+     */
+    public static String getTag(User user) {
+        if (user.getDiscriminator().equals("0000")) {
+            return user.getName();
+        } else {
+            return user.getAsTag();
+        }
     }
 
     public static int asInt(String s) {

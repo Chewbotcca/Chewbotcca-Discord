@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ import org.mapdb.Serializer;
 import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.objects.PollEmbed;
 import pw.chew.chewbotcca.objects.PollVoter;
+import pw.chew.chewbotcca.util.MiscUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,7 +96,7 @@ public class PollCommand extends SlashCommand {
                 choices.add(e.getValue(id + "-option-" + i).getAsString());
             }
 
-            String user = String.format("%s (%s)", event.getUser().getAsTag(), event.getUser().getId());
+            String user = String.format("%s (%s)", MiscUtil.getTag(event.getUser()), event.getUser().getId());
 
             PollEmbed embed = new PollEmbed(id, question, description, choices, user);
 

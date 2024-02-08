@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import org.json.JSONArray;
+import pw.chew.chewbotcca.util.MiscUtil;
 
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
@@ -127,7 +128,7 @@ public class Bot {
      */
     public void addOwner(String ownerId) {
         User user = jda.retrieveUserById(ownerId).complete();
-        this.owners.add(user.getAsTag());
+        this.owners.add(MiscUtil.getTag(user));
     }
 
     /**
