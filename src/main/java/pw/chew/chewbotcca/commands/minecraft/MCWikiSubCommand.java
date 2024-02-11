@@ -29,7 +29,6 @@ import org.json.JSONException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.net.URLEncoder;
@@ -100,10 +99,12 @@ public class MCWikiSubCommand extends SlashCommand {
         Document doc = Jsoup.parse(page);
 
         // Get summary
-        String summar1 = doc.select("#mw-content-text > div.mw-parser-output > p:nth-child(3)").html();
-        String summar2 = doc.select("#mw-content-text > div.mw-parser-output > p:nth-child(4)").html();
+        Element summarySelection = doc.select("#mw-content-text > div.mw-parser-output > p").first();
 
-        String summary = summar1.isBlank() ? summar2 : summar1;
+        String summary = "";
+        if (summarySelection != null) {
+            summary = summarySelection.html();
+        }
 
         String img = null;
         Element infobox = doc.select("#mw-content-text > div.mw-parser-output > div.notaninfobox > div.infobox-imagearea.animated-container").first();
@@ -113,7 +114,6 @@ public class MCWikiSubCommand extends SlashCommand {
                 img = "https://minecraft.wiki" + imgEle.attr("src");
                 // Ensure img is a valid image
 
-                LoggerFactory.getLogger(this.getClass()).debug("image is " + img);
                 if (!EmbedBuilder.URL_PATTERN.matcher(img).matches()) {
                     img = null;
                 }
