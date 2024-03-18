@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ repositories {
 }
 
 dependencies {
-    implementation("net.dv8tion", "JDA", "5.0.0-beta.15")
+    implementation("net.dv8tion", "JDA", "5.0.0-beta.21")
     implementation("pw.chew", "jda-chewtils", "2.0-SNAPSHOT")
     implementation("ch.qos.logback", "logback-classic", "1.4.11")
     implementation("com.squareup.okhttp3", "okhttp", "4.12.0")
