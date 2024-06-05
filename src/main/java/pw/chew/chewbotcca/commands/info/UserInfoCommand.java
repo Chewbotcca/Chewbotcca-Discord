@@ -33,8 +33,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.objects.services.DBioUser;
 import pw.chew.chewbotcca.util.DateTime;
 import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.RestClient;
@@ -45,9 +45,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static pw.chew.chewbotcca.util.MiscUtil.capitalize;
-
-// %^uinfo command
+/**
+ * Userinfo Command.
+ * <br>
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/userinfo">View information</a>
+ */
 public class UserInfoCommand extends SlashCommand {
 
     public UserInfoCommand() {
@@ -101,7 +103,7 @@ public class UserInfoCommand extends SlashCommand {
                         if (users.isEmpty() && byNick.isEmpty()) {
                             commandEvent.reply("No members found for the given input");
                             return;
-                        } else if (users.size() > 0 && byNick.size() == 0) {
+                        } else if (!users.isEmpty() && byNick.isEmpty()) {
                             user = users.get(0).getUser();
                         } else {
                             user = byNick.get(0).getUser();
@@ -129,10 +131,7 @@ public class UserInfoCommand extends SlashCommand {
      */
     public static EmbedBuilder gatherMainInfo(@Nullable Guild server, User user, User author) {
         // Get the member
-        Member member = null;
-        if (server != null) {
-            member = server.getMember(user);
-        }
+        Member member = server == null ? null : server.getMember(user);
         boolean onServer = member != null;
         boolean self = user == author;
 
@@ -153,6 +152,7 @@ public class UserInfoCommand extends SlashCommand {
             "ID: " + user.getId(),
             "Mention: " + user.getAsMention()
         ));
+        // Since bots can get a userinfo response, and they still have discriminators, we need to keep this check :/
         if (user.getDiscriminator().equals("0000")) {
             nameInfo.add(0, "Username: " + user.getName());
         } else {
@@ -206,32 +206,19 @@ public class UserInfoCommand extends SlashCommand {
                     activities.add(activity.getName());
             }
 
-            if (activities.size() > 0)
+            if (!activities.isEmpty())
                 e.addField("Activities - " + activities.size(), String.join("\n", activities), false);
         }
 
         // Get pronoun if they have it
-        JSONObject pronounData = RestClient.get("https://pronoundb.org/api/v1/lookup?platform=discord&id=" + user.getId()).asJSONObject();
-        String pronouns = null;
-        if (pronounData.has("pronouns") && !pronounData.getString("pronouns").equals("unspecified")) {
-            pronouns = Pronoun.valueOf(pronounData.getString("pronouns")).detailed;
-        }
+        JSONObject pronounData = RestClient.get("https://pronoundb.org/api/v2/lookup?platform=discord&ids=" + user.getId()).asJSONObject();
+        boolean hasPronouns = false;
+        if (pronounData.has(user.getId()) && !pronounData.getJSONObject(user.getId()).getJSONObject("sets").getJSONArray("en").isEmpty()) {
+            // en set
+            JSONArray set = pronounData.getJSONObject(user.getId()).getJSONObject("sets").getJSONArray("en");
+            hasPronouns = true;
 
-        // Get their bio from discord.bio, if they have one.
-        DBioUser dbio = DBioUser.getUser(user.getId());
-        if (dbio != null) {
-            e.setDescription(dbio.get("description"));
-
-            if (dbio.getBirthday() != null) e.addField("Birthday", dbio.getBirthday(), true);
-
-            String gender = capitalize(dbio.getGender());
-            if (pronouns != null) gender += String.format("\n(%s)", pronouns);
-            e.addField("Gender", gender, true);
-
-            if (dbio.get("location") != null) e.addField("Location", dbio.get("location"), true);
-            if (dbio.get("occupation") != null) e.addField("Occupation", dbio.get("occupation"), true);
-        } else if (pronouns != null) {
-            e.addField("Pronouns", pronouns, true);
+            e.addField("Pronouns", String.join("/", MiscUtil.toList(set, String.class)), true);
         }
 
         int missingFields;
@@ -247,8 +234,7 @@ public class UserInfoCommand extends SlashCommand {
 
         // Give credit
         List<String> credits = new ArrayList<>();
-        if (dbio != null) credits.add("Profile info provided by discord.bio");
-        if (pronouns != null) credits.add("Pronoun data from pronoundb.org");
+        if (hasPronouns) credits.add("Pronoun data from pronoundb.org");
         if (!credits.isEmpty()) e.setFooter(String.join(" - ", credits));
 
         List<String> createInfo = new ArrayList<>();
@@ -331,35 +317,5 @@ public class UserInfoCommand extends SlashCommand {
             }
         }
         return -1;
-    }
-
-    private enum Pronoun {
-        unspecified("Unspecified"),
-        hh("he/him"),
-        hi("he/it"),
-        hs("he/she"),
-        ht("he/they"),
-        ih("it/him"),
-        ii("it/its"),
-        is("it/she"),
-        it("it/they"),
-        shh("she/he"),
-        sh("she/her"),
-        si("she/it"),
-        st("she/they"),
-        th("they/he"),
-        ti("they/it"),
-        ts("they/she"),
-        tt("they/them"),
-        any("Any pronouns"),
-        other("Other pronouns"),
-        ask("Ask me my pronouns"),
-        avoid("Avoid pronouns, use my name");
-
-        public final String detailed;
-
-        Pronoun(String detail) {
-            this.detailed = detail;
-        }
     }
 }
