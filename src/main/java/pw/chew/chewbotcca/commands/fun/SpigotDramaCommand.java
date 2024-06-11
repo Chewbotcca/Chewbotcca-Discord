@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,16 +16,19 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import pro.chew.api.objects.SpigotDrama;
 import pw.chew.chewbotcca.objects.Memory;
 
-// %^spigotdrama command
+/**
+ * <h1><code>/spigotdrama Command</code></h1>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/spigotdrama">Docs</a>
+ */
 public class SpigotDramaCommand extends SlashCommand {
     public SpigotDramaCommand() {
         this.name = "spigotdrama";
@@ -35,24 +38,17 @@ public class SpigotDramaCommand extends SlashCommand {
     }
 
     @Override
-    protected void execute(SlashCommandEvent slashCommandEvent) {
-        slashCommandEvent.replyEmbeds(generateDramaEmbed()).queue();
-    }
-
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        commandEvent.reply(generateDramaEmbed());
-    }
-
-    private MessageEmbed generateDramaEmbed() {
+    protected void execute(SlashCommandEvent event) {
         // Get a SpigotDrama response
         SpigotDrama response = Memory.getChewAPI().generateSpigotDrama();
         // Make an embed and send it off
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setAuthor("mdcfe", "https://github.com/mdcfe/spigot-drama-generator", "https://avatars0.githubusercontent.com/u/1917406");
-        embed.setTitle("Spigot Drama Generator", "https://drama.essentialsx.net/");
-        embed.setDescription(response.getPhrase() + "\n\n" + "[Permalink](" + response.getPermalink() + ")");
+        embed.setAuthor("By mdcfe", "https://github.com/mdcfe/spigot-drama-generator", "https://avatars0.githubusercontent.com/u/1917406");
+        embed.setTitle("Spigot Drama Generator", "https://drama.mdcfe.dev/");
+        embed.setDescription(response.getPhrase());
 
-        return embed.build();
+        event.replyEmbeds(embed.build())
+            .addActionRow(Button.link(response.getPermalink(), "Permalink"))
+            .queue();
     }
 }
