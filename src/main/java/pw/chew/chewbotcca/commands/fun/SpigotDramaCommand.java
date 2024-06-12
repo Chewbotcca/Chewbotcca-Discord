@@ -25,7 +25,7 @@ import pro.chew.api.objects.SpigotDrama;
 import pw.chew.chewbotcca.objects.Memory;
 
 /**
- * <h1><code>/spigotdrama Command</code></h1>
+ * <h2><code>/spigotdrama Command</code></h2>
  *
  * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/spigotdrama">Docs</a>
  */
