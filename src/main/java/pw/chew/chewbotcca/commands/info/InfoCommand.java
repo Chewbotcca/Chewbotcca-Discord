@@ -22,6 +22,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -45,7 +46,7 @@ public class InfoCommand extends SlashCommand {
         this.name = "info";
         this.help = "Returns some detailed information about a specified command";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
 
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "command", "The command to find info for").setRequired(true)

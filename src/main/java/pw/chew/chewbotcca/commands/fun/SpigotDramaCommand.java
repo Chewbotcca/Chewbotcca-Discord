@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import pro.chew.api.objects.SpigotDrama;
 import pw.chew.chewbotcca.objects.Memory;
@@ -32,7 +33,7 @@ import pw.chew.chewbotcca.objects.Memory;
 public class SpigotDramaCommand extends SlashCommand {
     public SpigotDramaCommand() {
         this.name = "spigotdrama";
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.help = "Generates some random Spigot drama";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
     }

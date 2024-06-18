@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.MiscUtil;
 
@@ -41,7 +42,7 @@ public class UserStatsCommand extends SlashCommand {
         this.name = "userstats";
         this.help = "Finds amount of users with user flags";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
     }
 
     @Override

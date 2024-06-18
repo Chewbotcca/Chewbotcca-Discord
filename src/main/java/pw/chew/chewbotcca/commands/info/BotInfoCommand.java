@@ -22,6 +22,7 @@ import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -43,7 +44,7 @@ public class BotInfoCommand extends SlashCommand {
         this.help = "Finds info on a specified bot";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.aliases = new String[]{"binfo"};
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.options = Arrays.asList(
             new OptionData(OptionType.USER, "bot", "The bot to look up").setRequired(true),
             new OptionData(OptionType.STRING, "list", "The list to look for, default: discord.bots.gg")

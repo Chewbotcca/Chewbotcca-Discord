@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.MiscUtil;
@@ -75,7 +76,7 @@ public class EightBallCommand extends SlashCommand {
         this.name = "8ball";
         this.help = "Ask the magic 8ball a question!";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.BOT_DM, InteractionContextType.GUILD, InteractionContextType.PRIVATE_CHANNEL};
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "question", "The question to ask the eight ball").setRequired(true)
         );

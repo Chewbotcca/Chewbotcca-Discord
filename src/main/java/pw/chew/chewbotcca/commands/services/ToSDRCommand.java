@@ -21,6 +21,7 @@ import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.menu.EmbedPaginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,7 +34,7 @@ public class ToSDRCommand extends Command {
 
     public ToSDRCommand() {
         this.name = "tosdr";
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.children = new Command[]{new ToSDRInfoSubCommand(), new ToSDRPointsSubCommand(), new ToSDRDocsSubCommand()};
     }

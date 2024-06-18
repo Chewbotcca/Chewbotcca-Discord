@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.PropertiesManager;
@@ -48,7 +49,7 @@ public class MemeratorCommand extends SlashCommand {
 
     public MemeratorCommand() {
         this.name = "memerator";
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.children = new SlashCommand[]{new MemeratorMemeSubCommand(), new MemeratorUserSubCommand()};
     }

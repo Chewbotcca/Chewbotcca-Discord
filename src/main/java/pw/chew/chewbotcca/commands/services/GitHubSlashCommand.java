@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package pw.chew.chewbotcca.commands.services;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import me.memerator.api.client.errors.NotFound;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.kohsuke.github.GHDirection;
@@ -51,6 +52,8 @@ public class GitHubSlashCommand extends SlashCommand {
             new GitHubRepoSubCommand(),
             new GitHubUserSubCommand()
         };
+
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
     }
 
     @Override

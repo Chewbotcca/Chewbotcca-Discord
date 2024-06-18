@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import com.jagrosh.jdautilities.command.MessageContextMenu;
 import com.jagrosh.jdautilities.command.MessageContextMenuEvent;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.unfurls.GenericUnfurler;
@@ -45,6 +46,7 @@ public class UnfurlMessageContextMenu extends MessageContextMenu {
 
     public UnfurlMessageContextMenu() {
         this.name = "Unfurl Link";
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
     }
 
     @Override

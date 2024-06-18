@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.ResponseHelper;
@@ -41,7 +42,7 @@ public class FeedbackCommand extends SlashCommand {
         this.help = "Leave some feedback about the bot";
         this.cooldown = 30;
         this.cooldownScope = CooldownScope.USER;
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "feedback", "The feedback you want to leave").setRequired(true)
         );

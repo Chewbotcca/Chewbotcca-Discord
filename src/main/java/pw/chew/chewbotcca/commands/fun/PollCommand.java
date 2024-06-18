@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -59,7 +60,7 @@ public class PollCommand extends SlashCommand {
     public PollCommand() {
         this.name = "poll";
         this.help = "Create a poll! Use the options to configure it, then a modal will appear for you to add questions.";
-        this.guildOnly = true;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD};
         this.options = Arrays.asList(
             new OptionData(OptionType.INTEGER, "options", "The number of options to choose from", true)
                 .setRequiredRange(1, 10)

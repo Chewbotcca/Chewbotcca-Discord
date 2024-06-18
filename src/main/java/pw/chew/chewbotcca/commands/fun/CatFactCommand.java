@@ -19,6 +19,7 @@ package pw.chew.chewbotcca.commands.fun;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.RestClient;
 
@@ -28,7 +29,7 @@ public class CatFactCommand extends SlashCommand {
     public CatFactCommand() {
         this.name = "catfact";
         this.help = "Find a fun fact about our furry feline friends!";
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
     }
 
     @Override

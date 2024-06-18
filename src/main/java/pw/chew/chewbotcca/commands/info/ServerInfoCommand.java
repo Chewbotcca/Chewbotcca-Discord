@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.StageChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -79,7 +80,7 @@ public class ServerInfoCommand extends SlashCommand {
         this.help = "Gathers general information about the server";
         this.aliases = new String[]{"sinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = true;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD};
         this.children = new SlashCommand[]{
             new ServerGeneralInfoSubCommand(),
             new ServerBoostsInfoSubCommand(),

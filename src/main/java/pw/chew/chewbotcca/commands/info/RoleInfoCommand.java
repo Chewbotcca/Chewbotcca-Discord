@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.RoleIcon;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
@@ -48,7 +49,7 @@ public class RoleInfoCommand extends SlashCommand {
         this.help = "Find some information about roles";
         this.aliases = new String[]{"rinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION};
-        this.guildOnly = true;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD};
         this.options = Arrays.asList(
             new OptionData(OptionType.ROLE, "role", "The role to get info about").setRequired(true),
             new OptionData(OptionType.STRING, "mode", "The type of data to receive")

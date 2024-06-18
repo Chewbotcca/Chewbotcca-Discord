@@ -22,6 +22,7 @@ import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.RestClient;
@@ -35,7 +36,7 @@ public class NumberFactCommand extends SlashCommand {
         this.name = "numberfact";
         this.help = "Find some cool and interesting facts about a number";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.options = Arrays.asList(
             new OptionData(OptionType.INTEGER, "number", "The number to get facts about").setRequired(true),
             new OptionData(OptionType.STRING, "type", "The type of fact to return")

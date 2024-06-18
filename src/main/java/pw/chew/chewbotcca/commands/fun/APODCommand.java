@@ -22,6 +22,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -43,9 +44,8 @@ public class APODCommand extends SlashCommand {
     public APODCommand() {
         this.name = "apod";
         this.help = "Show NASA's Astronomy Picture of the Day for today, or a specified date";
-        this.aliases = new String[]{"dailyspace", "astropix", "apix"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.options = List.of(
             new OptionData(OptionType.INTEGER, "year", "The year for the pic, blank for this year. Range: (1995-)")
                 .setMinValue(1995).setMaxValue(OffsetDateTime.now().getYear()),

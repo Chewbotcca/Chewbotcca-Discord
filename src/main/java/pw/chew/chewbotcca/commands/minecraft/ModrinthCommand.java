@@ -21,6 +21,7 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.TimeFormat;
@@ -36,7 +37,7 @@ public class ModrinthCommand extends SlashCommand {
     public ModrinthCommand() {
         this.name = "modrinth";
         this.help = "Searches modrinth.com for a specified project";
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
 
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "query", "The project to search for", true)

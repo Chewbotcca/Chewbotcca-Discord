@@ -23,6 +23,7 @@ import com.jagrosh.jdautilities.menu.ButtonEmbedPaginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
@@ -41,8 +42,8 @@ public class UrbanDictionaryCommand extends SlashCommand {
         this.name = "urban";
         this.help = "Checks a word on Urban Dictionary. Only works in NSFW channels";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = false;
-        this.nsfwOnly = true;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+        this.nsfwOnly = false;
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "word", "The word to define", true)
         );

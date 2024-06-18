@@ -22,6 +22,7 @@ import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONException;
@@ -44,7 +45,7 @@ public class RubyGemsCommand extends SlashCommand {
         this.help = "Searches for and returns some basic info about a specified ruby gem";
         this.aliases = new String[]{"gem", "rgem", "rubyg", "gems"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "gem", "The gem to lookup").setRequired(true)
         );

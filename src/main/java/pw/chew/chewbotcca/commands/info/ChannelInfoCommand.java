@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2024 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -48,7 +49,7 @@ public class ChannelInfoCommand extends SlashCommand {
         this.help = "Gathers info about a specified channel";
         this.aliases = new String[]{"cinfo"};
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = true;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD};
         this.options = Arrays.asList(
             new OptionData(OptionType.CHANNEL, "channel", "The channel to find info about").setRequired(true),
             new OptionData(OptionType.STRING, "type", "The type of information to return. default: general")

@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.entities.WebhookType;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONObject;
@@ -41,7 +42,7 @@ public class RoryCommand extends SlashCommand {
     public RoryCommand() {
         this.name = "rory";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.children = new SlashCommand[]{new GetRorySubCommand(), new FollowRorySubCommand()};
     }
 
@@ -80,7 +81,7 @@ public class RoryCommand extends SlashCommand {
         public GetRorySubCommand() {
             this.name = "get";
             this.help = "Gets a Rory photo!";
-            this.guildOnly = false;
+            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
             this.options = Collections.singletonList(
                 new OptionData(OptionType.INTEGER, "id", "The ID of a rory! Leave blank for a random Rory")
             );
@@ -95,7 +96,7 @@ public class RoryCommand extends SlashCommand {
             }
 
             EmbedBuilder embed = generateRoryEmbed(rory);
-            if (event.getChannelType() == ChannelType.TEXT && event.getMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
+            if (event.getChannelType() == ChannelType.TEXT && !event.getGuild().isDetached() && event.getMember().hasPermission(Permission.MANAGE_WEBHOOKS)) {
                 embed.setDescription("Stay up to date with new Rory images by running `/rory follow`!");
             }
 
@@ -109,7 +110,7 @@ public class RoryCommand extends SlashCommand {
             this.help = "Follows the Rory Image feed to the current channel (Requires Manage Webhooks)";
             this.botPermissions = new Permission[]{Permission.MANAGE_WEBHOOKS};
             this.userPermissions = new Permission[]{Permission.MANAGE_WEBHOOKS};
-            this.guildOnly = true;
+            this.contexts = new InteractionContextType[]{InteractionContextType.GUILD};
             this.cooldown = 30;
             this.cooldownScope = CooldownScope.CHANNEL;
         }

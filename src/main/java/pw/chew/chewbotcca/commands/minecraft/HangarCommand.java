@@ -22,6 +22,7 @@ import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONObject;
@@ -40,7 +41,7 @@ public class HangarCommand extends SlashCommand {
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.cooldown = 5;
         this.cooldownScope = CooldownScope.USER;
-        this.guildOnly = false;
+        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "plugin", "The plugin to search for").setRequired(true)
         );
