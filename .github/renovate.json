@@ -1,6 +1,6 @@
 {
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
   "ignoreDeps": ["pro.chew.api:ChewAPI"],
   "packageRules": [
