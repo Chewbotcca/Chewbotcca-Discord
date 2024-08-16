@@ -30,11 +30,15 @@ import java.awt.Color;
 import java.time.Instant;
 import java.util.Collections;
 
-// %^mcserver command
+/**
+ * <h2></code>/minecraft server</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/minecraft#server-subcommand">Docs</a>
+ */
 public class MCServerSubCommand extends SlashCommand {
     public MCServerSubCommand() {
         this.name = "server";
-        this.help = "Find some information about a specified server";
+        this.help = "Find some information about a specified MC server";
         this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.guildOnly = false;
         this.options = Collections.singletonList(
@@ -45,7 +49,9 @@ public class MCServerSubCommand extends SlashCommand {
     @Override
     protected void execute(SlashCommandEvent event) {
         String ip = event.optString("ip", "");
-        event.replyEmbeds(gatherServerData(ip)).queue();
+        event.deferReply().queue(hook -> {
+            hook.editOriginalEmbeds(gatherServerData(ip)).queue();
+        });
     }
 
     private MessageEmbed gatherServerData(String ip) {
