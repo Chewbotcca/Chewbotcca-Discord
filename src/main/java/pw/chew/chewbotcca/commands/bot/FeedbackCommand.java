@@ -16,12 +16,10 @@
  */
 package pw.chew.chewbotcca.commands.bot;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.CooldownScope;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -30,13 +28,15 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import pw.chew.chewbotcca.util.ResponseHelper;
 
-import java.awt.Color;
 import java.time.Instant;
 import java.util.Collections;
 
-// %^feedback command
+/**
+ * <h2><code>/feedback</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/feedback">Docs</a>
+ */
 public class FeedbackCommand extends SlashCommand {
-
     public FeedbackCommand() {
         this.name = "feedback";
         this.help = "Leave some feedback about the bot";
@@ -44,58 +44,42 @@ public class FeedbackCommand extends SlashCommand {
         this.cooldownScope = CooldownScope.USER;
         this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.options = Collections.singletonList(
-            new OptionData(OptionType.STRING, "feedback", "The feedback you want to leave").setRequired(true)
+            new OptionData(OptionType.STRING, "feedback", "The feedback you want to leave", true)
+                .setMinLength(10)
         );
     }
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        try {
-            var feedback = event.optString("feedback", "");
-            TextChannel feedbackChannel = retrieveFeedbackChannel(event.getJDA());
-            feedbackChannel.sendMessageEmbeds(generateFeedbackEmbed(feedback, event.getUser())).queue(
-                message -> event.reply("I have successfully sent the feedback! Feel free to see it on the help server with `/invite`")
-                    .setEphemeral(true)
-                    .queue()
-            );
-        } catch (IllegalArgumentException e) {
-            event.replyEmbeds(ResponseHelper.generateFailureEmbed(null, e.getMessage())).setEphemeral(true).queue();
-        }
-
-    }
-
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        try {
-            var feedback = commandEvent.getArgs();
-            TextChannel feedbackChannel = retrieveFeedbackChannel(commandEvent.getJDA());
-            feedbackChannel.sendMessageEmbeds(generateFeedbackEmbed(feedback, commandEvent.getAuthor())).queue(
-                message -> commandEvent.reply("I have successfully sent the feedback! Feel free to see it on the help server with `" + commandEvent.getPrefix() + "invite`")
-            );
-        } catch (IllegalArgumentException e) {
-            commandEvent.replyError(e.getMessage());
-        }
-    }
-
-    private MessageEmbed generateFeedbackEmbed(String feedback, User author) {
-        if (feedback.length() < 10) {
-            throw new IllegalArgumentException("Your feedback is too short, how are we supposed to improve! Please enter at least 10 characters.");
-        }
-        var embed = new EmbedBuilder();
-        embed.setTitle("New Feedback!");
-        embed.setColor(Color.decode("#6166A8"));
-        embed.setDescription(feedback);
-        embed.setTimestamp(Instant.now());
-        embed.setAuthor(author.getAsTag(), null, author.getAvatarUrl());
-        embed.setFooter("User ID: " + author.getId());
-        return embed.build();
-    }
-
-    private TextChannel retrieveFeedbackChannel(JDA jda) {
-        TextChannel feedbackChannel = jda.getTextChannelById("745164378659225651");
+        var feedback = event.optString("feedback", "");
+        TextChannel feedbackChannel = event.getJDA().getTextChannelById("745164378659225651");
         if (feedbackChannel == null) {
-            throw new IllegalArgumentException("Could not find feedback channel!");
+            event.replyEmbeds(ResponseHelper.generateFailureEmbed("Error Sending Feedback!", "Could not find feedback channel."))
+                .setEphemeral(true).queue();
+            return;
         }
-        return feedbackChannel;
+
+        feedbackChannel.sendMessageEmbeds(generateFeedbackEmbed(feedback, event.getUser())).queue(
+            message -> event.reply("I have successfully sent the feedback! Feel free to see it on the help server with `/invite`")
+                .setEphemeral(true)
+                .queue()
+        );
+    }
+
+    /**
+     * Generates the feedback embed
+     *
+     * @param feedback The feedback to send
+     * @param author The author of the feedback
+     * @return The feedback embed
+     */
+    private MessageEmbed generateFeedbackEmbed(String feedback, User author) {
+        return new EmbedBuilder()
+            .setTitle("New Feedback!")
+            .setColor(0x6166A8)
+            .setDescription(feedback)
+            .setTimestamp(Instant.now())
+            .setAuthor(author.getAsTag(), null, author.getAvatarUrl())
+            .setFooter("User ID: " + author.getId()).build();
     }
 }

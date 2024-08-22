@@ -16,16 +16,19 @@
  */
 package pw.chew.chewbotcca.commands.bot;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
 
-// %^ping command
-public class PingCommand extends SlashCommand {
+import java.time.OffsetDateTime;
 
+/**
+ * <h2><code>/ping</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/ping">Docs</a>
+ */
+public class PingCommand extends SlashCommand {
     public PingCommand() {
         this.name = "ping";
         this.help = "Ping the bot";
@@ -34,22 +37,12 @@ public class PingCommand extends SlashCommand {
     }
 
     @Override
-    protected void execute(SlashCommandEvent slashCommandEvent) {
+    protected void execute(SlashCommandEvent event) {
         // Has to be simpler due to interaction weirdness
-        slashCommandEvent.reply("Pong!").setEphemeral(true).queue();
-    }
+        OffsetDateTime startTime = event.getTimeCreated();
+        OffsetDateTime endTime = OffsetDateTime.now();
+        long diffInMs = endTime.toInstant().toEpochMilli() - startTime.toInstant().toEpochMilli();
 
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        // Get the timestamp of the ping message
-        long time = commandEvent.getMessage().getTimeCreated().toInstant().toEpochMilli();
-        // Send a "Checking ping" message and calculate the difference between this message and the %^ping message
-        commandEvent.getChannel().sendMessageEmbeds(new EmbedBuilder().setDescription("Checking ping..").build()).queue((msg) -> {
-            EmbedBuilder eb = new EmbedBuilder().setDescription(
-                "Ping is " + (msg.getTimeCreated().toInstant().toEpochMilli() - time) + "ms\n" +
-                "Gateway Ping is " + commandEvent.getJDA().getGatewayPing() + "ms\n"
-            );
-            msg.editMessageEmbeds(eb.build()).queue();
-        });
+        event.reply("Pong! Took %sms".formatted(Math.abs(diffInMs))).setEphemeral(true).queue();
     }
 }

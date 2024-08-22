@@ -16,15 +16,17 @@
  */
 package pw.chew.chewbotcca.commands.bot;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
 
-// %^invite command
+/**
+ * <h2><code>/invite</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/invite">Docs</a>
+ */
 public class InviteCommand extends SlashCommand {
     public InviteCommand() {
         this.name = "invite";
@@ -35,16 +37,7 @@ public class InviteCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.replyEmbeds(generateInviteEmbed()).queue();
-    }
-
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        commandEvent.reply(generateInviteEmbed());
-    }
-
-    private MessageEmbed generateInviteEmbed() {
-        return new EmbedBuilder()
+        event.replyEmbeds(new EmbedBuilder()
             .setTitle("Invite me!")
             .setDescription("""
                     [Click me to invite me to your server (recommended)](https://discord.com/api/oauth2/authorize?client_id=604362556668248095&permissions=939879492&scope=bot%20applications.commands)!
@@ -52,6 +45,6 @@ public class InviteCommand extends SlashCommand {
                     
                     [Need help? Click me to join my help server](https://discord.gg/UjxQ3Bh)!
                     
-                    [Sponsored: Click me to get a VPS from SkySilk Cloud Services](https://www.skysilk.com/ref/4PRQpuQraD)!""").build();
+                    [Sponsored: Click me to get a VPS from SkySilk Cloud Services](https://www.skysilk.com/ref/4PRQpuQraD)!""").build()).setEphemeral(true).queue();
     }
 }

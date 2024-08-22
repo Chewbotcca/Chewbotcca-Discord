@@ -16,7 +16,6 @@
  */
 package pw.chew.chewbotcca.commands.bot;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -27,11 +26,18 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
 import pw.chew.chewbotcca.util.DateTime;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.time.Instant;
 
 import static pw.chew.chewbotcca.util.MiscUtil.bytesToFriendly;
+import static pw.chew.chewbotcca.util.MiscUtil.delimitNumber;
 
-// %^stats command
+/**
+ * <h2><code>/stats</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/stats">Docs</a>
+ */
 public class StatsCommand extends SlashCommand {
     private final static Instant startTime = Instant.now();
 
@@ -47,12 +53,7 @@ public class StatsCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.replyEmbeds(generateStatsEmbed(event.getJDA())).queue();
-    }
-
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        commandEvent.reply(generateStatsEmbed(commandEvent.getJDA()));
+        event.replyEmbeds(generateStatsEmbed(event.getJDA())).setEphemeral(true).queue();
     }
 
     /**
@@ -69,31 +70,31 @@ public class StatsCommand extends SlashCommand {
 
         // TODO: Cpu stats?
         // OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+        // double cpuLoad = operatingSystemMXBean.getSystemLoadAverage();
 
         // Gather other data. All must be strings
-        String author = jda.retrieveUserById("476488167042580481").complete().getAsMention();
-        long uptimeInSeconds = Instant.now().toEpochMilli() - startTime.toEpochMilli() / 1000;
+        long uptimeInSeconds = Instant.now().getEpochSecond() - startTime.getEpochSecond();
         String uptime = DateTime.timeAgoFromNow(startTime).replaceAll(", ", ",\n");
-        String servers = String.valueOf(jda.getGuildCache().size());
-        // TODO: Round commands/messages per x to 4 decimal
-        // DecimalFormat df = new DecimalFormat("#.####");
-        // df.setRoundingMode(RoundingMode.CEILING);
-        // float commandsPerMinute = (float)getExecutedCommandsCount() / (float)(uptimeInSeconds / 60);
-        // float messagesPerSecond = (float)getMessageCount() / (float)uptimeInSeconds;
-        // String commands = getExecutedCommandsCount() + String.format(" [%s/m]", df.format(commandsPerMinute));
-        // String messages = getMessageCount() + String.format(" [%s/s]", df.format(messagesPerSecond));
-        String commands = String.valueOf(getExecutedCommandsCount());
-        String messages = String.valueOf(getMessageCount());
+        long servers = jda.getGuildCache().size();
+        int users = jda.retrieveApplicationInfo().complete().getUserInstallCount();
+        DecimalFormat df = new DecimalFormat("#.####");
+        df.setRoundingMode(RoundingMode.CEILING);
+        // rounded to 4 decimal places
+        float commandsPerMinute = (float) executedCommands / ((float) uptimeInSeconds / 60);
+        float messagesPerSecond = (float) sentMessages / (float) uptimeInSeconds;
+        String commands = delimitNumber(executedCommands) + String.format(" [%s/m]", df.format(commandsPerMinute));
+        String messages = delimitNumber(sentMessages) + String.format(" [%s/s]", df.format(messagesPerSecond));
 
         return new EmbedBuilder()
             .setTitle("Chewbotcca - A basic, yet functioning, Discord bot")
-            .addField("Author", author, true)
-            .addField("Code", "[View code on GitHub](https://github.com/Chewbotcca/Discord)", true)
+            // Basic bot info
+            .addField("Author", "[Chew](https://github.com/Chew)", true)
+            .addField("Code", "[View code on GitHub](https://github.com/Chewbotcca/Chewbotcca-Discord)", true)
             .addField("Library", "[JDA " + JDAInfo.VERSION + "](" + JDAInfo.GITHUB + ")", true)
-            // Convert the time difference into a time ago
+            // Convert the time difference into a time ago.
             .addField("Uptime", uptime, true)
-            // Get the server count. NOT GUILD NOT GUILD NOT GUILD
-            .addField("Servers", servers, true)
+            // Get the installation count.
+            .addField("Installs", "Servers: %s\nUsers: %s".formatted(servers, users), true)
             // Memory usage
             .addField("Memory", memoryUsage, true)
             // Sent commands

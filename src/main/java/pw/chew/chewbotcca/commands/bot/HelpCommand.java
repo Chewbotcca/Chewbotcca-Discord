@@ -16,15 +16,18 @@
  */
 package pw.chew.chewbotcca.commands.bot;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
+import pw.chew.chewbotcca.util.CommandMentionHelper;
 
-// %^help command
+/**
+ * <h2><code>/help</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/help">Docs</a>
+ */
 public class HelpCommand extends SlashCommand {
     public HelpCommand() {
         this.name = "help";
@@ -35,25 +38,7 @@ public class HelpCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.replyEmbeds(generateHelpEmbed("/")).queue();
-    }
-
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        // Reply with embed
-        String notice = null;
-        if (!commandEvent.getArgs().isEmpty()) {
-            notice = "Psst, to view more info about a command, use `" + commandEvent.getPrefix() + "info command`!";
-        }
-        MessageEmbed embed = generateHelpEmbed(commandEvent.getPrefix());
-        if (notice == null)
-            commandEvent.getChannel().sendMessageEmbeds(embed).queue();
-        else
-            commandEvent.getChannel().sendMessage(notice).setEmbeds(embed).queue();
-    }
-
-    private MessageEmbed generateHelpEmbed(String prefix) {
-        return new EmbedBuilder()
+        event.replyEmbeds(new EmbedBuilder()
             .setTitle("Welcome to the Chewbotcca Discord Bot")
             .setColor(0xd084)
             .setDescription("""
@@ -63,7 +48,8 @@ public class HelpCommand extends SlashCommand {
             .addField("Commands", "You can find all my commands [here](https:/help.chew.pro/bots/discord/chewbotcca/commands)", true)
             .addField("Invite me!", "You can invite me to your server with [this link](https://discord.com/oauth2/authorize?client_id=604362556668248095&scope=bot&permissions=0).", true)
             .addField("Help Server", "Click [me](https://discord.gg/UjxQ3Bh) to join the help server.", true)
-            .addField("More Bot Stats", "Run `" + prefix + "stats` to see more stats!", true)
-            .build();
+            .addField("Privacy Policy", "[View Privacy Policy](https://chew.pw/chewbotcca/discord/privacy)", true)
+            .addField("More Bot Stats", "Run %s to see more stats!".formatted(CommandMentionHelper.mention("stats")), true)
+            .build()).setEphemeral(true).queue();
     }
 }
