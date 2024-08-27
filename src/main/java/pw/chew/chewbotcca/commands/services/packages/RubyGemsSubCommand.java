@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package pw.chew.chewbotcca.commands.info;
+package pw.chew.chewbotcca.commands.services.packages;
 
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
@@ -37,15 +37,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-// %^rubygem command
-public class RubyGemsCommand extends SlashCommand {
-
-    public RubyGemsCommand() {
+/**
+ * <h2><code>/packages rubygem</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/packages#rubygem">Docs</a>
+ */
+public class RubyGemsSubCommand extends SlashCommand {
+    public RubyGemsSubCommand() {
         this.name = "rubygem";
-        this.help = "Searches for and returns some basic info about a specified ruby gem";
-        this.aliases = new String[]{"gem", "rgem", "rubyg", "gems"};
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+        this.help = "Searches for and returns some basic info about a specified Ruby gem";
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "gem", "The gem to lookup").setRequired(true)
         );
