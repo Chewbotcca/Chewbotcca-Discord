@@ -78,10 +78,16 @@ public class GHIssueCommand extends Command {
         // Set the title and body to the issue title and body
         e.setTitle(issue.getTitle(), String.valueOf(issue.getHtmlUrl()));
         if (issue.getBody() != null) {
-            if (issue.getBody().length() > 400) {
-                e.setDescription(issue.getBody().substring(0, 399) + "...");
+            String body = issue.getBody();
+            // Remove Comments
+            body = body.replaceAll("<!--(.*?)-->", "");
+            // Remove double new-lines
+            body = body.replaceAll("\\n\\n", "\n");
+            LoggerFactory.getLogger(this.getClass()).debug(body);
+            if (body.length() > 400) {
+                e.setDescription(body.substring(0, 399) + "...");
             } else {
-                e.setDescription(issue.getBody());
+                e.setDescription(body);
             }
         }
         // Find the state
