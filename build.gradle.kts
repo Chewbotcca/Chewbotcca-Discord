@@ -53,7 +53,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.freya022", "JDA", "f94446d")
+    implementation("com.github.freya022", "JDA", "5fb5005")
     implementation("pw.chew", "jda-chewtils", "2.0-contexts-SNAPSHOT")
     implementation("ch.qos.logback", "logback-classic", "1.4.11")
     implementation("com.squareup.okhttp3", "okhttp", "4.12.0")

@@ -76,7 +76,7 @@ public class StatsCommand extends SlashCommand {
         long uptimeInSeconds = Instant.now().getEpochSecond() - startTime.getEpochSecond();
         String uptime = DateTime.timeAgoFromNow(startTime).replaceAll(", ", ",\n");
         long servers = jda.getGuildCache().size();
-        int users = jda.retrieveApplicationInfo().complete().getUserInstallCount();
+        long users = jda.retrieveApplicationInfo().complete().getUserInstallCount();
         DecimalFormat df = new DecimalFormat("#.####");
         df.setRoundingMode(RoundingMode.CEILING);
         // rounded to 4 decimal places
