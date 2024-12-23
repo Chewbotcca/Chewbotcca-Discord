@@ -14,13 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package pw.chew.chewbotcca.commands.info;
+package pw.chew.chewbotcca.commands.services;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -34,13 +32,16 @@ import pw.chew.chewbotcca.util.RestClient;
 import java.awt.Color;
 import java.util.Collections;
 
-// %^lastfm command
+/**
+ * <h2><code>/lastfm</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/lastfm">Docs</a>
+ */
 public class LastFMCommand extends SlashCommand {
 
     public LastFMCommand() {
         this.name = "lastfm";
         this.help = "Returns playing status for a specified user";
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "username", "The user to look up (default: yours if set)")
@@ -67,35 +68,6 @@ public class LastFMCommand extends SlashCommand {
             event.replyEmbeds(gatherData(args, PropertiesManager.getLastfmToken())).queue();
         } catch (IllegalArgumentException e) {
             event.reply(e.getMessage()).setEphemeral(true).queue();
-        }
-    }
-
-    @Override
-    protected void execute(CommandEvent event) {
-        // Make sure last.fm token exists
-        // not sure why i only do this here
-        String key = PropertiesManager.getLastfmToken();
-        if (key == null) {
-            event.reply("This command requires an API key from last.fm!");
-            return;
-        }
-
-        // Get args, assume it's a username, and find their stats
-        String args = event.getArgs();
-        if (args.length() == 0) {
-            UserProfile profile = UserProfile.getProfile(event.getAuthor().getId());
-            if (profile.getLastFm() != null) {
-                args = profile.getLastFm();
-            } else {
-                event.reply("You don't have a last.fm username set on your profile. Please specify a user with `" + event.getPrefix() + "lastfm user` or set your username with `" + event.getPrefix() + "profile set lastfm yourname`!");
-                return;
-            }
-        }
-
-        try {
-            event.reply(gatherData(args, key));
-        } catch (IllegalArgumentException e) {
-            event.replyError(e.getMessage());
         }
     }
 
@@ -133,10 +105,10 @@ public class LastFMCommand extends SlashCommand {
             .addField("Album", album, true);
 
         if (playing) {
-            embed.setColor(Color.decode("#00FF00"));
+            embed.setColor(Color.GREEN);
             embed.setDescription("Currently listening!");
         } else {
-            embed.setColor(Color.decode("#FF0000"));
+            embed.setColor(Color.RED);
             embed.setDescription("Last listened about " + timeago + " ago.");
         }
 
