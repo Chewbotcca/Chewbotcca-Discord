@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.Nullable;
 import pw.chew.chewbotcca.commands.services.google.YouTubeCommand;
 import pw.chew.chewbotcca.objects.services.YouTubeVideo;
+import pw.chew.chewbotcca.util.ResponseHelper;
 
 public class YouTubeLinkUnfurler implements GenericUnfurler {
     public boolean checkLink(String link) {
@@ -33,23 +34,20 @@ public class YouTubeLinkUnfurler implements GenericUnfurler {
     }
 
     public MessageEmbed unfurlVideo(String link) {
-        // Find the video ID
-        String video = null;
-
-        if (link.contains("youtube.com")) {
-            video = link.split("=")[1];
-        } else if (link.contains("youtu.be")) {
-            video = link.split("/")[link.split("/").length - 1];
-        }
+        String id = YouTubeCommand.extractVideoId(link);
 
         // If one couldn't be found for whatever reason
-        if (video == null)
+        if (id == null)
             return null;
 
         // Get the video
-        YouTubeVideo youTubeVideo = YouTubeCommand.getVideo(video);
+        try {
+            YouTubeVideo youTubeVideo = YouTubeCommand.getVideoById(id);
 
-        // make a YouTube video embed response
-        return YouTubeCommand.buildVideoEmbed(youTubeVideo).build();
+            // make a YouTube video embed response
+            return YouTubeCommand.buildVideoEmbed(youTubeVideo).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseHelper.generateFailureEmbed("Video not found", "The video could not be found. Please try again.");
+        }
     }
 }

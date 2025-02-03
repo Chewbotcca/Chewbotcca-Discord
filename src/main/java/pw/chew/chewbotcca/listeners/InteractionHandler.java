@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import pw.chew.chewbotcca.commands.fun.APODCommand;
 import pw.chew.chewbotcca.commands.fun.PollCommand;
 import pw.chew.chewbotcca.commands.info.InfoCommand;
 import pw.chew.chewbotcca.commands.minecraft.WynncraftCommand;
+import pw.chew.chewbotcca.commands.services.google.YouTubeCommand;
 import pw.chew.chewbotcca.objects.PollEmbed;
 import pw.chew.chewbotcca.objects.PollVoter;
 import pw.chew.chewbotcca.util.MiscUtil;
@@ -88,6 +89,8 @@ public class InteractionHandler extends ListenerAdapter {
             String date = parts[2] + "/" + parts[3] + "/" + parts[4];
 
             APODCommand.replyExplanation(event, date);
+        } else if (id.startsWith("youtube:view")) {
+            YouTubeCommand.replyVideoLink(event);
         }
     }
 
