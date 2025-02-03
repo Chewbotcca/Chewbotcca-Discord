@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.XYChart;
 import pw.chew.chewbotcca.objects.IKnowWhatIAmDoingISwearException;
 import pw.chew.chewbotcca.util.DateTime;
+import pw.chew.chewbotcca.util.EmojiUtil;
 import pw.chew.chewbotcca.util.JDAUtilUtil;
 import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.ResponseHelper;
@@ -208,11 +209,11 @@ public class ServerInfoCommand extends SlashCommand {
         return switch (feature) {
             default -> MiscUtil.capitalize(feature);
             case "BANNER" -> "[Banner](" + server.getBannerUrl() + "?size=2048)";
-            case "NEWS" -> "<:news:725504846937063595> News Channels";
+            case "NEWS" -> EmojiUtil.Emoji.NEWS.mention() + " News Channels";
             case "INVITE_SPLASH" -> "[Invite Splash](" + server.getSplashUrl() + "?size=2048)";
-            case "PARTNERED" -> "<:partner:753433398005071872> Partnered Server";
+            case "PARTNERED" -> EmojiUtil.Emoji.PARTNERED.mention() + " Partnered Server";
             case "VANITY_URL" -> parseVanityUrl(server.getVanityCode());
-            case "VERIFIED" -> "<:verifiedserver:753433397933899826> Verified";
+            case "VERIFIED" -> EmojiUtil.Emoji.PARTNERED.mention() + " Verified";
             case "COMMUNITY" -> ":white_check_mark: Community";
             case "MEMBER_VERIFICATION_GATE_ENABLED" -> ":white_check_mark: Membership Screening";
             case "WELCOME_SCREEN_ENABLED" -> ":white_check_mark: Welcome Screen";

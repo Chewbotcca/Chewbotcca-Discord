@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,17 @@ import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
+import pw.chew.chewbotcca.util.EmojiUtil;
 
 public class ReadyListener extends ListenerAdapter {
     @Override
     public void onReady(@NotNull ReadyEvent event) {
+        // initialize emoji
+        event.getJDA().retrieveApplicationEmojis().queue(applicationEmojis -> {
+            EmojiUtil.initialize(applicationEmojis);
+            LoggerFactory.getLogger(EmojiUtil.class).info("Initialized emoji!");
+        });
+
         // Not currently in use
         LoggerFactory.getLogger(ReadyListener.class).info("Ready!");
     }

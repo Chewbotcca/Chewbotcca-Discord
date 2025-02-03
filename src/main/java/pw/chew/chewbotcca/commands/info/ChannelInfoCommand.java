@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import pw.chew.chewbotcca.util.EmojiUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,9 +129,9 @@ public class ChannelInfoCommand extends SlashCommand {
             }
             List<String> info = new ArrayList<>();
             if (channel.getType() == ChannelType.NEWS)
-                info.add("<:news:725504846937063595> News");
+                info.add(EmojiUtil.Emoji.NEWS.mention() + " News");
             if (textChannel.isNSFW())
-                info.add("<:channel_nsfw:585783907660857354> Age-Restricted");
+                info.add(EmojiUtil.Emoji.CHANNEL_NSFW.mention() + " Age-Restricted");
             if (!info.isEmpty())
                 e.addField("Information", String.join("\n", info), true);
         }
