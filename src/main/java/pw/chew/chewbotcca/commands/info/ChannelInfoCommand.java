@@ -166,7 +166,7 @@ public class ChannelInfoCommand extends SlashCommand {
         Collections.reverse(l);
         // Make an arraylist with the "#x: User - Pins"
         List<CharSequence> top = new ArrayList<>();
-        top.add("Total Pins: " + pins.size() + " / 50");
+        top.add("Total Pins: " + pins.size() + " / 250");
         for (int i = 0; i < l.size(); i++) {
             Map.Entry<String, Integer> entry = l.get(i);
             String user = entry.getKey();
