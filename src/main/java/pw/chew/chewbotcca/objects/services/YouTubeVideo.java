@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ public class YouTubeVideo {
         List<String> timesTemp = Arrays.asList(duration.replace("PT", "").split("[A-Z]"));
         List<String> times = new ArrayList<>(timesTemp);
         if (times.size() == 1) {
-            times.add(0, "0");
+            times.addFirst("0");
         }
         for (int i = 1; i < times.size(); i++) {
             if (times.get(i).length() == 1) {

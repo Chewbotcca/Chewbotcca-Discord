@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public class BanCommand extends Command {
                 return;
             }
         } else {
-            user = mentioned.get(0);
+            user = mentioned.getFirst();
         }
 
         int days = 0;

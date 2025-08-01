@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,7 +117,7 @@ public class PollCommand extends SlashCommand {
             .setTitle("What would you like to do?")
             .setFooter("Poll message: " + event.getMessageId());
 
-        PollEmbed pollEmbed = PollEmbed.fromEmbed(event.getMessage().getEmbeds().get(0), pollId);
+        PollEmbed pollEmbed = PollEmbed.fromEmbed(event.getMessage().getEmbeds().getFirst(), pollId);
 
         PollVoter voter = getVote(pollId, event.getUser().getId());
         if (voter != null) {
@@ -139,9 +139,9 @@ public class PollCommand extends SlashCommand {
      * @param event  The event that triggered the interaction
      */
     public static void closePoll(String pollId, ButtonInteractionEvent event) {
-        String msgId = event.getMessage().getEmbeds().get(0).getFooter().getText().split(": ")[1];
+        String msgId = event.getMessage().getEmbeds().getFirst().getFooter().getText().split(": ")[1];
         event.getChannel().retrieveMessageById(msgId).queue(message -> {
-            PollEmbed embed = PollEmbed.fromEmbed(message.getEmbeds().get(0), pollId);
+            PollEmbed embed = PollEmbed.fromEmbed(message.getEmbeds().getFirst(), pollId);
 
             message.editMessageComponents(embed.buildActionRow(true))
                 .queue(unused -> event.reply("Poll closed!").setEphemeral(true).queue());
@@ -155,9 +155,9 @@ public class PollCommand extends SlashCommand {
      * @param event  The event that triggered the interaction
      */
     public static void showVoters(String pollId, ButtonInteractionEvent event) {
-        String msgId = event.getMessage().getEmbeds().get(0).getFooter().getText().split(": ")[1];
+        String msgId = event.getMessage().getEmbeds().getFirst().getFooter().getText().split(": ")[1];
         event.getChannel().retrieveMessageById(msgId).queue(message -> {
-            PollEmbed embed = PollEmbed.fromEmbed(message.getEmbeds().get(0), pollId);
+            PollEmbed embed = PollEmbed.fromEmbed(message.getEmbeds().getFirst(), pollId);
 
             ActionRow menu = buildChoicesMenu(embed.getChoices(), pollId, 0);
 
@@ -175,7 +175,7 @@ public class PollCommand extends SlashCommand {
      * @param event  The event that triggered the interaction
      */
     public static void switchVotersPage(String pollId, StringSelectInteractionEvent event) {
-        var selected = event.getSelectedOptions().get(0);
+        var selected = event.getSelectedOptions().getFirst();
         String choice = selected.getEmoji().getFormatted() + " " + selected.getLabel();
 
         // Get the position of the selected option in the menu

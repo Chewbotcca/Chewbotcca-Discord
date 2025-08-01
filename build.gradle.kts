@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ plugins {
     java
     `maven-publish`
     application
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "2.2.0"
 }
 
 repositories {
@@ -70,7 +70,7 @@ dependencies {
 group = "pw.chew.chewbotcca"
 version = "2.0-SNAPSHOT"
 description = "Chewbotcca"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 java {
     withSourcesJar()
@@ -101,10 +101,10 @@ tasks.withType<JavaCompile>() {
     options.encoding = "UTF-8"
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
-    kotlinOptions.jvmTarget = "17"
-    kotlinOptions.apiVersion = "1.6"
-}
+//tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
+//    kotlinOptions.jvmTarget = "17"
+//    kotlinOptions.apiVersion = "1.6"
+//}
 
 application {
     mainClass.set("pw.chew.chewbotcca.Chewbotcca")

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ public class PasteMessageContextMenu extends MessageContextMenu {
     protected void execute(MessageContextMenuEvent event) {
         // Store message and file URL for later
         Message message = event.getTarget();
-        String file = message.getAttachments().get(0).getUrl();
+        String file = message.getAttachments().getFirst().getUrl();
 
         try {
             event.reply(pasteData(file))

@@ -451,7 +451,7 @@ public class ServerInfoCommand extends SlashCommand {
 
                     if (displayMode) {
                         List<Role> userRoles = member.getRoles().stream().filter(Role::isHoisted).toList();
-                        if (!userRoles.isEmpty() && userRoles.get(0).equals(role)) {
+                        if (!userRoles.isEmpty() && userRoles.getFirst().equals(role)) {
                             display++;
                         }
                     }

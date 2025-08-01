@@ -47,7 +47,7 @@ public class InteractionHandler extends ListenerAdapter {
 
             PollVoter voter = new PollVoter(pollId, event.getUser().getId(), choice);
             PollCommand.addVote(pollId, voter);
-            PollEmbed embed = PollEmbed.fromEmbed(event.getMessage().getEmbeds().get(0), pollId);
+            PollEmbed embed = PollEmbed.fromEmbed(event.getMessage().getEmbeds().getFirst(), pollId);
             event.editMessageEmbeds(embed.buildEmbed()).setComponents(embed.buildActionRow()).queue();
         } else if (id.startsWith("poll-") && id.endsWith("-settings")) {
             // Full ID is formatted as: poll-%s-config

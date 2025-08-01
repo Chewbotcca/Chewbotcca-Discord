@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ public class UserInfoCommand extends SlashCommand {
         } else {
             List<User> mentions = commandEvent.getMessage().getMentions().getUsers();
             if (!mentions.isEmpty()) {
-                user = mentions.get(0);
+                user = mentions.getFirst();
             } else {
                 try {
                     user = commandEvent.getJDA().getUserById(args);
@@ -105,9 +105,9 @@ public class UserInfoCommand extends SlashCommand {
                             commandEvent.reply("No members found for the given input");
                             return;
                         } else if (!users.isEmpty() && byNick.isEmpty()) {
-                            user = users.get(0).getUser();
+                            user = users.getFirst().getUser();
                         } else {
-                            user = byNick.get(0).getUser();
+                            user = byNick.getFirst().getUser();
                         }
                     }
                 }
@@ -155,9 +155,9 @@ public class UserInfoCommand extends SlashCommand {
         ));
         // Since bots can get a userinfo response, and they still have discriminators, we need to keep this check :/
         if (user.getDiscriminator().equals("0000")) {
-            nameInfo.add(0, "Username: " + user.getName());
+            nameInfo.addFirst("Username: " + user.getName());
         } else {
-            nameInfo.add(0, "Tag: " + user.getAsTag());
+            nameInfo.addFirst("Tag: " + user.getAsTag());
         }
 
         if (onServer && !member.getEffectiveName().equals(user.getName())) {
@@ -255,9 +255,9 @@ public class UserInfoCommand extends SlashCommand {
             // If they are more new than old
             if (agePosition > (server.getMembers().size() / 2)) {
                 int position = server.getMembers().size() - agePosition;
-                createInfo.add(0, "#" + position + " youngest (this server)");
+                createInfo.addFirst("#" + position + " youngest (this server)");
             } else {
-                createInfo.add(0, "#" + agePosition + " oldest (this server)");
+                createInfo.addFirst("#" + agePosition + " oldest (this server)");
             }
         }
 

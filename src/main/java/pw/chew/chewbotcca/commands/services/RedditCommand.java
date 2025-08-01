@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public class RedditCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        int num = (int) event.getOptionsByName("number").get(0).getAsLong();
+        int num = (int) event.getOptionsByName("number").getFirst().getAsLong();
         String subreddit = event.optString("subreddit", "");
         boolean nsfwAllowed = event.getChannelType() == ChannelType.TEXT && !event.getTextChannel().isNSFW();
 
@@ -106,7 +106,7 @@ public class RedditCommand extends SlashCommand {
         JSONObject reddit = RestClient.get(url).asJSONObject();
         JSONArray data = reddit.getJSONObject("data").getJSONArray("children");
 
-        if (data.length() == 0) {
+        if (data.isEmpty()) {
             throw new IllegalArgumentException("This sub-reddit does not have any posts!");
         }
 

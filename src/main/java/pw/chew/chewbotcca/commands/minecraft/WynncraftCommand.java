@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -219,7 +219,7 @@ public class WynncraftCommand extends SlashCommand {
      * @param player  the player's name
      */
     public static void handleCharacterSelection(StringSelectInteractionEvent event, String player) {
-        SelectOption option = event.getSelectedOptions().get(0);
+        SelectOption option = event.getSelectedOptions().getFirst();
 
         JSONObject data = RestClient.get("https://api.wynncraft.com/v3/player/%s/characters/%s".formatted(player, option.getValue())).asJSONObject();
         characterCache.put(option.getValue(), data);
@@ -473,7 +473,7 @@ public class WynncraftCommand extends SlashCommand {
             characterCache.remove(key);
         }
 
-        var embed = event.getMessage().getEmbeds().get(0);
+        var embed = event.getMessage().getEmbeds().getFirst();
         Checks.notNull(embed, "embed");
         Checks.notNull(embed.getTitle(), "embed title");
         Checks.notNull(embed.getDescription(), "embed description");

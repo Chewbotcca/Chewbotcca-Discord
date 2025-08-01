@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ public class BotInfoCommand extends SlashCommand {
         // Parse the bot mention or just use the ID they provided an ID
         String botId;
         if (!commandEvent.getMessage().getMentions().getUsers().isEmpty()) {
-            botId = commandEvent.getMessage().getMentions().getUsers().get(0).getId();
+            botId = commandEvent.getMessage().getMentions().getUsers().getFirst().getId();
         } else {
             botId = args[0];
         }

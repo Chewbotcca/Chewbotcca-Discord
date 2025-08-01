@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ public class RoleInfoCommand extends SlashCommand {
         // "Nullable" begone
         if (event.getGuild() == null || event.getMember() == null) return;
 
-        Role role = event.getOptionsByName("role").get(0).getAsRole();
+        Role role = event.getOptionsByName("role").getFirst().getAsRole();
 
         // Make a response depending on the mode
         if (mode.equals("members")) {
@@ -113,12 +113,12 @@ public class RoleInfoCommand extends SlashCommand {
             id = false;
         }
         if(arg.contains("<")) {
-            role = event.getMessage().getMentions().getRoles().get(0);
+            role = event.getMessage().getMentions().getRoles().getFirst();
         } else if(id) {
             role = event.getGuild().getRoleById(arg);
         } else {
             List<Role> roles = event.getGuild().getRolesByName(arg, true);
-            if(roles.size() > 0) {
+            if(!roles.isEmpty()) {
                 for (Role check : roles) {
                     if (role != null) continue;
 
@@ -127,7 +127,7 @@ public class RoleInfoCommand extends SlashCommand {
                     }
                 }
                 if (role == null) {
-                    role = roles.get(0);
+                    role = roles.getFirst();
                 }
             }
         }

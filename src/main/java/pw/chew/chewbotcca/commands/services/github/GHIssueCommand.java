@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -138,13 +138,13 @@ public class GHIssueCommand extends Command {
             for(GHLabel label : issue.getLabels()) {
                 labels.add(label.getName());
             }
-            if(labels.size() > 0)
+            if(!labels.isEmpty())
                 e.addField("Labels", String.join(", ", labels), true);
             List<CharSequence> assignees = new ArrayList<>();
             for(GHUser assignee : issue.getAssignees()) {
                 assignees.add(assignee.getLogin());
             }
-            if(assignees.size() > 0)
+            if(!assignees.isEmpty())
                 e.addField("Assignees", String.join(", ", assignees), true);
         } catch (IOException ignored) { }
         return e;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ public class MCWikiSubCommand extends SlashCommand {
         }
 
         if(!noSlash.isEmpty())
-            articleName = noSlash.get(0).replaceAll(" ", "_");
+            articleName = noSlash.getFirst().replaceAll(" ", "_");
         else
             articleName = j.getString(0).replaceAll(" ", "_");
 

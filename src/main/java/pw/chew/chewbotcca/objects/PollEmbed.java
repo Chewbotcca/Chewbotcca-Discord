@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ public record PollEmbed(String pollId, String title, String description, List<St
         String title = embed.getTitle();
         String description = embed.getDescription();
 
-        String value = embed.getFields().get(0).getValue();
+        String value = embed.getFields().getFirst().getValue();
         Checks.notNull(value, "Poll choices cannot be null!");
         String[] rows = value.split("\n");
         // Look for rows that start with an emoji from the array

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ public class DateTime {
         for (String module : output) {
             if(response.toString().equals("")) {
                 response = new StringBuilder(module);
-            } else if(module.equals(output.get(output.size() - 1))) {
+            } else if(module.equals(output.getLast())) {
                 response.append(", and ").append(module);
             } else {
                 response.append(", ").append(module);

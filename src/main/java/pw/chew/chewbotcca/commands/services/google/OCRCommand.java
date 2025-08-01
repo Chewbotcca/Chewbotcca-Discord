@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ public class OCRCommand extends SlashCommand {
                 return;
             }
         } else {
-            url = event.getMessage().getAttachments().get(0).getUrl();
+            url = event.getMessage().getAttachments().getFirst().getUrl();
         }
         event.getChannel().sendTyping().queue();
 

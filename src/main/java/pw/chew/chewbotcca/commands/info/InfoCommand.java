@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,13 +79,13 @@ public class InfoCommand extends SlashCommand {
     public static void updateInfo(StringSelectInteractionEvent event) {
         // Selected options is only null if ephemeral, which it never will be
         Checks.notNull(event.getSelectedOptions(), "Selected options");
-        String selected = event.getSelectedOptions().get(0).getValue();
+        String selected = event.getSelectedOptions().getFirst().getValue();
         if (selected.equals("NONE")) {
             event.editComponents(new ArrayList<>()).queue();
             return;
         }
 
-        event.editMessageEmbeds(gatherData(event.getSelectedOptions().get(0).getValue()))
+        event.editMessageEmbeds(gatherData(event.getSelectedOptions().getFirst().getValue()))
             .setContent(null)
             .setComponents(new ArrayList<>())
             .queue();

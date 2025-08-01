@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ public class RoleCommand extends Command {
             // Get the user's highest role and check to make sure hierarchy is maintained
             Role highest = getHighestRole(event.getMember());
             Role bot = getHighestRole(event.getSelfMember());
-            Role target = roles.get(0);
+            Role target = roles.getFirst();
             if (target.getPosition() >= highest.getPosition() || target.getPosition() >= bot.getPosition()) {
                 event.reply("I can't delete this role because it is higher or equal to your (or my) highest role!");
                 return;
@@ -155,7 +155,7 @@ public class RoleCommand extends Command {
             // Get author's highest role for hierarchy checking
             Role highest = getHighestRole(event.getMember());
             Role bot = getHighestRole(event.getSelfMember());
-            Role target = roles.get(0);
+            Role target = roles.getFirst();
             if (target.getPosition() >= highest.getPosition() || target.getPosition() >= bot.getPosition()) {
                 event.reply("I can't assign this role because it is higher or equal to your (or my) highest role!");
                 return;
@@ -214,7 +214,7 @@ public class RoleCommand extends Command {
             // Get author's highest role for hierarchy checking
             Role highest = getHighestRole(event.getMember());
             Role bot = getHighestRole(event.getSelfMember());
-            Role target = roles.get(0);
+            Role target = roles.getFirst();
             if (target.getPosition() >= highest.getPosition() || target.getPosition() >= bot.getPosition()) {
                 event.reply("I can't assign this role because it is higher or equal to your (or my) highest role!");
                 return;
@@ -295,7 +295,7 @@ public class RoleCommand extends Command {
     public Role getHighestRole(Member member) {
         Role role = member.getGuild().getPublicRole();
         if (!member.getRoles().isEmpty()) {
-            role = member.getRoles().get(0);
+            role = member.getRoles().getFirst();
         }
         return role;
     }

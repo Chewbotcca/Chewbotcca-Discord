@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@ public class MessageHandler extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (!event.isFromGuild()) return;
-        if (event.getChannel().getId().equals("745164378659225651") && event.getAuthor().getDiscriminator().equals("0000") && event.getMessage().getEmbeds().size() > 0) {
-            String title = event.getMessage().getEmbeds().get(0).getTitle();
+        if (event.getChannel().getId().equals("745164378659225651") && event.getAuthor().getDiscriminator().equals("0000") && !event.getMessage().getEmbeds().isEmpty()) {
+            String title = event.getMessage().getEmbeds().getFirst().getTitle();
             if (title != null && title.contains("[Discord] Compile success on main")) {
                 event.getChannel().sendMessage("Updating...").queue(message -> System.exit(0));
             }
