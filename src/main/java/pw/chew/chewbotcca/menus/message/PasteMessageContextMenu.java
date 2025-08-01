@@ -19,8 +19,9 @@ package pw.chew.chewbotcca.menus.message;
 import com.jagrosh.jdautilities.command.CooldownScope;
 import com.jagrosh.jdautilities.command.MessageContextMenu;
 import com.jagrosh.jdautilities.command.MessageContextMenuEvent;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pw.chew.chewbotcca.util.PropertiesManager;
@@ -48,7 +49,7 @@ public class PasteMessageContextMenu extends MessageContextMenu {
 
         try {
             event.reply(pasteData(file))
-                .setActionRow(Button.link(message.getJumpUrl(), "Jump to Message"))
+                .setComponents(ActionRow.of(Button.link(message.getJumpUrl(), "Jump to Message")))
                 .queue();
         } catch (IllegalArgumentException e) {
             event.reply(e.getMessage()).setEphemeral(true).queue();

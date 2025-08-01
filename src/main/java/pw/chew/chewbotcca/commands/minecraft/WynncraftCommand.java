@@ -21,6 +21,11 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import com.jagrosh.jdautilities.menu.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.selections.SelectOption;
+import net.dv8tion.jda.api.components.selections.StringSelectMenu;
+import net.dv8tion.jda.api.components.selections.StringSelectMenu.Builder;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -28,10 +33,6 @@ import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import net.dv8tion.jda.internal.utils.Checks;
 import org.json.JSONArray;
@@ -97,18 +98,18 @@ public class WynncraftCommand extends SlashCommand {
         if (type.equals("player")) {
             playerCache.put(query, data);
             event.replyEmbeds(buildPlayerEmbed(data).build())
-                .addActionRow(
+                .setComponents(ActionRow.of(
                     Button.primary("wynn:chars:" + query, "View Characters"),
                     Button.secondary("wynn:refresh:player:%s".formatted(query), "Refresh")
-                ).queue();
+                )).queue();
         } else {
             guildCache.put(query, data);
             event.replyEmbeds(buildGuildEmbed(data).build())
-                .addActionRow(
+                .setComponents(ActionRow.of(
                     Button.primary("wynn:guild:" + query + ":members", "View Members")
                     // TODO: Implement this
                     // Button.secondary("wynn:refresh:guild:%s".formatted(query), "Refresh")
-                ).queue();
+                )).queue();
         }
     }
 
@@ -184,7 +185,7 @@ public class WynncraftCommand extends SlashCommand {
             .setDescription("Select a character to view stats for using the select menu below.");
 
         // Build Selection List.
-        StringSelectMenu.Builder menu = StringSelectMenu.create("wynn:char:" + player)
+        Builder menu = StringSelectMenu.create("wynn:char:" + player)
             .setPlaceholder("Select a character");
 
         for (String key : data.keySet()) {

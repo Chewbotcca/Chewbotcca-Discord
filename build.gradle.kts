@@ -45,15 +45,10 @@ repositories {
     }
 
     mavenCentral()
-
-    // jitpack
-    maven {
-        url = uri("https://jitpack.io")
-    }
 }
 
 dependencies {
-    implementation("com.github.freya022", "JDA", "5fb5005")
+    implementation("net.dv8tion", "JDA", "6.0.0-rc.1")
     implementation("pw.chew", "jda-chewtils", "2.0-contexts-SNAPSHOT")
     implementation("ch.qos.logback", "logback-classic", "1.4.11")
     implementation("com.squareup.okhttp3", "okhttp", "4.12.0")

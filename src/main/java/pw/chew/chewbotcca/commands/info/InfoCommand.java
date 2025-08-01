@@ -20,15 +20,15 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.selections.SelectOption;
+import net.dv8tion.jda.api.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
-import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.internal.utils.Checks;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -60,10 +60,10 @@ public class InfoCommand extends SlashCommand {
             event.replyEmbeds(gatherData(event.optString("command", ""))).queue();
         } catch (IllegalArgumentException e) {
             if (e.getMessage().contains("Did you mean? ")) {
-                SelectMenu menu = buildSuggestionMenu(e.getMessage());
+                ActionRow menu = buildSuggestionMenu(e.getMessage());
 
                 event.reply("Invalid command! See <https://help.chew.pro/bots/discord/chewbotcca/commands> for a list of commands.")
-                    .addActionRow(menu)
+                    .setComponents(menu)
                     .queue();
             } else {
                 event.replyEmbeds(ResponseHelper.generateFailureEmbed(null, e.getMessage())).setEphemeral(true).queue();
@@ -97,17 +97,17 @@ public class InfoCommand extends SlashCommand {
      * @param message the original message
      * @return a selection menu
      */
-    private SelectMenu buildSuggestionMenu(String message) {
+    private ActionRow buildSuggestionMenu(String message) {
         String[] options = message.split("Did you mean\\? ")[1].split(", ");
         List<SelectOption> data = new ArrayList<>();
         for (String option : options) {
             data.add(SelectOption.of(option, option));
         }
         data.add(SelectOption.of("None of these", "NONE").withDescription("Can't find the command? Select to cancel."));
-        return StringSelectMenu.create("info:didyoumean")
+        return ActionRow.of(StringSelectMenu.create("info:didyoumean")
             .setPlaceholder("Did you mean?")
             .addOptions(data)
-            .build();
+            .build());
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import pro.chew.api.objects.SpigotDrama;
 import pw.chew.chewbotcca.objects.Memory;
 
@@ -49,7 +50,7 @@ public class SpigotDramaCommand extends SlashCommand {
         embed.setDescription(response.getPhrase());
 
         event.replyEmbeds(embed.build())
-            .addActionRow(Button.link(response.getPermalink(), "Permalink"))
+            .setComponents(ActionRow.of(Button.link(response.getPermalink(), "Permalink")))
             .queue();
     }
 }

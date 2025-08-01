@@ -20,6 +20,11 @@ package pw.chew.chewbotcca.commands.fun;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.selections.StringSelectMenu;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -29,10 +34,6 @@ import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import org.jetbrains.annotations.Nullable;
 import org.mapdb.DB;
@@ -127,7 +128,7 @@ public class PollCommand extends SlashCommand {
             .withDisabled(!pollEmbed.getAuthorId().equals(event.getUser().getId()));
 
         event.replyEmbeds(embed.build())
-            .addActionRow(Button.secondary(pollId + "-voters", "Voters"), closeButton)
+            .setComponents(ActionRow.of(Button.secondary(pollId + "-voters", "Voters"), closeButton))
             .setEphemeral(true).queue();
     }
 
@@ -158,10 +159,10 @@ public class PollCommand extends SlashCommand {
         event.getChannel().retrieveMessageById(msgId).queue(message -> {
             PollEmbed embed = PollEmbed.fromEmbed(message.getEmbeds().get(0), pollId);
 
-            StringSelectMenu menu = buildChoicesMenu(embed.getChoices(), pollId, 0);
+            ActionRow menu = buildChoicesMenu(embed.getChoices(), pollId, 0);
 
             event.replyEmbeds(getVotersEmbed(getVoters(pollId, 0), embed.getChoice(0)))
-                .addActionRow(menu)
+                .setComponents(menu)
                 .setEphemeral(true)
                 .queue();
         });
@@ -186,7 +187,7 @@ public class PollCommand extends SlashCommand {
 
         MessageEmbed embed = getVotersEmbed(voters, choice);
 
-        event.editMessageEmbeds(embed).setActionRow(buildChoicesMenu(choices, pollId, position)).queue();
+        event.editMessageEmbeds(embed).setComponents(buildChoicesMenu(choices, pollId, position)).queue();
     }
 
     /**
@@ -212,7 +213,7 @@ public class PollCommand extends SlashCommand {
      * @param selected The selected option
      * @return The select menu
      */
-    private static StringSelectMenu buildChoicesMenu(List<String> choices, String pollId, int selected) {
+    private static ActionRow buildChoicesMenu(List<String> choices, String pollId, int selected) {
         var menu = StringSelectMenu.create(pollId + "-voters-menu")
             .setPlaceholder("Select a option to see voters")
             .setRequiredRange(1, 1);
@@ -236,7 +237,7 @@ public class PollCommand extends SlashCommand {
 
         menu.setDefaultOptions(menu.getOptions().get(selected));
 
-        return menu.build();
+        return ActionRow.of(menu.build());
     }
 
     /**

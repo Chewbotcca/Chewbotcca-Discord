@@ -21,12 +21,13 @@ import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
@@ -89,11 +90,10 @@ public class YouTubeCommand extends SlashCommand {
             }
 
             event.replyEmbeds(buildVideoEmbed(video).build()).setEphemeral(forceEphemeral)
-                .setActionRow(
+                .setComponents(ActionRow.of(
                     Button.primary("youtube:view:" + video.getId(), "Reply with Video"),
                     Button.link(video.getURL(), "View on YouTube")
-                )
-                .queue();
+                )).queue();
         } catch (IllegalArgumentException e) {
             event.replyEmbeds(ResponseHelper.generateFailureEmbed("Error occurred!", e.getMessage())).queue();
         }
