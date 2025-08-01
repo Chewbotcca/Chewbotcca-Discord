@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ public class RubyGemsSubCommand extends SlashCommand {
         List<String> links = new ArrayList<>();
 
         // These are the URLs we want
-        String[] uris = new String[]{"documentation", "homepage", "wiki", "mailing_list", "source_code", "bug_tracker", "changelog"};
+        String[] uris = {"documentation", "homepage", "wiki", "mailing_list", "source_code", "bug_tracker", "changelog"};
 
         // Go through and add them to our link list
         for (String uri : uris) {

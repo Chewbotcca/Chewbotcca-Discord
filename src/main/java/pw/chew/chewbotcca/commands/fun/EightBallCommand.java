@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import java.util.Random;
 // %^8ball command
 public class EightBallCommand extends SlashCommand {
     // The good responses
-    final String[] goodResponses = new String[]{
+    final String[] goodResponses = {
             "As I see it, yes",
             "It is certain",
             "It is decidedly so",
@@ -49,7 +49,7 @@ public class EightBallCommand extends SlashCommand {
             "You can count on it"
     };
     // The neutral responses
-    final String[] neutralResponses = new String[]{
+    final String[] neutralResponses = {
             "Better not tell you now!",
             "Ask again later.",
             "Cannot predict now",
@@ -59,7 +59,7 @@ public class EightBallCommand extends SlashCommand {
             "Maybe..."
     };
     // The bad responses
-    final String[] badResponses = new String[]{
+    final String[] badResponses = {
             "You're kidding, right?",
             "Don't count on it.",
             "In your dreams",

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ public class ToSDRCommand extends Command {
     }
 
     private static class ToSDRInfoSubCommand extends Command {
-        private final String[] emoji = new String[]{
+        private final String[] emoji = {
             "<:AToS:815821354103865375>",
             "<:BToS:815821351444938782>",
             "<:CToS:815821356478103584>",

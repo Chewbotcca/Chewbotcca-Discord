@@ -41,7 +41,7 @@ import java.util.Map;
  */
 public record PollEmbed(String pollId, String title, String description, List<String> choices, String author) {
     // emoji regional_indicators for each letter
-    private static final String[] EMOJI = new String[]{
+    private static final String[] EMOJI = {
         "<:letter_a:1034691614792241282>",
         "<:letter_b:1034691618311241748>",
         "<:letter_c:1034691615719182366>",

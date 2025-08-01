@@ -669,7 +669,7 @@ public class ServerInfoCommand extends SlashCommand {
      * Get member milestone (estimated)
      */
     private static class ServerMemberMilestoneSubCommand extends SlashCommand {
-        final static int[] milestones = new int[]{10, 25, 50, 100, 500, 1000, 5000, 10000, 20000, 50000, 100000, 200000, 300000, 400000, 500000, 1000000};
+        final static int[] milestones = {10, 25, 50, 100, 500, 1000, 5000, 10000, 20000, 50000, 100000, 200000, 300000, 400000, 500000, 1000000};
 
         public ServerMemberMilestoneSubCommand() {
             this.name = "milestones";

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,7 +102,7 @@ public class MiscUtil {
     public static String bytesToFriendly(long bytes) {
         // Find size of repo and list it
         int k = 1024;
-        String[] measure = new String[]{"B", "KB", "MB", "GB", "TB"};
+        String[] measure = {"B", "KB", "MB", "GB", "TB"};
         double i;
         if (bytes == 0) {
             i = 0;
