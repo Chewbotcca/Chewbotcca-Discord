@@ -83,7 +83,16 @@ public class YouTubeVideo {
      * @return The parsed duration
      */
     public String getDuration() {
-        String duration = data.getJSONObject("contentDetails").getString("duration");
+        if (isLive()) {
+            return "Live";
+        }
+
+        JSONObject details = data.getJSONObject("contentDetails");
+        if (!details.has("duration")) {
+            return "Unknown";
+        }
+
+        String duration = details.getString("duration");
         List<String> timesTemp = Arrays.asList(duration.replace("PT", "").split("[A-Z]"));
         List<String> times = new ArrayList<>(timesTemp);
         if (times.size() == 1) {
@@ -95,6 +104,14 @@ public class YouTubeVideo {
             }
         }
         return String.join(":", times);
+    }
+
+    /**
+     * Checks if the video is a live stream.
+     * @return true if the video is a live stream, false otherwise
+     */
+    public boolean isLive() {
+        return data.getJSONObject("snippet").getString("liveBroadcastContent").equals("live");
     }
 
     public OffsetDateTime getUploadDate() {
