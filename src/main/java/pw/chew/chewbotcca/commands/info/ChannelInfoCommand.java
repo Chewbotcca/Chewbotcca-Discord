@@ -22,7 +22,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.Region;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -35,6 +34,7 @@ import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.requests.restaction.pagination.PinnedMessagePaginationAction;
 import pw.chew.chewbotcca.util.EmojiUtil;
 
 import java.util.ArrayList;
@@ -152,11 +152,11 @@ public class ChannelInfoCommand extends SlashCommand {
     public EmbedBuilder getPinsInfo(TextChannel channel, JDA jda) {
         EmbedBuilder e = new EmbedBuilder();
         // Retrieve the channel pins
-        List<Message> pins = channel.retrievePinnedMessages().complete();
+        List<PinnedMessagePaginationAction.PinnedMessage> pins = channel.retrievePinnedMessages().complete();
         // Find the top pins users and sort it
         HashMap<String, Integer> topPins = new HashMap<>();
-        for (Message message : pins) {
-            String authorId = message.getAuthor().getId();
+        for (PinnedMessagePaginationAction.PinnedMessage message : pins) {
+            String authorId = message.getMessage().getAuthor().getId();
             int current = topPins.getOrDefault(authorId, 0);
             topPins.put(authorId, current + 1);
         }
