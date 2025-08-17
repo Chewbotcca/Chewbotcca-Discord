@@ -15,32 +15,32 @@ The goal of Chewbotcca isn't really to be the "best", its goal is to have featur
 
 ## What can it do?
 
-It's mostly fun commands like `%^roll`ing some dice, getting cats with `%^cat`, and more.
+It's mostly fun commands like `/roll`ing some dice, getting cats with `/cat`, and more.
 
-However, it can also be used to find information like getting RubyGem information with `%^rubygem`, ironic considering this is a Java bot now.
+However, it can also be used to find information like getting RubyGem information with `/packages rubygem`, ironic considering this is a Java bot now.
 
 It also has powerful server info commands,
-for example, you can run `%^sinfo bot` to find all bots on the server, and when they got added,
-being able to find role and member counts (`%^sinfo roles`),
-finding a member by join position (`%^sinfo member [position]`),
-finding boosters and boost time (`%^sinfo boost`),
+for example, you can run `/serverinfo bots` to find all bots on the server, and when they got added,
+being able to find role and member counts (`/serverinfo roles`),
+finding a member by join position (`/serverinfo member [position]`),
+finding boosters and boost time (`/serverinfo boosts`),
 and more!
 
-There's also commands such as `%^youtube` to find YouTube videos,
-and `%^ghuser` to detail your favorite developers on GitHub.
+There's also commands such as `/youtube` to find YouTube videos,
+and `/github user` to detail your favorite developers on GitHub.
 
 I'm always open to suggestions on what to add. Please let me know what you would like to see!
 
 ## Links
 
-You can view commands [here](https://chew.pw/chewbotcca/discord/commands).
+You can view commands [here](https://help.chew.pro/bots/discord/chewbotcca/commands/).
 
 You can add the
 bot [with this link](https://discord.com/api/oauth2/authorize?client_id=604362556668248095&permissions=939879492&scope=bot%20applications.commands)
 
 You can join the Discord server with [this link](https://discord.gg/UjxQ3Bh).
 
-You can view the GitHub repository @ [Chewbotcca/Discord](https://github.com/Chewbotcca/Discord)
+You can view the GitHub repository @ [Chewbotcca/Chewbotcca-Discord](https://github.com/Chewbotcca/Chewbotcca-Discord)
 
 ## Licensing
 
