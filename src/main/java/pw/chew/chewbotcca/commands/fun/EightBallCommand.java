@@ -16,12 +16,11 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.components.container.Container;
+import net.dv8tion.jda.api.components.separator.Separator;
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -29,53 +28,53 @@ import pw.chew.chewbotcca.util.MiscUtil;
 
 import java.awt.Color;
 import java.util.Collections;
-import java.util.Random;
 
-// %^8ball command
+/**
+ * <h2><code>/8ball</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/8ball">Docs</a>
+ */
 public class EightBallCommand extends SlashCommand {
     // The good responses
     final String[] goodResponses = {
-            "As I see it, yes",
-            "It is certain",
-            "It is decidedly so",
-            "Most likely",
-            "Outlook good",
-            "Signs point to yes",
-            "One would be wise to think so",
-            "Naturally",
-            "Without a doubt",
-            "Yes",
-            "You may rely on it",
-            "You can count on it"
+        "As I see it, yes",
+        "It is certain",
+        "It is decidedly so",
+        "Most likely",
+        "Outlook good",
+        "Signs point to yes",
+        "One would be wise to think so",
+        "Naturally",
+        "Without a doubt",
+        "Yes",
+        "You may rely on it",
+        "You can count on it"
     };
     // The neutral responses
     final String[] neutralResponses = {
-            "Better not tell you now!",
-            "Ask again later.",
-            "Cannot predict now",
-            "Cool down enabled! Please try again.",
-            "Concentrate and ask again.",
-            "Rhetorical questions can be answered in solo",
-            "Maybe..."
+        "Better not tell you now!",
+        "Ask again later.",
+        "Cannot predict now",
+        "Cool down enabled! Please try again.",
+        "Concentrate and ask again.",
+        "Rhetorical questions can be answered in solo",
+        "Maybe..."
     };
     // The bad responses
     final String[] badResponses = {
-            "You're kidding, right?",
-            "Don't count on it.",
-            "In your dreams",
-            "My reply is no",
-            "Outlook not so good",
-            "My undisclosed sources say NO",
-            "One would be wise to think not",
-            "Very doubtful"
+        "You're kidding, right?",
+        "Don't count on it.",
+        "In your dreams",
+        "My reply is no",
+        "Outlook not so good",
+        "My undisclosed sources say NO",
+        "One would be wise to think not",
+        "Very doubtful"
     };
-    // A Random object
-    final Random rand = new Random();
 
     public EightBallCommand() {
         this.name = "8ball";
         this.help = "Ask the magic 8ball a question!";
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
         this.contexts = new InteractionContextType[]{InteractionContextType.BOT_DM, InteractionContextType.GUILD, InteractionContextType.PRIVATE_CHANNEL};
         this.options = Collections.singletonList(
             new OptionData(OptionType.STRING, "question", "The question to ask the eight ball").setRequired(true)
@@ -84,40 +83,37 @@ public class EightBallCommand extends SlashCommand {
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.replyEmbeds(generateEmbed(event.optString("question", ""))).queue();
+        event.replyComponents(buildResponse(event.optString("question", ""))).useComponentsV2().queue();
     }
 
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        // Get the question, doesn't matter what they said but we'll send it back to them
-        String question = commandEvent.getArgs();
-        commandEvent.reply(generateEmbed(question));
-    }
-
-    private MessageEmbed generateEmbed(String question) {
+    private Container buildResponse(String question) {
         // Pick a number between 0 and 2 inclusive
-        int response = rand.nextInt(3);
-        EmbedBuilder e = new EmbedBuilder();
-        e.setTitle(":question: Question");
-        e.setDescription(question);
-        String answer = null;
+        int response = MiscUtil.getRandom(0, 1, 2);
+        String answer;
+        Color color;
         // Set the answer based on the random response
         switch (response) {
             case 0 -> {
                 answer = MiscUtil.getRandom(goodResponses);
-                e.setColor(Color.decode("#00FF00"));
+                color = Color.RED;
             }
             case 1 -> {
                 answer = MiscUtil.getRandom(neutralResponses);
-                e.setColor(Color.decode("#FFFF00"));
+                color = Color.YELLOW;
             }
-            case 2 -> {
+            default -> {
                 answer = MiscUtil.getRandom(badResponses);
-                e.setColor(Color.decode("#FF0000"));
+                color = Color.GREEN;
             }
         }
-        // Finish and send embed
-        e.addField(":8ball: 8ball says", answer, false);
-        return e.build();
+
+        // Finish and send container
+        return Container.of(
+            TextDisplay.of("### :question: Question"),
+            TextDisplay.of(question),
+            Separator.createDivider(Separator.Spacing.SMALL),
+            TextDisplay.of("### :8ball: 8ball says..."),
+            TextDisplay.of(answer)
+        ).withAccentColor(color);
     }
 }
