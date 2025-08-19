@@ -18,13 +18,18 @@ package pw.chew.chewbotcca.commands.fun;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.InteractionContextType;
-import pro.chew.api.objects.SpigotDrama;
-import pw.chew.chewbotcca.objects.Memory;
+import net.dv8tion.jda.api.components.container.Container;
+import net.dv8tion.jda.api.components.separator.Separator;
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import org.json.JSONObject;
+import pw.chew.chewbotcca.util.CommandContext;
+import pw.chew.chewbotcca.util.RestClient;
+
+import java.util.Collections;
 
 /**
  * <h2><code>/spigotdrama Command</code></h2>
@@ -34,23 +39,35 @@ import pw.chew.chewbotcca.objects.Memory;
 public class SpigotDramaCommand extends SlashCommand {
     public SpigotDramaCommand() {
         this.name = "spigotdrama";
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
         this.help = "Generates some random Spigot drama";
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+        this.contexts = CommandContext.GLOBAL;
+
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "mode", "Which mode to use (default: mja00 fork)")
+                .addChoice("mja00 fork", "https://drama.mart.fyi/api")
+                .addChoice("Classic (mdcfe)", "https://api.chew.pro/spigotdrama")
+        );
     }
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        // Get a SpigotDrama response
-        SpigotDrama response = Memory.getChewAPI().generateSpigotDrama();
-        // Make an embed and send it off
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setAuthor("By mdcfe", "https://github.com/mdcfe/spigot-drama-generator", "https://avatars0.githubusercontent.com/u/1917406");
-        embed.setTitle("Spigot Drama Generator", "https://drama.mdcfe.dev/");
-        embed.setDescription(response.getPhrase());
+        // Find which API to call
+        String api = event.optString("mode", "https://drama.mart.fyi/api");
 
-        event.replyEmbeds(embed.build())
-            .setComponents(ActionRow.of(Button.link(response.getPermalink(), "Permalink")))
-            .queue();
+        // Get a SpigotDrama response
+        JSONObject response = RestClient.get(api).asJSONObject();
+
+        // Build response
+        Container container = Container.of(
+            TextDisplay.of("# Spigot Drama Generator"),
+            TextDisplay.of(response.getString("response")),
+            Separator.createDivider(Separator.Spacing.SMALL),
+            ActionRow.of(Button.link(
+                response.getString("permalink").replace("/api", ""),
+                "Permalink"
+            ))
+        );
+
+        event.replyComponents(container).useComponentsV2(true).queue();
     }
 }
