@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,22 +16,25 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.interactions.InteractionContextType;
+import net.dv8tion.jda.api.components.container.Container;
+import net.dv8tion.jda.api.components.mediagallery.MediaGallery;
+import net.dv8tion.jda.api.components.mediagallery.MediaGalleryItem;
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay;
+import pw.chew.chewbotcca.util.CommandContext;
 import pw.chew.chewbotcca.util.RestClient;
 
-// %^dog command
+/**
+ * <h2><code>/dog</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/dog">Docs</a>
+ */
 public class DogCommand extends SlashCommand {
-
     public DogCommand() {
         this.name = "dog";
         this.help = "Gets a random dog picture! Bark, woof, purr?";
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+        this.contexts = CommandContext.GLOBAL;
     }
 
     @Override
@@ -39,22 +42,9 @@ public class DogCommand extends SlashCommand {
         // Get a dog and bark it, i mean send it, am not furry i swear
         String dog = RestClient.get("https://random.dog/woof.json").asJSONObject().getString("url");
 
-        event.replyEmbeds(new EmbedBuilder()
-            .setTitle("Adorable.", dog)
-            .setImage(dog)
-            .build()
-        ).queue();
-    }
-
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        // Get a dog and woof it, i mean send it, am not furry i swear
-        String dog = RestClient.get("https://random.dog/woof.json").asJSONObject().getString("url");
-
-        commandEvent.reply(new EmbedBuilder()
-            .setTitle("Adorable.", dog)
-            .setImage(dog)
-            .build()
-        );
+        event.replyComponents(Container.of(
+            TextDisplay.of("Adorable."),
+            MediaGallery.of(MediaGalleryItem.fromUrl(dog))
+        )).useComponentsV2().queue();
     }
 }
