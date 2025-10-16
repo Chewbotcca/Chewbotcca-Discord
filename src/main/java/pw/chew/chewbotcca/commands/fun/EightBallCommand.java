@@ -95,7 +95,7 @@ public class EightBallCommand extends SlashCommand {
         switch (response) {
             case 0 -> {
                 answer = MiscUtil.getRandom(goodResponses);
-                color = Color.RED;
+                color = Color.GREEN;
             }
             case 1 -> {
                 answer = MiscUtil.getRandom(neutralResponses);
@@ -103,7 +103,7 @@ public class EightBallCommand extends SlashCommand {
             }
             default -> {
                 answer = MiscUtil.getRandom(badResponses);
-                color = Color.GREEN;
+                color = Color.RED;
             }
         }
 
