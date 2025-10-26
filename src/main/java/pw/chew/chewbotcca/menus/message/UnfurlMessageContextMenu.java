@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,7 +76,12 @@ public class UnfurlMessageContextMenu extends MessageContextMenu {
      */
     @Nullable
     public List<MessageEmbed> unfurlMessage(Message msg) {
-        String content = msg.getContentStripped().replace(">", "");
+        String content = msg.getContentStripped()
+            // Strip out <>s
+            .replaceAll("<", "").replaceAll(">", "")
+            // Make newlines spaces
+            .replaceAll("\n", " ")
+            ;
 
         // Find all the links in the message
         List<String> validLinks = new ArrayList<>();
@@ -86,7 +91,7 @@ public class UnfurlMessageContextMenu extends MessageContextMenu {
             try {
                 new URL(link);
                 validLinks.add(link);
-                LoggerFactory.getLogger(this.getClass()).debug("Found link: " + link);
+                LoggerFactory.getLogger(this.getClass()).debug("Found link: {}", link);
             } catch (MalformedURLException ignored) {
             }
         }
