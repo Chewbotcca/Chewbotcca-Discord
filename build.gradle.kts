@@ -25,7 +25,7 @@ plugins {
     java
     `maven-publish`
     application
-    kotlin("jvm") version "2.2.10"
+    kotlin("jvm") version "2.2.21"
 }
 
 repositories {
@@ -48,14 +48,14 @@ repositories {
 }
 
 dependencies {
-    implementation("net.dv8tion", "JDA", "6.0.0-rc.2")
-    implementation("pw.chew", "jda-chewtils", "2.0-contexts-SNAPSHOT")
-    implementation("ch.qos.logback", "logback-classic", "1.5.18")
+    implementation("net.dv8tion", "JDA", "6.1.0")
+    implementation("pw.chew", "jda-chewtils", "2.0-SNAPSHOT")
+    implementation("ch.qos.logback", "logback-classic", "1.5.20")
     implementation("com.squareup.okhttp3", "okhttp", "4.12.0")
     implementation("org.json", "json", "20231013")
     implementation("io.sentry", "sentry", "5.7.4")
-    implementation("org.kohsuke", "github-api", "1.329")
-    implementation("org.jsoup", "jsoup", "1.21.1")
+    implementation("org.kohsuke", "github-api", "1.330")
+    implementation("org.jsoup", "jsoup", "1.21.2")
     implementation("pro.chew.api", "ChewAPI", "1.0-b5")
     implementation("org.reflections", "reflections", "0.10.2")
     implementation("me.memerator.api", "MemeratorAPI", "2.0.0_74")
