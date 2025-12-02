@@ -394,7 +394,7 @@ public class WynncraftCommand extends SlashCommand {
             .setColor(Color.decode(meta.getJSONObject("legacyRankColour").getString("main")))
             .setThumbnail("https://visage.surgeplay.com/bust/350/%s".formatted(meta.getString("uuid")))
             .addField("Total Level", globalData.getInt("totalLevel") + "", true)
-            .addField("Mobs Killed", globalData.getInt("killedMobs") + "", true)
+            .addField("Mobs Killed", globalData.getInt("mobsKilled") + "", true)
             .addField("Playtime", meta.getDouble("playtime") + " hours", true)
             .addField("Dates",
                 "First Joined: " + TimeFormat.DATE_TIME_LONG.format(MiscUtil.dateParser(meta.getString("firstJoin"), "uuuu-MM-dd'T'HH:mm:ssX"))
