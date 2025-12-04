@@ -20,8 +20,10 @@ package pw.chew.chewbotcca.commands.fun;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.ModalTopLevelComponent;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.label.Label;
 import net.dv8tion.jda.api.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
@@ -34,7 +36,7 @@ import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.modals.Modal;
+import net.dv8tion.jda.api.modals.Modal;
 import org.jetbrains.annotations.Nullable;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
@@ -46,8 +48,8 @@ import pw.chew.chewbotcca.objects.PollVoter;
 import pw.chew.chewbotcca.util.MiscUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,9 +64,9 @@ public class PollCommand extends SlashCommand {
         this.name = "poll";
         this.help = "Create a poll! Use the options to configure it, then a modal will appear for you to add questions.";
         this.contexts = new InteractionContextType[]{InteractionContextType.GUILD};
-        this.options = Arrays.asList(
+        this.options = Collections.singletonList(
             new OptionData(OptionType.INTEGER, "options", "The number of options to choose from", true)
-                .setRequiredRange(1, 10)
+                .setRequiredRange(1, 3)
         );
     }
 
@@ -75,18 +77,27 @@ public class PollCommand extends SlashCommand {
         String id = String.format("poll-%s-%s", event.getChannel().getId(), System.currentTimeMillis());
 
         var modal = Modal.create(id, "Fill out your poll information");
-        modal.addActionRow(
-            TextInput.create(id + "-question", "Enter the question", TextInputStyle.SHORT).setRequired(true).build()
+        modal.addComponents(
+            Label.of(
+                id + "-queslabel", "Enter the question",
+                TextInput.create(id + "-question", TextInputStyle.SHORT).setRequired(true).build()
+            ),
+            Label.of(
+                id + "-desclabel", "Enter a more detailed description",
+                TextInput.create(id + "-description", TextInputStyle.PARAGRAPH)
+                    .setRequired(false).build()
+            )
         );
-        modal.addActionRow(
-            TextInput.create(id + "-description", "Enter a more detailed description", TextInputStyle.PARAGRAPH)
-                .setRequired(false).build()
-        );
+        List<ModalTopLevelComponent> questions = new ArrayList<>();
         for (int i = 0; i < options; i++) {
-            modal.addActionRow(
-                TextInput.create(id + "-option-" + i, "Enter option " + (i + 1), TextInputStyle.SHORT).setRequired(true).build()
+            questions.add(
+                Label.of(
+                    id + "-optlabel-" + i, "Enter option " + (i + 1),
+                    TextInput.create(id + "-option-" + i, TextInputStyle.SHORT).setRequired(true).build()
+                )
             );
         }
+        modal.addComponents(questions);
 
         event.replyModal(modal.build()).queue();
 
