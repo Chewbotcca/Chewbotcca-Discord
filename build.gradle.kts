@@ -56,6 +56,7 @@ dependencies {
     implementation("io.sentry", "sentry", "5.7.4")
     implementation("org.kohsuke", "github-api", "1.330")
     implementation("org.jsoup", "jsoup", "1.21.1")
+    implementation("com.google.code.gson", "gson", "2.13.2")
     implementation("pro.chew.api", "ChewAPI", "1.0-b5")
     implementation("org.reflections", "reflections", "0.10.2")
     implementation("me.memerator.api", "MemeratorAPI", "2.0.0_74")

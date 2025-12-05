@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
  */
 package pw.chew.chewbotcca.util;
 
+import com.google.gson.Gson;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,7 @@ import java.time.Duration;
  */
 public class RestClient {
     public static final String JSON = "application/json; charset=utf-8";
+    private static final Gson GSON = new Gson();
     private static String userAgent = "Java Discord Bot";
     private static final HttpClient client = HttpClient.newBuilder()
         .followRedirects(HttpClient.Redirect.NORMAL)
@@ -106,7 +109,7 @@ public class RestClient {
             request.header(details[0].trim(), details[1].trim());
         }
 
-        if (debug) LoggerFactory.getLogger(RestClient.class).debug("Making call to GET " + url);
+        if (debug) LoggerFactory.getLogger(RestClient.class).debug("Making call to GET {}", url);
         return performRequest(request.build());
     }
 
@@ -153,7 +156,7 @@ public class RestClient {
             int code = response.statusCode();
             String body = response.body();
             if (debug) {
-                LoggerFactory.getLogger(RestClient.class).debug("Response is " + body);
+                LoggerFactory.getLogger(RestClient.class).debug("Response is {}", body);
             }
             return new Response(code, body);
         } catch (IOException | InterruptedException e) {
@@ -192,6 +195,15 @@ public class RestClient {
         }
 
         /**
+         * Gets the response as the provided Gson type.
+         * @param type The class type to use
+         * @return A Gson object
+         */
+        public <T> T asGsonObject(Class<T> type) {
+            return GSON.fromJson(asString(), type);
+        }
+
+        /**
          * Get the response as a JSONArray
          * @return a JSONArray
          */
@@ -204,7 +216,7 @@ public class RestClient {
          * @return a String
          */
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return asString();
         }
     }
