@@ -86,7 +86,7 @@ public class InteractionHandler extends ListenerAdapter {
         } else if (id.startsWith("apod:explanation")) {
             // apod:explanation:month:day:year
             String[] parts = id.split(":");
-            String date = parts[2] + "/" + parts[3] + "/" + parts[4];
+            String date = parts[2];
 
             APODCommand.replyExplanation(event, date);
         } else if (id.startsWith("youtube:view")) {
