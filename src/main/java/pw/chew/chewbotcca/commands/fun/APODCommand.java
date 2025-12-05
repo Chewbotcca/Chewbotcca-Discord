@@ -18,19 +18,21 @@ package pw.chew.chewbotcca.commands.fun;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.components.container.Container;
+import net.dv8tion.jda.api.components.mediagallery.MediaGallery;
+import net.dv8tion.jda.api.components.mediagallery.MediaGalleryItem;
+import net.dv8tion.jda.api.components.separator.Separator;
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import org.json.JSONObject;
+import pw.chew.chewbotcca.util.CommandContext;
 import pw.chew.chewbotcca.util.RestClient;
 
+import javax.annotation.Nullable;
 import java.text.DateFormatSymbols;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -39,14 +41,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * <h2><code>/apod</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/apod">Docs</a>
+ */
 public class APODCommand extends SlashCommand {
     private static final Map<String, Astropix> cache = new HashMap<>();
 
     public APODCommand() {
         this.name = "apod";
         this.help = "Show NASA's Astronomy Picture of the Day for today, or a specified date";
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+        this.contexts = CommandContext.GLOBAL;
         this.options = List.of(
             new OptionData(OptionType.INTEGER, "year", "The year for the pic, blank for this year. Range: (1995-)")
                 .setMinValue(1995).setMaxValue(OffsetDateTime.now().getYear()),
@@ -62,79 +68,33 @@ public class APODCommand extends SlashCommand {
         try {
             // Check for no input
             OffsetDateTime today = OffsetDateTime.now();
-            String month = event.optString("month", String.valueOf(today.getMonthValue()));
-            String day = event.optString("day", String.valueOf(today.getDayOfMonth()));
-            String year = event.optString("year", String.valueOf(today.getYear()));
-            String date = month + "/" + day + "/" + year;
+            long month = event.optLong("month", today.getMonthValue());
+            long day = event.optLong("day", today.getDayOfMonth());
+            long year = event.optLong("year", today.getYear());
+            String date = getDateURL(year, month, day);
 
             Astropix pic = cache.get(date);
             if (pic == null) {
-                pic = gatherPicture(date);
+                pic = retrievePicture(date);
                 cache.put(date, pic);
             }
 
-            event.replyEmbeds(pic.buildEmbed())
-                .setComponents(ActionRow.of(Button.secondary("apod:explanation:%s:%s:%s".formatted(month, day, year), "View Explanation")))
+            event.replyComponents(pic.buildContainer())
+                .useComponentsV2()
                 .queue();
         } catch (IllegalArgumentException e) {
             event.reply(e.getMessage()).setEphemeral(true).queue();
         }
     }
 
-    private static Astropix gatherPicture(String date) {
-        if (!date.equals("astropix") || date.isBlank()) {
-            String[] input = date.split("/");
-            if (input.length < 3) {
-                throw new IllegalArgumentException("Invalid format! Must be MM/DD/YYYY");
-            }
-            try {
-                date = getDateURL(input);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Error occurred: " + e.getMessage() + " Range is June 16th, 1995 to today!");
-            }
-        }
-
-        JSONObject data = RestClient.get("https://api.chew.pro/apod?date=%s".formatted(date)).asJSONObject();
-
-        // Get title and img
-        String url = String.format("https://apod.nasa.gov/apod/ap%s.html", date);
-        String friendlyDate = data.getString("friendlyDate");
-        String title = data.getString("title");
-        String description = data.getString("description");
-        String img = data.getString("img");
-        String explanation = data.getString("explanation");
-        // Ensure img is a valid image
-        if (img == null) {
-            // debug output the image url for debugging
-            description = "Could not find an image for this date! You will need to visit the page to enjoy today's \"picture\".";
-        }
-
-        return new Astropix(friendlyDate, title, description, img, url, explanation);
+    private static Astropix retrievePicture(String date) {
+        return RestClient.get("https://api.chew.pro/apod?date=%s".formatted(date)).asGsonObject(Astropix.class);
     }
 
-    private static String getDateURL(String[] date) {
+    private static String getDateURL(long year, long month, long day) {
         // Get current time in CST
         OffsetDateTime current = OffsetDateTime.now();
         // Parse int from date input
-        int month = Integer.parseInt(date[0]);
-        int day = Integer.parseInt(date[1]);
-        int year = Integer.parseInt(date[2]);
-
-        // Sanity check the year, ensure it's 4 digits
-        if (year < 100) {
-            if (year >= 95) {
-                year += 1900;
-            } else {
-                year += 2000;
-            }
-        }
-
-        // No APOD prior to 1995
-        if (year < 1995)
-            throw new IllegalArgumentException("Year must not be prior to 1995.");
-        // No APOD for the future
-        if (year > current.getYear())
-            throw new IllegalArgumentException("Year must not be later than current year.");
         if (year == current.getYear()) {
             if (month > current.getMonthValue())
                 throw new IllegalArgumentException("Month must not be later than current month.");
@@ -158,7 +118,7 @@ public class APODCommand extends SlashCommand {
     public static void replyExplanation(ButtonInteractionEvent event, String date) {
         Astropix pic = cache.get(date);
         if (pic == null) {
-            pic = gatherPicture(date);
+            pic = retrievePicture(date);
             cache.put(date, pic);
         }
 
@@ -174,20 +134,34 @@ public class APODCommand extends SlashCommand {
         return responses;
     }
 
-    private record Astropix(String friendlyDate, String title, String description, String img, String url, String explanation) {
-        // clean description when instantiating
-        public Astropix {
-            description = description.replaceAll("Clicking on the picture will download the highest resolution version available.", "");
+    private record Astropix(String friendlyDate, String title, @Nullable String description, String img, String url, String explanation) {
+        private final static String NO_PICTURE = "Could not find an image for this date! You will need to visit the page to enjoy today's \"picture\".";
+
+        public String description() {
+            String desc = description;
+            if (desc == null) {
+                return "No description provided. See explanation for more details.";
+            }
+            desc = desc.replaceAll("Clicking on the picture will download the highest resolution version available.", "");
+            return desc;
         }
 
-        private MessageEmbed buildEmbed() {
-            EmbedBuilder embed = new EmbedBuilder();
-            embed.setImage(img)
-                .setAuthor("NASA Astronomy Picture of the Day")
-                .setTitle(title, url)
-                .setDescription(description)
-                .setFooter(friendlyDate);
-            return embed.build();
+        private Container buildContainer() {
+            return Container.of(
+                TextDisplay.of("## NASA Astronomy Picture of the Day"),
+                TextDisplay.of("### [%s](%s)".formatted(title, url)),
+                TextDisplay.of(description()),
+                TextDisplay.of("-# " + friendlyDate),
+                Separator.createDivider(Separator.Spacing.SMALL),
+                img == null ? TextDisplay.of(NO_PICTURE) : MediaGallery.of(
+                    MediaGalleryItem.fromUrl(img)
+                ),
+                Separator.createDivider(Separator.Spacing.SMALL),
+                ActionRow.of(Button.primary(
+                    "apod:explanation:%s".formatted(url.substring(29, 35)),
+                    "View Explanation"
+                ), Button.link(url, "View Online"))
+            );
         }
     }
 }
