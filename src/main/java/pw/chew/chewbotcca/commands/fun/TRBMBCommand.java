@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,29 +16,26 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.InteractionContextType;
-import pw.chew.chewbotcca.objects.Memory;
+import pw.chew.chewbotcca.util.CommandContext;
+import pw.chew.chewbotcca.util.RestClient;
 
-// %^trbmb command
+/**
+ * <h2><code>/trbmb</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/trbmb">Docs</a>
+ */
 public class TRBMBCommand extends SlashCommand {
-
     public TRBMBCommand() {
         this.name = "trbmb";
-        this.help = "Generates a random TRBMB phrase";
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+        this.help = "Generates a random 'That really [blanks] my [blank]' phrase";
+        this.contexts = CommandContext.GLOBAL;
     }
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.reply(Memory.getChewAPI().getTRBMBPhrase()).queue();
-    }
-
-    @Override
-    protected void execute(CommandEvent event) {
-        // Get and send TRBMB Phrase
-        event.reply(Memory.getChewAPI().getTRBMBPhrase());
+        String phrase = RestClient.get("https://api.chew.pro/trbmb").asJSONArray().getString(0);
+        event.reply(phrase).queue();
     }
 }
