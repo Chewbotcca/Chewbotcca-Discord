@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,45 +16,53 @@
  */
 package pw.chew.chewbotcca.commands.services.github;
 
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.kohsuke.github.GHRepository;
 import pw.chew.chewbotcca.objects.Memory;
+import pw.chew.chewbotcca.util.CommandContext;
 import pw.chew.chewbotcca.util.MiscUtil;
 
 import java.io.IOException;
+import java.util.Arrays;
 
-// %^ghrepo command
-public class GHRepoCommand extends Command {
+/**
+ * <h2><code>/github repository</code> Sub-Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/github/#repository-subcommand">Docs</a>
+ */
+public class GitHubRepoSubCommand extends SlashCommand {
 
-    public GHRepoCommand() {
-        this.name = "ghrepo";
-        this.aliases = new String[]{"githubrepo", "ghrepository"};
-        this.guildOnly = false;
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
+    public GitHubRepoSubCommand() {
+        this.name = "repository";
+        this.help = "Gathers a repository from GitHub";
+        this.contexts = CommandContext.GLOBAL;
+        this.options = Arrays.asList(
+            new OptionData(OptionType.STRING, "user", "The user or organization to find", true),
+            new OptionData(OptionType.STRING, "repo", "The repo to look up in this user/org", true)
+        );
     }
 
     @Override
-    protected void execute(CommandEvent commandEvent) {
+    protected void execute(SlashCommandEvent event) {
         // Get the repo
-        String repoName = commandEvent.getArgs();
-        if (!repoName.contains("/")) {
-            commandEvent.reply("Make sure your input contains a UserOrOrg/RepositoryName (e.g. Chewbotcca/Discord).");
-            return;
-        }
-        commandEvent.getChannel().sendTyping().queue();
+        String userName = event.optString("user", "");
+        String repoName = event.optString("repo", "");
+
         // Find the repo
         GHRepository repo;
         try {
-            repo = Memory.getGithub().getRepository(repoName);
+            repo = Memory.getGithub().getRepository(userName + "/" + repoName);
         } catch (IOException e) {
-            commandEvent.reply("Invalid repository name. Please make sure this repository exists!");
+            event.reply("Invalid repository name. Please make sure this repository exists!").setEphemeral(true).queue();
             return;
         }
-        commandEvent.reply(gatherRepoData(repo));
+
+        event.replyEmbeds(gatherRepoData(repo)).queue();
     }
 
     public static MessageEmbed gatherRepoData(GHRepository repo) {
@@ -65,7 +73,7 @@ public class GHRepoCommand extends Command {
             e.setTitle("GitHub Repository Info for " + repo.getFullName(), "https://github.com/" + repo.getFullName());
             e.setDescription(repo.getDescription());
             if (repo.getHomepage() != null)
-                e.addField("URL", String.valueOf(repo.getHomepage()), true);
+                e.addField("URL", repo.getHomepage(), true);
             if (repo.getLicense() != null)
                 e.addField("License", repo.getLicense().getName(), true);
             e.addField("Open Issues/PRs", String.valueOf(repo.getOpenIssueCount()), true);

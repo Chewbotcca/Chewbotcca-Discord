@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,52 +16,59 @@
  */
 package pw.chew.chewbotcca.commands.services.github;
 
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
+import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHUser;
 import pw.chew.chewbotcca.objects.Memory;
 import pw.chew.chewbotcca.objects.UserProfile;
 
 import java.io.IOException;
+import java.util.Collections;
 
-// %^ghuser command
-public class GHUserCommand extends Command {
-
-    public GHUserCommand() {
-        this.name = "ghuser";
-        this.aliases = new String[]{"ghorg"};
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.guildOnly = false;
+/**
+ * <h2><code>/github user</code> Sub-Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/github/#user-subcommand">Docs</a>
+ */
+public class GitHubUserSubCommand extends SlashCommand {
+    public GitHubUserSubCommand() {
+        this.name = "user";
+        this.help = "Gathers a user from GitHub";
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.STRING, "username", "The user to look up (default: yours if set)")
+        );
     }
 
     @Override
-    protected void execute(CommandEvent commandEvent) {
+    protected void execute(SlashCommandEvent event) {
         // Get the input
-        String username = commandEvent.getArgs();
+        String username = event.optString("username", "");
         if (username.isBlank()) {
-            UserProfile profile = UserProfile.getProfile(commandEvent.getAuthor().getId());
+            UserProfile profile = UserProfile.getProfile(event.getUser().getId());
             if (profile.getGitHub() != null) {
                 username = profile.getGitHub();
             } else {
-                commandEvent.reply("You don't have a GitHub username set on your profile. " +
-                    "Please specify a user with `" + commandEvent.getPrefix() + "ghuser user` or set your username with `" + commandEvent.getPrefix() + "profile set github yourname`!");
+                event.reply("You don't have a GitHub username set on your profile. " +
+                        "Please specify a user with `/github user [name]` or set your username with `/profile set github [yourname]`!")
+                    .setEphemeral(true)
+                    .queue();
                 return;
             }
         }
-        commandEvent.getChannel().sendTyping().queue();
-        // Find the GitHub user and notify if errored
+
         GHUser user;
         try {
             user = Memory.getGithub().getUser(username);
         } catch (IOException e) {
-            commandEvent.reply("Invalid username. Please make sure this user exists!");
+            event.reply("Invalid username. Please make sure this user exists!").setEphemeral(true).queue();
             return;
         }
-        commandEvent.reply(gatherUser(user));
+        event.replyEmbeds(gatherUser(user)).queue();
     }
 
     public static MessageEmbed gatherUser(GHUser user) {
@@ -79,11 +86,11 @@ public class GHUserCommand extends Command {
                 e.setDescription(user.getBio());
                 e.addField("Followers", String.valueOf(user.getFollowersCount()), true);
                 e.addField("Following", String.valueOf(user.getFollowingCount()), true);
-                if(user.getCompany() != null)
+                if (user.getCompany() != null)
                     e.addField("Company", user.getCompany(), true);
-                if(!user.getBlog().equals(""))
+                if (!user.getBlog().isBlank())
                     e.addField("Website", user.getBlog(), true);
-                if(user.getTwitterUsername() != null)
+                if (user.getTwitterUsername() != null)
                     e.addField("Twitter", "[@" + user.getTwitterUsername() + "](https://twitter.com/" + user.getTwitterUsername() + ")", true);
             } else {
                 // If it is an org, list other stuff instead
@@ -97,5 +104,4 @@ public class GHUserCommand extends Command {
 
         return e.build();
     }
-
 }

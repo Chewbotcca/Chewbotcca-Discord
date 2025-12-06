@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Chewbotcca
+ * Copyright (C) 2025 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GitHub;
-import pw.chew.chewbotcca.commands.services.github.GHIssueCommand;
+import pw.chew.chewbotcca.commands.services.github.GitHubIssueSubCommand;
 import pw.chew.chewbotcca.objects.Memory;
 
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class GitHubUnfurler implements GenericUnfurler {
         GHIssue ghIssue;
         try {
             ghIssue = github.getRepository(repo).getIssue(issue);
-            return GHIssueCommand.issueBuilder(ghIssue).build();
+            return GitHubIssueSubCommand.issueBuilder(ghIssue).build();
         } catch (IOException e) {
             return null;
         }
