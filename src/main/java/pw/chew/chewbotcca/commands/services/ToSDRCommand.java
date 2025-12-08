@@ -16,204 +16,272 @@
  */
 package pw.chew.chewbotcca.commands.services;
 
-import com.jagrosh.jdautilities.command.Command;
-import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.menu.EmbedPaginator;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.interactions.InteractionContextType;
+import com.jagrosh.jdautilities.command.SlashCommand;
+import com.jagrosh.jdautilities.command.SlashCommandEvent;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.container.Container;
+import net.dv8tion.jda.api.components.container.ContainerChildComponent;
+import net.dv8tion.jda.api.components.replacer.ComponentReplacer;
+import net.dv8tion.jda.api.components.section.Section;
+import net.dv8tion.jda.api.components.separator.Separator;
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay;
+import net.dv8tion.jda.api.components.thumbnail.Thumbnail;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.util.JDAUtilUtil;
+import pw.chew.chewbotcca.util.CommandContext;
+import pw.chew.chewbotcca.util.EmojiUtil;
+import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.RestClient;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class ToSDRCommand extends Command {
+public class ToSDRCommand extends SlashCommand {
+    private static final Map<Integer, JSONObject> cache = new HashMap<>();
 
     public ToSDRCommand() {
         this.name = "tosdr";
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.children = new Command[]{new ToSDRInfoSubCommand(), new ToSDRPointsSubCommand(), new ToSDRDocsSubCommand()};
+        this.help = "Look up information about a service on Terms of Service; Didn't Read";
+        this.contexts = CommandContext.GLOBAL;
+        this.options = Collections.singletonList(
+            new OptionData(OptionType.INTEGER, "service", "The service to look up", true, true)
+        );
     }
 
     @Override
-    protected void execute(CommandEvent event) {
-        event.reply("""
-            Please specify the sub-command you want to do. Examples:
-            `%^tosdr info google` => Get information about "Google" service.
-            `%^tosdr docs google` => Gets document links for "Google" service.
-            `%^tosdr points google` => Gets points for "Google" service.
-            """.replaceAll("%\\^", event.getPrefix()));
+    protected void execute(SlashCommandEvent event) {
+        int service = (int) event.optLong("service", 0);
+
+        JSONObject data = retrieveServiceDetails(service);
+        cache.put(service, data);
+
+        event.replyComponents(buildContainer(data)).useComponentsV2().queue();
     }
 
-    public static JSONObject getServiceData(String query) {
-        query = query.replaceAll("[^0-9a-z_]", "");
-        JSONObject data;
-        try {
-            data = RestClient.get("https://api.tosdr.org/v1/service/" + query + ".json").asJSONObject();
-        } catch (JSONException e) {
-            throw new IllegalArgumentException("JSON wasn't returned. Please fix your input before I send out another AMBER alert...");
-        }
+    /**
+     * Retrieves info about a service from ToS;DR
+     *
+     * @param id the service ID
+     * @return details
+     */
+    public static JSONObject retrieveServiceDetails(int id) {
+        JSONObject data = RestClient.get("https://api.tosdr.org/service/v3/?id=" + id).asJSONObject();
 
-        if (data.has("error") && data.getJSONArray("error").get(0).equals("INVALID_SERVICE")) {
-            data = RestClient.get("https://search.tosdr.org/" + query).asJSONObject();
-            if (data.getJSONObject("parameters").isNull("service")) {
-                throw new IllegalArgumentException("Service doesn't exist!");
-            }
-            JSONArray services = data.getJSONObject("parameters").getJSONArray("service");
-            return getServiceData(services.getJSONObject(0).getInt("id") + "");
-        }
-
-        if (data.has("error")) {
-            throw new IllegalArgumentException("Could not get service! Errors: " + data.getJSONArray("error").join(", "));
+        if (data.has("detail")) {
+            throw new IllegalArgumentException("Could not get service! " + data.getString("detail"));
         }
 
         return data;
     }
 
-    private static class ToSDRInfoSubCommand extends Command {
-        private final String[] emoji = {
-            "<:AToS:815821354103865375>",
-            "<:BToS:815821351444938782>",
-            "<:CToS:815821356478103584>",
-            "<:DToS:815821358868856852>",
-            "<:EToS:815821361015947284>"
-        };
+    public static void handleInteraction(ButtonInteractionEvent event, String[] parts) {
+        // well, parts is "tosdr:cont:id:page:pagenum"
+        int id = MiscUtil.asInt(parts[2]);
+        int pageNum = MiscUtil.asInt(parts[4]);
 
-        public ToSDRInfoSubCommand() {
-            this.name = "info";
-            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-            this.guildOnly = false;
+        // Get data from cache, or retrieve if we don't have it.
+        JSONObject data = cache.get(id);
+        if (data == null) {
+            data = retrieveServiceDetails(id);
         }
 
-        @Override
-        protected void execute(CommandEvent event) {
-            event.getTextChannel().sendTyping().queue();
+        var tree = event.getMessage().getComponentTree()
+            .replace(ComponentReplacer.byUniqueId(67, buildPointsSection(data, pageNum).withUniqueId(67)));
 
-            JSONObject data;
-            try {
-                data = getServiceData(event.getArgs());
-            } catch (IllegalArgumentException e) {
-                event.reply(e.getMessage());
-                return;
-            }
-
-            EmbedBuilder embed = new EmbedBuilder();
-            embed.setAuthor("Terms of Service; Didn't Read Lookup", "https://tosdr.org", "https://cdn.discordapp.com/icons/324969783508467715/64cee34d12d9bda16cb0d6abf8c530a7.png?size=1024");
-            embed.setTitle("Service: " + data.getString("name"));
-            embed.setThumbnail(data.getString("image"));
-            if (data.get("class") instanceof String) {
-                embed.addField("Class", emoji[data.getString("class").charAt(0) - 65], true);
-            } else {
-                embed.addField("Class", "Not yet classified!", true);
-            }
-            embed.addField("Points", "[View on Phoenix](https://edit.tosdr.org/services/" + data.getInt("id") + ")\n" +
-                "Run `" + event.getPrefix() + "tosdr points " + event.getArgs() + "`", false);
-            embed.addField("Documents", "Run `" + event.getPrefix() + "tosdr docs " + event.getArgs() + "`", false);
-            event.reply(embed.build());
+        var pageButtons = buildPointsButtons(data, pageNum);
+        if (pageButtons != null) {
+            tree = tree.replace(ComponentReplacer.byUniqueId(68, pageButtons.withUniqueId(68)));
         }
+
+        event.editComponents(tree).useComponentsV2().queue();
     }
 
-    private static class ToSDRPointsSubCommand extends Command {
+    @Override
+    public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
+        // Get input
+        String input = event.getOptionsByName("service").getFirst().getAsString();
+        String encoded = URLEncoder.encode(input, StandardCharsets.UTF_8);
 
-        public ToSDRPointsSubCommand() {
-            this.name = "points";
-            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-            this.guildOnly = false;
+        // Sanity
+        if (input.isBlank()) {
+            event.replyChoices().queue();
+            return;
         }
 
-        @Override
-        protected void execute(CommandEvent event) {
-            event.getTextChannel().sendTyping().queue();
+        // Query API
+        JSONObject results = RestClient.get("https://api.tosdr.org/search/v5?query=" + encoded).asJSONObject();
 
-            JSONObject data;
-            try {
-                data = getServiceData(event.getArgs());
-            } catch (IllegalArgumentException e) {
-                event.reply(e.getMessage());
-                return;
-            }
+        // We only care about name and ID
+        JSONArray services = results.getJSONArray("services");
+        List<JSONObject> serviceList = MiscUtil.toList(services, JSONObject.class);
 
-            EmbedPaginator.Builder paginator = JDAUtilUtil.makeEmbedPaginator();
-            paginator.setUsers(event.getAuthor());
-            paginator.allowTextInput(true);
-            paginator.setBulkSkipNumber(10);
+        List<Command.Choice> choices = serviceList.stream()
+            .map(j -> new Command.Choice(j.getString("name"), j.getInt("id")))
+            .distinct()
+            .limit(25)
+            .toList();
 
-            int points = data.getJSONArray("points").length();
-            List<Object> pointList = data.getJSONArray("points").toList();
-
-            for(int i = 0; i < points; i++) {
-                JSONObject pointData = data.getJSONObject("pointsData").getJSONObject(pointList.get(i) + "");
-
-                // Build the point embed
-                EmbedBuilder e = new EmbedBuilder();
-                e.setAuthor("Points for " + data.getString("name"), null, data.getString("image"));
-
-                e.setTitle(pointData.getString("title"));
-                e.addField("Point", pointData.getJSONObject("tosdr").getString("point"), true);
-
-                String quoteText;
-                if (pointData.isNull("quoteText")) {
-                    quoteText = pointData.getJSONObject("tosdr").getString("tldr");
-                } else {
-                    quoteText = pointData.getString("quoteText");
-                }
-
-                String description = "\"" + quoteText + "\"";
-
-                if (!pointData.isNull("quoteDoc")) {
-                    description += " - [" +
-                        pointData.getString("quoteDoc") + "](" +
-                        data.getJSONObject("links").getJSONObject(pointData.getString("quoteDoc")).getString("url") +
-                        ")";
-                }
-
-                e.setDescription(description);
-
-                e.setFooter("Point " + (i+1) + "/" + points);
-
-                paginator.addItems(e.build());
-            }
-            // Send it off!
-            paginator.setText("");
-            paginator.build().paginate(event.getChannel(), 1);
-        }
+        event.replyChoices(choices).queue();
     }
 
-    private static class ToSDRDocsSubCommand extends Command {
+    /**
+     * Builds the container for the embed.
+     *
+     * @param data the service data
+     * @return the container
+     */
+    private static Container buildContainer(JSONObject data) {
+        List<ContainerChildComponent> componentParts = new ArrayList<>(List.of(
+            Section.of(
+                // Due to a bug in JDA, we can't show the actual image since it might be a 404,
+                // which means we can't edit the component. TODO: Replace with below when fixed.
+                // Thumbnail.fromUrl(data.getString("image")),
+                // This is the ToS;DR icon; we'll use it for now.
+                Thumbnail.fromUrl("https://s3.tosdr.org/branding/tosdr-icon-128.png"),
+                TextDisplay.of("## [ToS;DR Lookup](%s)\n### Service: %s\nRating: %s"
+                    .formatted(
+                        "https://tosdr.org/en/service/%s".formatted(data.getInt("id")),
+                        data.getString("name"),
+                        data.getString("rating")
+                    ))
+            ),
+            Separator.createDivider(Separator.Spacing.SMALL),
+            buildPointsSection(data, 1).withUniqueId(67)
+        ));
 
-        public ToSDRDocsSubCommand() {
-            this.name = "docs";
-            this.aliases = new String[]{"links", "documents", "doc"};
-            this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-            this.guildOnly = false;
+        // Add buttons if needed
+        ActionRow buttons = buildPointsButtons(data, 1);
+        if (buttons != null) componentParts.add(buttons.withUniqueId(68));
+
+        componentParts.add(Separator.createDivider(Separator.Spacing.SMALL));
+
+        // Add doc buttons
+        componentParts.addAll(buildDocsEmbed(data));
+
+        return Container.of(componentParts);
+    }
+
+    /**
+     * Builds a section of points to be displayed based on the provided JSON data and the specified page number.
+     *
+     * @param data the service data
+     * @param page the page number to display
+     * @return a {@code TextDisplay} object containing the formatted points for the specified page
+     */
+    private static TextDisplay buildPointsSection(JSONObject data, int page) {
+        final int pointsPerPage = 5;
+        int totalPoints = data.getJSONArray("points").length();
+        List<JSONObject> pointList = MiscUtil.toList(data.getJSONArray("points"), JSONObject.class);
+
+        if (totalPoints == 0) {
+            return TextDisplay.of("No points found!");
         }
 
-        @Override
-        protected void execute(CommandEvent event) {
-            event.getTextChannel().sendTyping().queue();
+        // All points formatted
+        List<String> points = new ArrayList<>();
+        for (JSONObject point : pointList) {
+            EmojiUtil.Emoji emoji = switch (point.getJSONObject("case").getString("classification")) {
+                case "bad" -> EmojiUtil.Emoji.BAD_TOS;
+                case "good" -> EmojiUtil.Emoji.GOOD_TOS;
+                case "blocker" -> EmojiUtil.Emoji.BLOCKER_TOS;
+                case null, default -> EmojiUtil.Emoji.NEUTRAL_TOS;
+            };
 
-            JSONObject data;
-            try {
-                data = getServiceData(event.getArgs());
-            } catch (IllegalArgumentException e) {
-                event.reply(e.getMessage());
-                return;
+            String title = point.getString("title");
+            String description = point.getJSONObject("case").getString("description").trim().split("\n")[0];
+
+            StringBuilder builder = new StringBuilder();
+            builder.append(emoji.mention()).append(" ").append(title);
+
+            if (!description.isBlank()) {
+                builder.append("\n");
+                builder.append("-# ").append(description);
             }
 
-            EmbedBuilder embed = new EmbedBuilder();
-            embed.setAuthor("Terms of Service; Didn't Read Lookup", "https://tosdr.org", "https://cdn.discordapp.com/icons/324969783508467715/64cee34d12d9bda16cb0d6abf8c530a7.png?size=1024");
-            embed.setTitle("Documents for Service: " + data.getString("name"));
-            embed.setThumbnail(data.getString("image"));
+            builder.append("\n");
 
-            for (String object : data.getJSONObject("links").keySet()) {
-                embed.addField(object, data.getJSONObject("links").getJSONObject(object).getString("url"), true);
-            }
-
-            event.reply(embed.build());
+            points.add(builder.toString());
         }
+
+        // Calculate start and end points
+        int start = (page - 1) * pointsPerPage;
+        int end = Math.min(start + pointsPerPage, totalPoints);
+
+        return TextDisplay.of(String.join("\n", points.subList(start, end)));
+    }
+
+    /**
+     * Constructs an {@code ActionRow} containing buttons for navigating points pages.
+     *
+     * @param data the service data
+     * @param page the current page number
+     * @return an {@code ActionRow} object containing navigation buttons
+     */
+    private static ActionRow buildPointsButtons(JSONObject data, int page) {
+        int id = data.getInt("id");
+        int totalPoints = data.getJSONArray("points").length();
+
+        int totalPages = (int) Math.ceil((double) totalPoints / 5);
+
+        if (totalPages <= 1) {
+            return null;
+        }
+
+        int prevPage = Math.max(page - 1, 1);
+        int nextPage = Math.min(page + 1, totalPages);
+
+        return ActionRow.of(
+            Button.primary("tosdr:cont:%s:points:1:first".formatted(id), "<<").withDisabled(page == 1),
+            Button.primary("tosdr:cont:%s:points:%s".formatted(id, prevPage), "<").withDisabled(page == 1),
+            Button.secondary("tosdr:cont:%s:points:page", "Page %s/%s".formatted(page, totalPages)).asDisabled(),
+            Button.primary("tosdr:cont:%s:points:%s".formatted(id, nextPage), ">").withDisabled(page == totalPages),
+            Button.primary("tosdr:cont:%s:points:%s:last".formatted(id, totalPages), ">>").withDisabled(page == totalPages)
+        );
+    }
+
+    /**
+     * Builds a list of {@code ActionRow} objects containing buttons for accessing document links.
+     *
+     * @param data the service data
+     * @return a list of {@code ActionRow} objects, each containing buttons grouped in sets of up to 5
+     */
+    private static List<ActionRow> buildDocsEmbed(JSONObject data) {
+        List<ActionRow> rows = new ArrayList<>();
+        List<Button> buttons = new ArrayList<>();
+
+        List<JSONObject> docList = MiscUtil.toList(data.getJSONArray("documents"), JSONObject.class);
+        List<JSONObject> pointList = MiscUtil.toList(data.getJSONArray("points"), JSONObject.class);
+
+        // To save on room let's only get documents that are used
+        List<Integer> docIds = pointList.stream()
+            .map(j -> j.optInt("document_id", 0))
+            .filter(id -> id != 0)
+            .distinct().toList();
+
+        for (JSONObject doc : docList) {
+            int id = doc.getInt("id");
+
+            if (docIds.contains(id) || docIds.isEmpty()) {
+                buttons.add(Button.link(doc.getString("url"), doc.getString("name")));
+            }
+        }
+
+        // Group buttons into groups of 5
+        for (int i = 0; i < buttons.size(); i += 5) {
+            rows.add(ActionRow.of(buttons.subList(i, Math.min(i + 5, buttons.size()))));
+        }
+
+        return rows;
     }
 }

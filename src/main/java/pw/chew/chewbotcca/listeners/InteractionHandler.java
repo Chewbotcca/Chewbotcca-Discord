@@ -24,6 +24,7 @@ import pw.chew.chewbotcca.commands.fun.APODCommand;
 import pw.chew.chewbotcca.commands.fun.PollCommand;
 import pw.chew.chewbotcca.commands.info.InfoCommand;
 import pw.chew.chewbotcca.commands.minecraft.WynncraftCommand;
+import pw.chew.chewbotcca.commands.services.ToSDRCommand;
 import pw.chew.chewbotcca.commands.services.google.YouTubeCommand;
 import pw.chew.chewbotcca.objects.PollEmbed;
 import pw.chew.chewbotcca.objects.PollVoter;
@@ -91,6 +92,10 @@ public class InteractionHandler extends ListenerAdapter {
             APODCommand.replyExplanation(event, date);
         } else if (id.startsWith("youtube:view")) {
             YouTubeCommand.replyVideoLink(event);
+        } else if (id.startsWith("tosdr:")) {
+            String[] parts = id.split(":");
+
+            ToSDRCommand.handleInteraction(event, parts);
         }
     }
 

@@ -35,6 +35,10 @@ public class EmojiUtil {
         PARTNERED,
         NEWS,
         CHANNEL_NSFW,
+        BAD_TOS,
+        GOOD_TOS,
+        NEUTRAL_TOS,
+        BLOCKER_TOS,
         ;
 
         public ApplicationEmoji get() {
