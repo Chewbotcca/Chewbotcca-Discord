@@ -35,6 +35,7 @@ import pw.chew.chewbotcca.util.RestClient;
 import javax.annotation.Nullable;
 import java.text.DateFormatSymbols;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class APODCommand extends SlashCommand {
     protected void execute(SlashCommandEvent event) {
         try {
             // Check for no input
-            OffsetDateTime today = OffsetDateTime.now();
+            OffsetDateTime today = OffsetDateTime.now(ZoneId.of("America/Chicago"));
             long month = event.optLong("month", today.getMonthValue());
             long day = event.optLong("day", today.getDayOfMonth());
             long year = event.optLong("year", today.getYear());
@@ -93,7 +94,7 @@ public class APODCommand extends SlashCommand {
 
     private static String getDateURL(long year, long month, long day) {
         // Get current time in CST
-        OffsetDateTime current = OffsetDateTime.now();
+        OffsetDateTime current = OffsetDateTime.now(ZoneId.of("America/Chicago"));
         // Parse int from date input
         if (year == current.getYear()) {
             if (month > current.getMonthValue())
