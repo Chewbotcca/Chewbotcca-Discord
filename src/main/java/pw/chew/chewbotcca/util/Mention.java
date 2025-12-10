@@ -19,7 +19,9 @@ package pw.chew.chewbotcca.util;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.utils.MiscUtil;
 
 public class Mention {
     public static User parseUserMention(String mention, JDA jda) {
@@ -54,5 +56,44 @@ public class Mention {
             return server.getRoleById(mention.replace("@&", ""));
         }
         return null;
+    }
+
+    public static boolean isValidMention(Message.MentionType type, String mention) {
+        String internal = "not numbers";
+        if (!(mention.startsWith("<") && mention.endsWith(">"))) {
+            return false;
+        }
+        switch (type) {
+            case USER -> {
+                if (mention.startsWith("<@!")) {
+                    internal = mention.replaceAll("[<>!@]", "");
+                } else {
+                    return false;
+                }
+            }
+            case CHANNEL -> {
+                if (mention.startsWith("<#")) {
+                    internal = mention.replaceAll("[<>#]", "");
+                } else {
+                    return false;
+                }
+            }
+            case ROLE -> {
+                if (mention.startsWith("@&")) {
+                    internal = mention.replaceAll("[<>@&]", "");
+                } else {
+                    return false;
+                }
+            }
+        }
+        if (internal.length() < 17) {
+            return false;
+        }
+        try {
+            MiscUtil.parseSnowflake(internal);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }
