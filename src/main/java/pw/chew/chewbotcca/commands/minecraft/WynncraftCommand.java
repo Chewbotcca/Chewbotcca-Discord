@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Chewbotcca
+ * Copyright (C) 2026 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -388,10 +388,9 @@ public class WynncraftCommand extends SlashCommand {
 
         JSONObject globalData = meta.getJSONObject("globalData");
 
-        return new EmbedBuilder()
+        EmbedBuilder embed = new EmbedBuilder()
             .setTitle(meta.getString("username") + "'s Wynncraft Stats")
             .setDescription("Viewing global stats for %s".formatted(meta.getString("username")))
-            .setColor(Color.decode(meta.getJSONObject("legacyRankColour").getString("main")))
             .setThumbnail("https://visage.surgeplay.com/bust/350/%s".formatted(meta.getString("uuid")))
             .addField("Total Level", globalData.getInt("totalLevel") + "", true)
             .addField("Mobs Killed", globalData.getInt("mobsKilled") + "", true)
@@ -401,6 +400,13 @@ public class WynncraftCommand extends SlashCommand {
                     + "\n" +
                     "Last Seen: " + lastSeen,
                 true);
+
+        JSONObject color = meta.getJSONObject("legacyRankColour");
+        if (color != null) {
+            embed.setColor(Color.decode(color.getString("main")));
+        }
+
+        return embed;
     }
 
     private static EmbedBuilder buildCharacterEmbed(JSONObject data, String character) {
