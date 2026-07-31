@@ -365,8 +365,10 @@ public class WynncraftCommand extends SlashCommand {
         List<Command.Choice> choices = new ArrayList<>();
 
         for (String key : players.keySet()) {
-            String player = players.getString(key);
-            choices.add(new Command.Choice("Player: " + player, "p:" + player));
+            JSONObject player = players.getJSONObject(key);
+            String username = player.getString("username");
+
+            choices.add(new Command.Choice("Player: " + username, "p:" + username));
         }
 
         for (String key : guilds.keySet()) {
