@@ -44,6 +44,7 @@ import pw.chew.chewbotcca.util.RestClient;
 import java.awt.Color;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -383,7 +384,7 @@ public class WynncraftCommand extends SlashCommand {
     }
 
     private static EmbedBuilder buildPlayerEmbed(JSONObject meta) {
-        String lastSeen = TimeFormat.DATE_TIME_LONG.format(MiscUtil.dateParser(meta.getString("lastJoin"), "uuuu-MM-dd'T'HH:mm:ss.SSSSSSX"));
+        String lastSeen = TimeFormat.DATE_TIME_LONG.format(MiscUtil.dateParser(meta.getString("lastJoin"), DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         if (meta.getBoolean("online")) {
             lastSeen = "Online on " + meta.getJSONObject("location").getString("server");
         }
@@ -398,7 +399,7 @@ public class WynncraftCommand extends SlashCommand {
             .addField("Mobs Killed", globalData.getInt("mobsKilled") + "", true)
             .addField("Playtime", meta.getDouble("playtime") + " hours", true)
             .addField("Dates",
-                "First Joined: " + TimeFormat.DATE_TIME_LONG.format(MiscUtil.dateParser(meta.getString("firstJoin"), "uuuu-MM-dd'T'HH:mm:ssX"))
+                "First Joined: " + TimeFormat.DATE_TIME_LONG.format(MiscUtil.dateParser(meta.getString("firstJoin"), DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                     + "\n" +
                     "Last Seen: " + lastSeen,
                 true);
