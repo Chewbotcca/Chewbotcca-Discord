@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Chewbotcca
+ * Copyright (C) 2026 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public class YouTubeCommand extends SlashCommand {
     private static final Pattern YOUTUBE_REGEX = Pattern.compile(
         "(?:youtube\\.com/(?:watch\\?v=|shorts/)|youtu\\.be/)([a-zA-Z0-9_-]+)"
     );
-    private static final String YOUTUBE_ICON = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/YouTube_social_red_circle_%282024%29.svg/2048px-YouTube_social_red_circle_%282024%29.svg.png";
+    private static final String YOUTUBE_ICON = "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/YouTube_social_red_circle_%282024%29.svg/1280px-YouTube_social_red_circle_%282024%29.svg.png";
 
     public YouTubeCommand() {
         this.name = "youtube";
@@ -212,10 +212,19 @@ public class YouTubeCommand extends SlashCommand {
         int currentHeight = 0;
         for (String value : thumbnails.keySet()) {
             JSONObject thumbnail = thumbnails.getJSONObject(value);
-            if (thumbnail.getInt("width") > currentWidth && thumbnail.getInt("height") > currentHeight) {
+            int width = thumbnail.getInt("width");
+            int height = thumbnail.getInt("height");
+
+            // seemingly thumbnails above 1280x720 (maxres) are weird, so we are limiting to that.
+            // this is "maxres" in the API, but not all videos have maxres, so we still need to do this
+            if (width > 1280 || height > 720) {
+                continue;
+            }
+
+            if (width > currentWidth && height > currentHeight) {
                 bestThumbnail = thumbnail.getString("url");
-                currentWidth = thumbnail.getInt("width");
-                currentHeight = thumbnail.getInt("height");
+                currentWidth = width;
+                currentHeight = height;
             }
         }
         return bestThumbnail;
