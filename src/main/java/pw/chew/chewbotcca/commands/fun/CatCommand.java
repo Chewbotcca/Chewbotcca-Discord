@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2026 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,25 +16,26 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.interactions.InteractionContextType;
 import org.json.JSONException;
+import org.json.JSONObject;
+import pw.chew.chewbotcca.util.CommandContext;
 import pw.chew.chewbotcca.util.ResponseHelper;
 import pw.chew.chewbotcca.util.RestClient;
 
-// %^cat command
+/**
+ * <h2><code>/cat</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/cat">Docs</a>
+ */
 public class CatCommand extends SlashCommand {
-
     public CatCommand() {
         this.name = "cat";
         this.help = "Get a very cute picture of a cat!";
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+        this.contexts = CommandContext.GLOBAL;
     }
 
     @Override
@@ -42,19 +43,15 @@ public class CatCommand extends SlashCommand {
         event.replyEmbeds(generateCatEmbed()).queue();
     }
 
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        commandEvent.reply(generateCatEmbed());
-    }
-
     private MessageEmbed generateCatEmbed() {
         // Try to gather a cat from the Cat API
         try {
-            String showcat = RestClient.get("https://aws.random.cat/meow").asJSONObject().getString("file");
+            JSONObject cat = RestClient.get("https://random.cat/api/random").asJSONObject();
 
             return (new EmbedBuilder()
-                .setTitle("Adorable.", showcat)
-                .setImage(showcat)
+                .setTitle("Adorable.", cat.getString("page"))
+                .setImage(cat.getString("url"))
+                .setFooter("ID: " + cat.getString("id"))
                 .build()
             );
         } catch (JSONException e) {
