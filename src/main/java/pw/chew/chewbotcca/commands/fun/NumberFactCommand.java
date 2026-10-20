@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2026 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,27 +16,28 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import pw.chew.chewbotcca.util.CommandContext;
 import pw.chew.chewbotcca.util.RestClient;
 
 import java.util.Arrays;
 
-// %^numberfact command
+/**
+ * <h2><code>/numberfact</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/numberfact">Docs</a>
+ */
 public class NumberFactCommand extends SlashCommand {
 
     public NumberFactCommand() {
         this.name = "numberfact";
         this.help = "Find some cool and interesting facts about a number";
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+        this.contexts = CommandContext.GLOBAL;
         this.options = Arrays.asList(
             new OptionData(OptionType.INTEGER, "number", "The number to get facts about").setRequired(true),
             new OptionData(OptionType.STRING, "type", "The type of fact to return")
@@ -55,39 +56,11 @@ public class NumberFactCommand extends SlashCommand {
         )).queue();
     }
 
-    @Override
-    protected void execute(CommandEvent commandEvent) {
-        // Get the arguments
-        String[] args = commandEvent.getArgs().split(" ");
-        // If there's no args
-        if (args.length == 0) {
-            commandEvent.reply("Please specify a number to find a fact for! Also, optionally specify what type of fact, choices: `trivia`, `year`, `date`, `math`.");
-            return;
-        }
-        String number = args[0];
-        // If the first arg isn't a number
-        try {
-            Long.parseLong(args[0]);
-        } catch (NumberFormatException e) {
-            commandEvent.reply("Invalid number input!");
-            return;
-        }
-        // The type if specified
-        String type;
-        if (args.length > 1) {
-            type = args[1].toLowerCase();
-        } else {
-            type = "trivia";
-        }
-
-        commandEvent.reply(gatherFact(number, type));
-    }
-
     private MessageEmbed gatherFact(String number, String type) {
         // Generate the url based off of the type
         String url = switch (type) {
-            default -> "http://numbersapi.com/" + number + "?notfound=";
-            case "math", "year", "date" -> "http://numbersapi.com/" + number + "/" + type + "?notfound=";
+            default -> "http://number-trivia.com/" + number + "?notfound=";
+            case "math", "year", "date" -> "http://number-trivia.com/" + number + "/" + type + "?notfound=";
         };
 
         EmbedBuilder embed = new EmbedBuilder();
