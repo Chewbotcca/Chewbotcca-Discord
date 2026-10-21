@@ -148,7 +148,7 @@ public class APODCommand extends SlashCommand {
                 return "No description provided. See explanation for more details.";
             }
             desc = desc.replaceAll("Clicking on the picture will download the highest resolution version available.", "");
-            return desc;
+            return FlexmarkHtmlConverter.builder().build().convert(desc);
         }
 
         public String friendlyDate() {
