@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Chewbotcca
+ * Copyright (C) 2026 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ package pw.chew.chewbotcca.commands.fun;
 
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
+import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.components.container.Container;
@@ -34,12 +35,15 @@ import pw.chew.chewbotcca.util.RestClient;
 
 import javax.annotation.Nullable;
 import java.text.DateFormatSymbols;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -89,7 +93,7 @@ public class APODCommand extends SlashCommand {
     }
 
     private static Astropix retrievePicture(String date) {
-        return RestClient.get("https://api.chew.pro/apod?date=%s".formatted(date)).asGsonObject(Astropix.class);
+        return RestClient.get("https://science.nasa.gov/wp-json/wp/v2/apod-basic/%s".formatted(date)).asGsonObject(Astropix.class);
     }
 
     private static String getDateURL(long year, long month, long day) {
@@ -123,7 +127,7 @@ public class APODCommand extends SlashCommand {
             cache.put(date, pic);
         }
 
-        event.reply(pic.explanation()).setEphemeral(true).queue();
+        event.reply(pic.markdownExplanation()).setEphemeral(true).setSuppressEmbeds(true).queue();
     }
 
     private List<Command.Choice> buildMonthChoices() {
@@ -135,11 +139,11 @@ public class APODCommand extends SlashCommand {
         return responses;
     }
 
-    private record Astropix(String friendlyDate, String title, @Nullable String description, String img, String url, String explanation) {
+    private record Astropix(String date, String title, @Nullable String alt, String hdurl, String url, String explanation) {
         private final static String NO_PICTURE = "Could not find an image for this date! You will need to visit the page to enjoy today's \"picture\".";
 
         public String description() {
-            String desc = description;
+            String desc = alt;
             if (desc == null) {
                 return "No description provided. See explanation for more details.";
             }
@@ -147,19 +151,36 @@ public class APODCommand extends SlashCommand {
             return desc;
         }
 
+        public String friendlyDate() {
+            // 2026-10-10 to October 10, 2026
+            LocalDate parsed = LocalDate.parse(date);
+            return parsed.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH));
+        }
+
+        public String markdownExplanation() {
+            return FlexmarkHtmlConverter.builder().build().convert(explanation);
+        }
+
+        private String oldDate() {
+            // turns 2026-10-10 into 261010
+            return
+                date.substring(2)
+                .replace("-", "");
+        }
+
         private Container buildContainer() {
             return Container.of(
                 TextDisplay.of("## NASA Astronomy Picture of the Day"),
                 TextDisplay.of("### [%s](%s)".formatted(title, url)),
                 TextDisplay.of(description()),
-                TextDisplay.of("-# " + friendlyDate),
+                TextDisplay.of("-# " + friendlyDate()),
                 Separator.createDivider(Separator.Spacing.SMALL),
-                img == null ? TextDisplay.of(NO_PICTURE) : MediaGallery.of(
-                    MediaGalleryItem.fromUrl(img)
+                hdurl == null ? TextDisplay.of(NO_PICTURE) : MediaGallery.of(
+                    MediaGalleryItem.fromUrl(hdurl).withDescription(alt)
                 ),
                 Separator.createDivider(Separator.Spacing.SMALL),
                 ActionRow.of(Button.primary(
-                    "apod:explanation:%s".formatted(url.substring(29, 35)),
+                    "apod:explanation:%s".formatted(oldDate()),
                     "View Explanation"
                 ), Button.link(url, "View Online"))
             );
