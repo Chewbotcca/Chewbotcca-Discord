@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Chewbotcca
+ * Copyright (C) 2026 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import com.jagrosh.jdautilities.command.CommandClient;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.JDA;
 import org.kohsuke.github.GitHub;
-import pro.chew.api.ChewAPI;
 
 /**
  * The bot's "Memory", that is, objects to be stored here for later use
@@ -28,14 +27,12 @@ import pro.chew.api.ChewAPI;
 public class Memory {
     private static EventWaiter waiter;
     private static JDA jda;
-    private static ChewAPI chewAPI;
     private static GitHub github;
     private static CommandClient client;
 
-    public static void remember(EventWaiter waiter, JDA jda, ChewAPI chewAPI, GitHub github, CommandClient client) {
+    public static void remember(EventWaiter waiter, JDA jda, GitHub github, CommandClient client) {
         Memory.waiter = waiter;
         Memory.jda = jda;
-        Memory.chewAPI = chewAPI;
         Memory.github = github;
         Memory.client = client;
     }
@@ -45,13 +42,6 @@ public class Memory {
      */
     public static JDA getJda() {
         return jda;
-    }
-
-    /**
-     * @return the ChewAPI used for Chew API stuff
-     */
-    public static ChewAPI getChewAPI() {
-        return chewAPI;
     }
 
     /**

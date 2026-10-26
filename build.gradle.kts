@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Chewbotcca
+ * Copyright (C) 2026 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ repositories {
         url = uri("https://jenkins.chew.pw/plugin/repository/everything/")
         content {
             includeGroup("me.memerator.api")
-            includeGroup("pro.chew.api")
         }
     }
 
@@ -57,7 +56,6 @@ dependencies {
     implementation("org.kohsuke", "github-api", "1.330")
     implementation("org.jsoup", "jsoup", "1.22.2")
     implementation("com.google.code.gson", "gson", "2.14.0")
-    implementation("pro.chew.api", "ChewAPI", "1.0-b5")
     implementation("org.reflections", "reflections", "0.10.2")
     implementation("me.memerator.api", "MemeratorAPI", "2.0.0_74")
     implementation("org.hibernate", "hibernate-core", "5.6.15.Final")
