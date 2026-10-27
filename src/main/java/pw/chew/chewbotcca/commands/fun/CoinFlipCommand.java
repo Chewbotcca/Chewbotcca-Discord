@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Chewbotcca
+ * Copyright (C) 2026 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,44 +16,43 @@
  */
 package pw.chew.chewbotcca.commands.fun;
 
-import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.command.SlashCommand;
 import com.jagrosh.jdautilities.command.SlashCommandEvent;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.interactions.InteractionContextType;
+import net.dv8tion.jda.api.components.MessageTopLevelComponent;
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay;
+import pw.chew.chewbotcca.util.CommandContext;
+import pw.chew.chewbotcca.util.EmojiUtil;
+import pw.chew.chewbotcca.util.MiscUtil;
 
-import static pw.chew.chewbotcca.util.MiscUtil.getRandom;
-
+/**
+ * <h2><code>/coinflip</code> Command</h2>
+ *
+ * <a href="https://help.chew.pro/bots/discord/chewbotcca/commands/coinflip">Docs</a>
+ */
 public class CoinFlipCommand extends SlashCommand {
+    private static final String[] PREFIXES = {
+        "I flipped a coin, and it landed on",
+        "I threw the coin into the air and it finally landed on",
+        "I dropped the coin, it landed on",
+    };
 
     public CoinFlipCommand() {
         this.name = "coinflip";
-        this.help = "Flip a coin";
-        this.aliases = new String[]{"flip"};
-        this.botPermissions = new Permission[]{Permission.MESSAGE_EMBED_LINKS};
-        this.contexts = new InteractionContextType[]{InteractionContextType.GUILD, InteractionContextType.BOT_DM, InteractionContextType.PRIVATE_CHANNEL};
+        this.help = "Flips a coin.";
+        this.contexts = CommandContext.GLOBAL;
     }
 
     @Override
     protected void execute(SlashCommandEvent event) {
-        event.replyEmbeds(flipCoin()).queue();
+        event.replyComponents(flipCoin()).useComponentsV2().queue();
     }
 
-    @Override
-    protected void execute(CommandEvent event) {
-        event.reply(flipCoin());
-    }
+    private MessageTopLevelComponent flipCoin() {
+        String prefix = MiscUtil.getRandom(PREFIXES);
+        String headsOrTails = MiscUtil.getRandom("heads", "tails");
 
-    private MessageEmbed flipCoin() {
-        String first = getRandom("I flipped a coin, and it landed on",
-            "I threw the coin into the air and it finally landed on",
-            "I dropped the coin, it landed on");
-        String headsOrTails = getRandom("heads", "tails");
-        EmbedBuilder e = new EmbedBuilder();
-        e.setTitle("Coin Flip");
-        e.setDescription(first + " **" + headsOrTails + "**!");
-        return e.build();
+        EmojiUtil.Emoji emoji = headsOrTails.equals("heads") ? EmojiUtil.Emoji.HEADS_SPIN : EmojiUtil.Emoji.TAILS_SPIN;
+
+        return TextDisplay.of("%s %s **%s**.".formatted(emoji.get(), prefix, headsOrTails));
     }
 }

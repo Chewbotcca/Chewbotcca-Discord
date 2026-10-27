@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Chewbotcca
+ * Copyright (C) 2026 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,8 @@ public class EmojiUtil {
         GOOD_TOS,
         NEUTRAL_TOS,
         BLOCKER_TOS,
+        HEADS_SPIN,
+        TAILS_SPIN,
         ;
 
         public ApplicationEmoji get() {
