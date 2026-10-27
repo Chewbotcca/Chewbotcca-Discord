@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pw.chew.chewbotcca.listeners.BotCommandListener;
 import pw.chew.chewbotcca.listeners.InteractionHandler;
-import pw.chew.chewbotcca.listeners.MessageHandler;
 import pw.chew.chewbotcca.listeners.ReadyListener;
 import pw.chew.chewbotcca.listeners.ServerJoinLeaveListener;
 import pw.chew.chewbotcca.menus.message.PasteMessageContextMenu;
@@ -139,7 +138,6 @@ public class Chewbotcca {
             .addEventListeners(
                 waiter, commandClient, // JDA-Chewtils stuff
                 new InteractionHandler(), // Handle interactions
-                new MessageHandler(), // Handle messages
                 new ReadyListener(), // Ran on boot
                 new ServerJoinLeaveListener() // Listen for server count changes for stats
             ).build();
