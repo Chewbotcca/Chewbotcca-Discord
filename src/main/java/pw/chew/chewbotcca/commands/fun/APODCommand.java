@@ -127,7 +127,8 @@ public class APODCommand extends SlashCommand {
             cache.put(date, pic);
         }
 
-        event.reply(pic.markdownExplanation()).setEphemeral(true).setSuppressEmbeds(true).queue();
+        TextDisplay explanation = TextDisplay.of(pic.markdownExplanation());
+        event.replyComponents(explanation).setEphemeral(true).setSuppressEmbeds(true).useComponentsV2().queue();
     }
 
     private List<Command.Choice> buildMonthChoices() {
