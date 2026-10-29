@@ -30,7 +30,7 @@ plugins {
 
 repositories {
     maven {
-        url = uri("https://jenkins.chew.pw/plugin/repository/everything/")
+        url = uri("https://m2.chew.pro/snapshots/")
         content {
             includeGroup("me.memerator.api")
         }
@@ -57,7 +57,7 @@ dependencies {
     implementation("org.jsoup", "jsoup", "1.22.2")
     implementation("com.google.code.gson", "gson", "2.14.0")
     implementation("org.reflections", "reflections", "0.10.2")
-    implementation("me.memerator.api", "MemeratorAPI", "2.0.0_74")
+    implementation("me.memerator.api", "MemeratorAPI", "2.0.0-SNAPSHOT")
     implementation("org.hibernate", "hibernate-core", "5.6.15.Final")
     implementation("mysql", "mysql-connector-java", "8.0.33")
     implementation("org.codehaus.groovy", "groovy", "3.0.25")
