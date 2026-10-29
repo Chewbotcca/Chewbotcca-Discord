@@ -30,13 +30,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import pw.chew.chewbotcca.util.MiscUtil;
 import pw.chew.chewbotcca.util.RestClient;
 
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 /**
@@ -67,67 +63,62 @@ public class MCUserSubCommand extends SlashCommand {
     }
 
     private Container gatherData(String name) {
-        String uuid;
-        // Get profile info
-        if (name.length() == 32 || name.length() == 36) {
-            // If it's a UUID
-            try {
-                uuid = name;
-            } catch (JSONException e) {
-                throw new IllegalArgumentException("Not a valid input! Please enter a valid UUID!");
-            }
-        } else if (name.length() >= 1 && name.length() <= 16) {
-            // If it's a username
-            try {
-                JSONObject profile = RestClient.get("https://api.mojang.com/users/profiles/minecraft/" + name).asJSONObject();
-                uuid = profile.getString("id");
-            } catch (JSONException e) {
-                throw new IllegalArgumentException("Not a valid input! Please enter a valid username!");
-            }
-        } else {
-            throw new IllegalArgumentException("Not a valid input! Please enter a valid username or a valid UUID!");
-        }
-        JSONObject profile = RestClient.get("https://laby.net/api/v2/user/" + uuid + "/get-profile").asJSONObject();
-        JSONArray history = profile.getJSONArray("username_history");
+        JSONObject response = RestClient.get("https://playerdb.co/api/player/minecraft/" + name).asJSONObject();
 
-        // Find recent names and when they were changed
+        if (!response.getBoolean("success")) {
+            throw new IllegalArgumentException("Not a valid Minecraft player! Please enter a valid username or UUID.");
+        }
+
+        JSONObject player = response.getJSONObject("data").getJSONObject("player");
+        String uuid = player.getString("id"); // UUID with dashes
+        String rawId = player.getString("raw_id"); // UUID without dashes
+        String currentName = player.getString("username");
+        String avatar = player.getString("avatar");
+
+        // Build name history
         StringBuilder names = new StringBuilder();
-        for(int i = history.length() - 1; i >= 0; i--) {
-            JSONObject data = history.getJSONObject(i);
-            String time;
-            if (!data.isNull("changed_at") && data.getString("changed_at").length() > 4) {
-                OffsetDateTime at = MiscUtil.dateParser(data.getString("changed_at"), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                time = TimeFormat.DATE_TIME_SHORT.format(at);
-            } else if (!data.isNull("changed_at")) {
-                time = data.getString("changed_at");
-            } else {
-                time = "Original";
+        if (player.has("meta") && !player.isNull("meta")) {
+            JSONObject meta = player.getJSONObject("meta");
+            if (meta.has("name_history") && !meta.isNull("name_history")) {
+                JSONArray history = meta.getJSONArray("name_history");
+                for (int i = history.length() - 1; i >= 0; i--) {
+                    JSONObject entry = history.getJSONObject(i);
+                    String time;
+                    if (entry.has("changedToAt") && !entry.isNull("changedToAt")) {
+                        time = TimeFormat.DATE_TIME_SHORT.format(entry.getLong("changedToAt") * 1000);
+                    } else {
+                        time = "Original";
+                    }
+                    names.append("`").append(entry.getString("name")).append("` - ").append(time).append("\n");
+                }
             }
-
-            String username = data.getString("name");
-            names.append("`").append(username).append("` - ").append(time).append("\n");
         }
 
-        String currentName = profile.getString("username");
-
-        return Container.of(
-            Section.of(
-                // avatar
-                Thumbnail.fromUrl("https://minotar.net/helm/" + uuid),
-                TextDisplay.of("# Minecraft Profile Information\n ## User: " + currentName)
-            ),
-
-            Separator.createDivider(Separator.Spacing.SMALL),
-
-            TextDisplay.of("Name History\n" + names),
-
-            Separator.createDivider(Separator.Spacing.SMALL),
-
-            // buttons to view online
-            ActionRow.of(
-                Button.link("https://namemc.com/profile/" + uuid, "View on NameMC"),
-                Button.link("https://laby.net/@" + uuid, "View on LabyMod")
-            )
+        ActionRow buttons = ActionRow.of(
+            Button.link("https://namemc.com/profile/" + uuid, "View on NameMC"),
+            Button.link("https://playerdb.co/player/minecraft/" + rawId, "View on PlayerDB")
         );
+
+        if (names.length() > 0) {
+            return Container.of(
+                Section.of(
+                    Thumbnail.fromUrl(avatar),
+                    TextDisplay.of("# Minecraft Profile Information\n ## User: " + currentName)
+                ),
+                Separator.createDivider(Separator.Spacing.SMALL),
+                TextDisplay.of("Name History\n" + names),
+                Separator.createDivider(Separator.Spacing.SMALL),
+                buttons
+            );
+        } else {
+            return Container.of(
+                Section.of(
+                    Thumbnail.fromUrl(avatar),
+                    TextDisplay.of("# Minecraft Profile Information\n ## User: " + currentName)
+                ),
+                Separator.createDivider(Separator.Spacing.SMALL),
+                buttons
+            );
+        }
     }
 }
