@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2026 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ public class UserProfile {
             session.beginTransaction();
             user = new Profile();
             user.setId(id);
-            session.save(user);
+            session.persist(user);
             session.getTransaction().commit();
         }
         session.close();
@@ -70,7 +70,7 @@ public class UserProfile {
         var session = DatabaseHelper.getSessionFactory().openSession();
         session.beginTransaction();
         data.setString(key, value);
-        session.update(data);
+        session.merge(data);
         session.getTransaction().commit();
         session.close();
         cache.put(getId(), new UserProfile(data));
@@ -104,7 +104,7 @@ public class UserProfile {
         String id = getId();
         var session = DatabaseHelper.getSessionFactory().openSession();
         session.beginTransaction();
-        session.delete(data);
+        session.remove(session.merge(data));
         session.getTransaction().commit();
         session.close();
         cache.remove(id);

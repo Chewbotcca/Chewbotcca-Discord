@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Chewbotcca
+ * Copyright (C) 2026 Chewbotcca
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,13 +67,13 @@ public class ServerSettings {
             session.beginTransaction();
             server = new Server();
             server.setId(id);
-            session.save(server);
+            session.persist(server);
             session.getTransaction().commit();
         }
         session.close();
         ServerSettings settings = new ServerSettings(server);
         cache.put(stringId, settings);
-        LoggerFactory.getLogger(ServerSettings.class).debug("Saving " + id + " to Server cache");
+        LoggerFactory.getLogger(ServerSettings.class).debug("Saving {} to Server cache", id);
         return settings;
     }
 
@@ -81,11 +81,11 @@ public class ServerSettings {
         var session = DatabaseHelper.getSessionFactory().openSession();
         session.beginTransaction();
         data.setString(key, value);
-        session.update(data);
+        session.merge(data);
         session.getTransaction().commit();
         session.close();
         cache.put(getId(), new ServerSettings(data));
-        LoggerFactory.getLogger(ServerSettings.class).debug("Setting " + key + " to " + value + " for " + getId());
+        LoggerFactory.getLogger(ServerSettings.class).debug("Setting {} to {} for {}", key, value, getId());
     }
 
     /**
